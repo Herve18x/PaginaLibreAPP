@@ -22,30 +22,26 @@ public class UsuarioController {
         do {
             opcion = vista.mostrarMenu();
             switch (opcion) {
-                case 1 ->
-                    registrar();
-                case 2 ->
-                    listar();
-                case 3 ->
-                    buscar();
-                case 4 ->
-                    actualizar();
-                case 5 ->
-                    eliminar();
-                case 6 ->
-                    vista.mostrarMensaje("Regresando al menú principal...");
-                default ->
-                    vista.mostrarMensaje("Opción no válida.");
+                case 1 -> registrar();
+                case 2 -> listar();
+                case 3 -> buscar();
+                case 4 -> actualizar();
+                case 5 -> eliminar();
+                case 6 -> vista.mostrarMensaje("Regresando al menú principal...");
+                default -> vista.mostrarMensaje("Opción no válida.");
             }
         } while (opcion != 6);
     }
 
     private void registrar() {
-        String usuario = vista.solicitarUsuario();
+        String username = vista.solicitarUsuario();
         String clave = vista.solicitarClave();
         String rol = vista.solicitarRol();
+        String nombre = vista.solicitarTextoOpcional("Nombre", "");
+        String apellido = vista.solicitarTextoOpcional("Apellido", "");
+        String correo = vista.solicitarTextoOpcional("Correo", "");
 
-        Usuario nuevo = new Usuario(0, usuario, clave, rol);
+        Usuario nuevo = new Usuario(0, username, clave, rol, nombre, apellido, correo, true);
         if (dao.insertar(nuevo)) {
             vista.mostrarMensaje(" Usuario registrado con éxito.");
         } else {
@@ -84,19 +80,34 @@ public class UsuarioController {
         // Limpiar buffer oculto de la consola
         vista.solicitarTextoOpcional("", "");
 
-        String usuario = vista.solicitarTextoOpcional("Nuevo Usuario", existente.getUsuario());
-        if (!usuario.trim().isEmpty()) {
-            existente.setUsuario(usuario);
+        String username = vista.solicitarTextoOpcional("Nuevo Username", existente.getUsername());
+        if (!username.trim().isEmpty()) {
+            existente.setUsername(username);
         }
 
-        String clave = vista.solicitarTextoOpcional("Nueva Clave", existente.getClave());
+        String clave = vista.solicitarTextoOpcional("Nueva Clave", existente.getPasswordHash());
         if (!clave.trim().isEmpty()) {
-            existente.setClave(clave);
+            existente.setPasswordHash(clave);
         }
 
         String rol = vista.solicitarTextoOpcional("Nuevo Rol", existente.getRol());
         if (!rol.trim().isEmpty()) {
             existente.setRol(rol);
+        }
+
+        String nombre = vista.solicitarTextoOpcional("Nuevo Nombre", existente.getNombre());
+        if (!nombre.trim().isEmpty()) {
+            existente.setNombre(nombre);
+        }
+
+        String apellido = vista.solicitarTextoOpcional("Nuevo Apellido", existente.getApellido());
+        if (!apellido.trim().isEmpty()) {
+            existente.setApellido(apellido);
+        }
+
+        String correo = vista.solicitarTextoOpcional("Nuevo Correo", existente.getCorreo());
+        if (!correo.trim().isEmpty()) {
+            existente.setCorreo(correo);
         }
 
         if (dao.actualizar(existente)) {
@@ -109,7 +120,7 @@ public class UsuarioController {
     private void eliminar() {
         int id = vista.solicitarId();
         if (dao.eliminar(id)) {
-            vista.mostrarMensaje("Usuario eliminado de la base de datos.");
+            vista.mostrarMensaje("Usuario desactivado o eliminado de la base de datos.");
         } else {
             vista.mostrarMensaje(" Error al eliminar el usuario.");
         }
