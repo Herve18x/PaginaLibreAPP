@@ -22,6 +22,11 @@ public class Libro {
     boolean activo; 
     Timestamp fechaActualizacion;
 
+    public Libro() {
+    }
+    
+    
+
     public Libro(String isbn, String titulo, LocalDate fechaPublicacion, double precio, int idCategoria, String nitEditorial, int stockActual, int stockMinimo, boolean activo, Timestamp fechaActualizacion) {
         this.isbn = isbn;
         this.titulo = titulo;
