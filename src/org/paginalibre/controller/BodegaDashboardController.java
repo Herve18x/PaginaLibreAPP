@@ -1,8 +1,10 @@
 package org.paginalibre.controller;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import org.paginalibre.model.Usuario;
+import org.paginalibre.system.Main;
 
 public class BodegaDashboardController implements BaseDashboardController {
 
@@ -21,6 +23,15 @@ public class BodegaDashboardController implements BaseDashboardController {
             if (lblRol != null) {
                 lblRol.setText(usuario.getRol());
             }
+        }
+    }
+
+    @FXML
+    private void cerrarSesion(ActionEvent event) {
+        try {
+            Main.cambiarVista("/org/paginalibre/view/login.fxml");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

@@ -8,16 +8,17 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="320" prefWidth="360" spacing="12" style="-fx-background-color: FFE8FB;" styleClass="contenedor-login" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.paginalibre.controller.LoginController">
+<VBox alignment="CENTER" prefHeight="466.0" prefWidth="707.0" spacing="12" style="-fx-background-color: FFE8FB;" styleClass="contenedor-login" stylesheets="@/org/paginalibre/view/style/login.css" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.paginalibre.controller.LoginController">
 
     <padding>
         <Insets bottom="40" left="40" right="40" top="40" />
     </padding>
 
     <Label styleClass="titulo-login" text="Página Libre" textFill="#b81db3">
-      <font>
-         <Font name="Bookshelf Symbol 7" size="30.0" />
-      </font></Label>
+   <font>
+      <Font name="System Bold" size="30.0" />
+   </font>
+</Label>
     <Label styleClass="subtitulo-login" text="Sistema de Gestión de Librería" textFill="#f872e9">
       <font>
          <Font name="Bookshelf Symbol 7" size="20.0" />

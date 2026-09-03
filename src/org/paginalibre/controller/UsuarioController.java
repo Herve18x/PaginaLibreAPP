@@ -1,128 +1,179 @@
 package org.paginalibre.controller;
 
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.stage.Stage;
 import org.paginalibre.dao.UsuarioDAO;
 import org.paginalibre.dao.impl.UsuarioDAOImpl;
 import org.paginalibre.model.Usuario;
-import org.paginalibre.view.UsuarioConsoleView;
-
-import java.util.List;
 
 public class UsuarioController {
 
-    private final UsuarioDAO dao;
-    private final UsuarioConsoleView vista;
+    // Componentes de la Tabla
+    @FXML private TableView<Usuario> tblUsuarios;
+    @FXML private TableColumn<Usuario, Integer> colId;
+    @FXML private TableColumn<Usuario, String> colUsername;
+    @FXML private TableColumn<Usuario, String> colNombre;
+    @FXML private TableColumn<Usuario, String> colApellido;
+    @FXML private TableColumn<Usuario, String> colCorreo;
+    @FXML private TableColumn<Usuario, String> colRol;
+    @FXML private TableColumn<Usuario, Boolean> colActivo;
 
-    public UsuarioController() {
-        this.dao = new UsuarioDAOImpl();
-        this.vista = new UsuarioConsoleView();
-    }
+    // Componentes del Formulario
+    @FXML private Label lblTituloFormulario;
+    @FXML private TextField txtUsername;
+    @FXML private PasswordField txtPassword;
+    @FXML private TextField txtNombre;
+    @FXML private TextField txtApellido;
+    @FXML private TextField txtCorreo;
+    @FXML private ComboBox<String> cmbRol;
 
-    public void iniciar() {
-        int opcion;
-        do {
-            opcion = vista.mostrarMenu();
-            switch (opcion) {
-                case 1 -> registrar();
-                case 2 -> listar();
-                case 3 -> buscar();
-                case 4 -> actualizar();
-                case 5 -> eliminar();
-                case 6 -> vista.mostrarMensaje("Regresando al menú principal...");
-                default -> vista.mostrarMensaje("Opción no válida.");
+    private final UsuarioDAO usuarioDAO = new UsuarioDAOImpl();
+    private final ObservableList<Usuario> listaUsuarios = FXCollections.observableArrayList();
+    private Usuario usuarioEdicion = null;
+
+    @FXML
+    public void initialize() {
+        tblUsuarios.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        colId.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getId()).asObject());
+        colUsername.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getUsername()));
+        colNombre.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getNombre()));
+        colApellido.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getApellido()));
+        colCorreo.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCorreo()));
+        colRol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getRol()));
+        colActivo.setCellValueFactory(cellData -> new SimpleBooleanProperty(cellData.getValue().isActivo()));
+
+        cmbRol.setItems(FXCollections.observableArrayList("admin", "bodega", "cajero"));
+
+        // Listener para cargar automáticamente el usuario seleccionado en el formulario
+        tblUsuarios.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                cargarParaEditar(newSelection);
             }
-        } while (opcion != 6);
+        });
+
+        cargarUsuarios();
     }
 
-    private void registrar() {
-        String username = vista.solicitarUsuario();
-        String clave = vista.solicitarClave();
-        String rol = vista.solicitarRol();
-        String nombre = vista.solicitarTextoOpcional("Nombre", "");
-        String apellido = vista.solicitarTextoOpcional("Apellido", "");
-        String correo = vista.solicitarTextoOpcional("Correo", "");
-
-        Usuario nuevo = new Usuario(0, username, clave, rol, nombre, apellido, correo, true);
-        if (dao.insertar(nuevo)) {
-            vista.mostrarMensaje(" Usuario registrado con éxito.");
-        } else {
-            vista.mostrarMensaje(" Error al registrar el usuario en la base de datos.");
-        }
+    public void cargarUsuarios() {
+        listaUsuarios.clear();
+        listaUsuarios.addAll(usuarioDAO.listar());
+        tblUsuarios.setItems(listaUsuarios);
     }
 
-    private void listar() {
-        List<Usuario> lista = dao.listar();
-        if (lista.isEmpty()) {
-            vista.mostrarMensaje("No hay usuarios registrados.");
-        } else {
-            vista.desplegarLista(lista);
-        }
+    private void cargarParaEditar(Usuario usuario) {
+        this.usuarioEdicion = usuario;
+        lblTituloFormulario.setText("EDITAR USUARIO (ID: " + usuario.getId() + ")");
+        txtUsername.setText(usuario.getUsername());
+        txtNombre.setText(usuario.getNombre());
+        txtApellido.setText(usuario.getApellido());
+        txtCorreo.setText(usuario.getCorreo());
+        cmbRol.setValue(usuario.getRol());
+        txtPassword.clear();
     }
 
-    private void buscar() {
-        int id = vista.solicitarId();
-        Usuario u = dao.buscar(id);
-        if (u != null) {
-            vista.desplegarUsuario(u);
-        } else {
-            vista.mostrarMensaje(" Usuario no encontrado con el ID: " + id);
-        }
-    }
+    @FXML
+    private void guardarUsuario() {
+        String username = txtUsername.getText().trim();
+        String password = txtPassword.getText().trim();
+        String nombre = txtNombre.getText().trim();
+        String apellido = txtApellido.getText().trim();
+        String correo = txtCorreo.getText().trim();
+        String rol = cmbRol.getValue();
 
-    private void actualizar() {
-        int id = vista.solicitarId();
-        Usuario existente = dao.buscar(id);
-
-        if (existente == null) {
-            vista.mostrarMensaje(" Usuario no encontrado.");
+        if (username.isEmpty() || nombre.isEmpty() || apellido.isEmpty() || rol == null) {
+            mostrarAlerta("Campos Requeridos", "Por favor complete usuario, nombre, apellido y rol.", Alert.AlertType.WARNING);
             return;
         }
 
-        // Limpiar buffer oculto de la consola
-        vista.solicitarTextoOpcional("", "");
+        if (usuarioEdicion == null) {
+            if (password.isEmpty()) {
+                mostrarAlerta("Campo Requerido", "Debe ingresar una contraseña para el nuevo usuario.", Alert.AlertType.WARNING);
+                return;
+            }
+            Usuario nuevo = new Usuario();
+            nuevo.setUsername(username);
+            nuevo.setPasswordHash(password);
+            nuevo.setRol(rol);
+            nuevo.setNombre(nombre);
+            nuevo.setApellido(apellido);
+            nuevo.setCorreo(correo);
 
-        String username = vista.solicitarTextoOpcional("Nuevo Username", existente.getUsername());
-        if (!username.trim().isEmpty()) {
-            existente.setUsername(username);
-        }
-
-        String clave = vista.solicitarTextoOpcional("Nueva Clave", existente.getPasswordHash());
-        if (!clave.trim().isEmpty()) {
-            existente.setPasswordHash(clave);
-        }
-
-        String rol = vista.solicitarTextoOpcional("Nuevo Rol", existente.getRol());
-        if (!rol.trim().isEmpty()) {
-            existente.setRol(rol);
-        }
-
-        String nombre = vista.solicitarTextoOpcional("Nuevo Nombre", existente.getNombre());
-        if (!nombre.trim().isEmpty()) {
-            existente.setNombre(nombre);
-        }
-
-        String apellido = vista.solicitarTextoOpcional("Nuevo Apellido", existente.getApellido());
-        if (!apellido.trim().isEmpty()) {
-            existente.setApellido(apellido);
-        }
-
-        String correo = vista.solicitarTextoOpcional("Nuevo Correo", existente.getCorreo());
-        if (!correo.trim().isEmpty()) {
-            existente.setCorreo(correo);
-        }
-
-        if (dao.actualizar(existente)) {
-            vista.mostrarMensaje(" Usuario actualizado exitosamente.");
+            if (usuarioDAO.insertar(nuevo)) {
+                mostrarAlerta("Éxito", "Usuario registrado correctamente.", Alert.AlertType.INFORMATION);
+                cargarUsuarios();
+                limpiarFormulario();
+            } else {
+                mostrarAlerta("Error", "No se pudo registrar el usuario.", Alert.AlertType.ERROR);
+            }
         } else {
-            vista.mostrarMensaje(" Error al actualizar el registro.");
+            usuarioEdicion.setUsername(username);
+            usuarioEdicion.setNombre(nombre);
+            usuarioEdicion.setApellido(apellido);
+            usuarioEdicion.setCorreo(correo);
+            usuarioEdicion.setRol(rol);
+
+            if (!password.isEmpty()) {
+                usuarioEdicion.setPasswordHash(password);
+            }
+
+            if (usuarioDAO.actualizar(usuarioEdicion)) {
+                mostrarAlerta("Éxito", "Usuario actualizado correctamente.", Alert.AlertType.INFORMATION);
+                cargarUsuarios();
+                limpiarFormulario();
+            } else {
+                mostrarAlerta("Error", "No se pudo actualizar el usuario.", Alert.AlertType.ERROR);
+            }
         }
     }
 
-    private void eliminar() {
-        int id = vista.solicitarId();
-        if (dao.eliminar(id)) {
-            vista.mostrarMensaje("Usuario desactivado o eliminado de la base de datos.");
+    @FXML
+    private void limpiarFormulario() {
+        tblUsuarios.getSelectionModel().clearSelection();
+        this.usuarioEdicion = null;
+        lblTituloFormulario.setText("REGISTRAR NUEVO USUARIO");
+        txtUsername.clear();
+        txtPassword.clear();
+        txtNombre.clear();
+        txtApellido.clear();
+        txtCorreo.clear();
+        cmbRol.setValue(null);
+    }
+
+    @FXML
+    private void toggleEstado() {
+        Usuario seleccionado = tblUsuarios.getSelectionModel().getSelectedItem();
+        if (seleccionado != null) {
+            seleccionado.setActivo(!seleccionado.isActivo());
+            if (usuarioDAO.actualizar(seleccionado)) {
+                tblUsuarios.refresh();
+            } else {
+                mostrarAlerta("Error", "No se pudo cambiar el estado del usuario.", Alert.AlertType.ERROR);
+            }
         } else {
-            vista.mostrarMensaje(" Error al eliminar el usuario.");
+            mostrarAlerta("Selección Requerida", "Seleccione un usuario de la tabla para cambiar su estado.", Alert.AlertType.INFORMATION);
         }
+    }
+
+    @FXML
+    private void cerrarVentana() {
+        Stage stage = (Stage) tblUsuarios.getScene().getWindow();
+        if (stage != null) {
+            stage.close();
+        }
+    }
+
+    private void mostrarAlerta(String titulo, String mensaje, Alert.AlertType tipo) {
+        Alert alert = new Alert(tipo);
+        alert.setTitle(titulo);
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
     }
 }

@@ -2,8 +2,10 @@ package org.paginalibre.system;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -11,7 +13,6 @@ public class Main extends Application {
     private static Stage escenarioPrincipal;
 
     public static void main(String[] args) {
-        // CORRECCIÓN: Inicia el ciclo de vida de la aplicación JavaFX
         launch(args);
     }
 
@@ -19,12 +20,11 @@ public class Main extends Application {
     public void start(Stage escenarioPrincipal) throws Exception {
         Main.escenarioPrincipal = escenarioPrincipal;
 
-        // Carga de la vista de inicio de sesión
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre/view/login.fxml"));
         Parent raiz = loader.load();
         Scene escena = new Scene(raiz);
 
-        escenarioPrincipal.setTitle("login");
+        escenarioPrincipal.setTitle("Pagina Libre - Login");
         escenarioPrincipal.setScene(escena);
         escenarioPrincipal.show();
     }
@@ -38,7 +38,24 @@ public class Main extends Application {
             escenarioPrincipal.centerOnScreen();
         }
         
-        // Retorna el controlador de la vista cargada para manipularlo si es necesario
+        return loader.getController();
+    }
+
+
+    public static Object cargarVistaEnContenedor(String fxmlPath, Pane contenedor) throws Exception {
+        FXMLLoader loader = new FXMLLoader(Main.class.getResource(fxmlPath));
+        Node vista = loader.load();
+        
+        contenedor.getChildren().clear();
+        contenedor.getChildren().add(vista);
+        
+        if (contenedor instanceof javafx.scene.layout.AnchorPane) {
+            javafx.scene.layout.AnchorPane.setTopAnchor(vista, 0.0);
+            javafx.scene.layout.AnchorPane.setBottomAnchor(vista, 0.0);
+            javafx.scene.layout.AnchorPane.setLeftAnchor(vista, 0.0);
+            javafx.scene.layout.AnchorPane.setRightAnchor(vista, 0.0);
+        }
+        
         return loader.getController();
     }
 
