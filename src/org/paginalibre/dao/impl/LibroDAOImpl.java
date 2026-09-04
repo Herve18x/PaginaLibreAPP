@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 //import java.sql.Timestamp;
 
 
@@ -73,18 +74,24 @@ public class LibroDAOImpl implements LibroDAO {
     }
 
     @Override
-    public Autores buscarPorId(int id_autor) {
-        Autores autor = new Autores();
-        String consultaSQL = "{call sp_buscarautor(?)}";
+    public Libro buscar(String isbn) {
+        Libro libro = new Libro();
+        String consultaSQL = "{call sp_buscarlibro(?)}";
         try (Connection conexion = Conexion.getInstancia().conectar(); CallableStatement consultaCall = conexion.prepareCall(consultaSQL);) {
-            consultaCall.setInt(1, id_autor);
+            consultaCall.setString(1, isbn);
             try (ResultSet tablaResultado = consultaCall.executeQuery()) {
                 if (tablaResultado.next()) {
-                    autor.setIdAutor(tablaResultado.getInt("id_autor"));
-                    autor.setNombreAutor(tablaResultado.getString("nombre_autor"));
-                    autor.setApellidoAutor(tablaResultado.getString("apellido_autor"));
-                    autor.setNacionalidad(tablaResultado.getString("nacionalidad"));
-                    autor.setBiografia(tablaResultado.getString("biografia"));
+                    libro.setIsbn(tablaResultado.getString("isbn"));
+                    libro.setTitulo(tablaResultado.getString("titulo"));
+                    libro.setFechaPublicacion(LocalDate.parse(tablaResultado.getDate("fecha_publicacion").toString()));
+                    libro.setPrecio(tablaResultado.getDouble("precio"));
+                    libro.setIdCategoria(tablaResultado.getInt("id_categoria"));
+                    libro.setNitEditorial(tablaResultado.getString("nit_editorial"));
+                    libro.setStockActual(tablaResultado.getInt("stock_actual"));
+                    libro.setStockMinimo(tablaResultado.getInt("stock_minmo"));
+                    libro.setActivo(tablaResultado.getBoolean("activo"));
+                    libro.setFechaActualizacion(tablaResultado.getTimestamp("fecha_actualizacion"));
+                    
                 } else {
                     return null;
                 }
@@ -93,26 +100,17 @@ public class LibroDAOImpl implements LibroDAO {
             System.err.print("Error al buscar Autor: " + e.getMessage());
             e.printStackTrace();
         }
-        return autor;
+        return libro;
     }
 
     @Override
-    public boolean actualizar(Autores autores) {
+    public boolean actualizar(Libro libro) {
         return false;
     }
 
     @Override
-    public boolean eliminar(int idAutores) {
+    public boolean eliminar(String isbn) {
         return false;
     }
-
-    @Override
-    public Libro buscar(String id) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-
-    @Override
-    public boolean eliminar(String id) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
+    
 }
