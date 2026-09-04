@@ -1,13 +1,15 @@
 drop database if exists libreriadb_in4cm;
 create database if not exists libreriadb_in4cm;
 use libreriadb_in4cm;
+
+-- =============================================================================
 -- 1. TABLAS BASE
+-- =============================================================================
 create table categorias(
     id_categoria int primary key auto_increment,
     nombre_categoria varchar(100)
 );
 
--- editoriales
 create table editoriales (
     nit varchar(20) primary key,
     nombre_editorial varchar(100) not null,
@@ -15,7 +17,6 @@ create table editoriales (
     direccion_editorial varchar(100)
 );
 
--- proveedores 
 create table proveedores (
     id_proveedor int primary key auto_increment,
     nombre_proveedor varchar(100) not null,
@@ -24,7 +25,6 @@ create table proveedores (
     correo_proveedor varchar(100)
 );
 
--- autores
 create table autores(
     id_autor int primary key auto_increment,
     nombre_autor varchar(100) not null,
@@ -33,7 +33,6 @@ create table autores(
     biografia text
 );
 
--- clientes
 create table clientes(
     cui bigint primary key,
     nombre_cliente varchar(100),
@@ -41,7 +40,6 @@ create table clientes(
     correo_electronico varchar(100)
 );
 
--- usuarios
 create table usuarios (
     id int primary key auto_increment,
     username varchar(50) not null unique,
@@ -55,7 +53,6 @@ create table usuarios (
     fecha_actualizacion timestamp default current_timestamp on update current_timestamp
 );
 
--- libros 
 create table libros(
     isbn varchar(20) primary key,
     titulo varchar(100) not null,
@@ -69,13 +66,15 @@ create table libros(
     fecha_actualizacion timestamp default current_timestamp on update current_timestamp
 );
 
--- autores_libro
 create table autores_libro(
     id_autor_libro int auto_increment primary key,
     id_autor int,
     isbn varchar(20)
 );
+
+-- =============================================================================
 -- 2. VENTAS 
+-- =============================================================================
 create table ventas(
     id_venta int primary key auto_increment,
     fecha_venta timestamp default current_timestamp,
@@ -99,7 +98,10 @@ create table detalle_venta(
     precio_unitario decimal(10,2) not null,
     subtotal decimal(10,2) not null
 );
+
+-- =============================================================================
 -- 3. MOVIMIENTOS_INVENTARIO
+-- =============================================================================
 create table movimientos_inventario(
     id_movimiento int primary key auto_increment,
     isbn varchar(20) not null,
@@ -109,7 +111,10 @@ create table movimientos_inventario(
     id_usuario int not null,
     observacion varchar(255)
 );
+
+-- =============================================================================
 -- 4. LLAVES FORÁNEAS
+-- =============================================================================
 alter table autores_libro
 add constraint fk_a_autor foreign key (id_autor) references autores(id_autor) on delete cascade,
 add constraint fk_a_libro foreign key (isbn) references libros(isbn) on delete cascade;
@@ -132,8 +137,9 @@ alter table movimientos_inventario
 add constraint fk_mi_libro foreign key (isbn) references libros(isbn) on delete cascade,
 add constraint fk_mi_usuario foreign key (id_usuario) references usuarios(id);
 
-use libreriadb_in4cm;
+-- =============================================================================
 -- 5. CRUD: CATEGORIAS
+-- =============================================================================
 delimiter $$
 
 create procedure sp_insertarcategoria(
@@ -176,7 +182,10 @@ begin
 end $$
 
 delimiter ;
+
+-- =============================================================================
 -- 6. CRUD: EDITORIALES
+-- =============================================================================
 delimiter $$
 
 create procedure sp_insertareditorial(
@@ -226,7 +235,10 @@ begin
 end $$
 
 delimiter ;
--- 7. CRUD: PROVEEDORES (nuevo)
+
+-- =============================================================================
+-- 7. CRUD: PROVEEDORES
+-- =============================================================================
 delimiter $$
 
 create procedure sp_insertarproveedor(
@@ -278,7 +290,10 @@ begin
 end $$
 
 delimiter ;
+
+-- =============================================================================
 -- 8. CRUD: AUTORES
+-- =============================================================================
 delimiter $$
 
 create procedure sp_insertarautor(
@@ -330,7 +345,10 @@ begin
 end $$
 
 delimiter ;
+
+-- =============================================================================
 -- 9. CRUD: CLIENTES
+-- =============================================================================
 delimiter $$
 
 create procedure sp_insertarcliente(
@@ -380,7 +398,10 @@ begin
 end $$
 
 delimiter ;
--- 10. CRUD: USUARIOS
+
+-- =============================================================================
+-- 10. CRUD: USUARIOS (CORREGIDO)
+-- =============================================================================
 delimiter $$
 
 create procedure sp_registrar_usuario(
@@ -405,9 +426,11 @@ begin
     where username = _username;
 end $$
 
+-- SE AÑADIÓ 'password_hash' EN EL SELECT PARA CORREGIR EL ERROR EN JAVA
 create procedure sp_listarusuarios()
 begin
-    select id, username, rol, nombre, apellido, correo, activo, fecha_creacion from usuarios;
+    select id, username, password_hash, rol, nombre, apellido, correo, activo, fecha_creacion 
+    from usuarios;
 end $$
 
 create procedure sp_cambiar_password(
@@ -430,7 +453,10 @@ begin
 end $$
 
 delimiter ;
--- 11. CRUD: LIBROS (con control de stock)
+
+-- =============================================================================
+-- 11. CRUD: LIBROS
+-- =============================================================================
 delimiter $$
 
 create procedure sp_insertarlibro(
@@ -496,7 +522,10 @@ begin
 end $$
 
 delimiter ;
--- 12. CRUD: AUTORES_LIBRO (tabla intermedia)
+
+-- =============================================================================
+-- 12. CRUD: AUTORES_LIBRO
+-- =============================================================================
 delimiter $$
 
 create procedure sp_insertarautorlibro(
@@ -542,8 +571,10 @@ begin
 end $$
 
 delimiter ;
--- 13. MOVIMIENTOS_INVENTARIO 
 
+-- =============================================================================
+-- 13. MOVIMIENTOS_INVENTARIO 
+-- =============================================================================
 delimiter $$
 
 create procedure sp_registrar_movimiento_inventario(
@@ -556,7 +587,6 @@ create procedure sp_registrar_movimiento_inventario(
 begin
     declare _delta int;
 
-    -- INGRESO/DEVOLUCION/AJUSTE positivo suman stock; VENTA/MERMA/TRASLADO restan
     if _tipo_movimiento in ('INGRESO', 'DEVOLUCION') then
         set _delta = _cantidad;
     else
@@ -589,7 +619,10 @@ begin
 end $$
 
 delimiter ;
+
+-- =============================================================================
 -- 14. VENTAS Y DETALLE_VENTA 
+-- =============================================================================
 delimiter $$
 
 create procedure sp_insertarventa(
@@ -710,6 +743,10 @@ begin
 end $$
 
 delimiter ;
+
+-- =============================================================================
+-- 15. VISTAS
+-- =============================================================================
 create or replace view vw_lista_categorias as
 select
     id_categoria as 'id categoría',
@@ -752,6 +789,7 @@ create or replace view vw_lista_usuarios as
 select
     id as 'id usuario',
     username as 'usuario',
+    password_hash as 'password_hash',
     rol as 'rol',
     concat(nombre, ' ', apellido) as 'nombre completo',
     correo as 'correo',
@@ -819,7 +857,6 @@ select
 from detalle_venta dv
 inner join libros l on dv.isbn = l.isbn;
 
--- factura de venta: encabezado + cliente + desglose de libros
 create or replace view vw_factura_ventas as
 select
     v.id_venta as 'numero_factura',
@@ -856,8 +893,10 @@ inner join libros l on mi.isbn = l.isbn
 inner join usuarios u on mi.id_usuario = u.id;
 
 -- =============================================================================
--- 1. CATEGORIAS
+-- 16. INSERCIÓN DE DATOS INICIALES
 -- =============================================================================
+
+-- CATEGORIAS
 CALL sp_insertarcategoria('Ficción Cósmica');
 CALL sp_insertarcategoria('Fantasía Épica');
 CALL sp_insertarcategoria('Ciencia Ficción');
@@ -879,10 +918,7 @@ CALL sp_insertarcategoria('Cómics y Manga');
 CALL sp_insertarcategoria('Gastronomía');
 CALL sp_insertarcategoria('Crónicas de Viajes');
 
-
--- =============================================================================
--- 2. EDITORIALES
--- =============================================================================
+-- EDITORIALES
 CALL sp_insertareditorial('1001-A', 'Editorial Planeta', '22334455', 'Zona 1, Ciudad');
 CALL sp_insertareditorial('1002-B', 'Penguin Random House', '22334456', 'Zona 10, Ciudad');
 CALL sp_insertareditorial('1003-C', 'Editorial Santillana', '22334457', 'Zona 9, Ciudad');
@@ -904,9 +940,7 @@ CALL sp_insertareditorial('1018-R', 'Acantilado', '22334472', 'Zona 21, Ciudad')
 CALL sp_insertareditorial('1019-S', 'Editorial Piedra Santa', '22334473', 'Zona 1, Ciudad');
 CALL sp_insertareditorial('1020-T', 'Fondo de Cultura Económica', '22334474', 'Zona 9, Ciudad');
 
--- =============================================================================
--- 3. PROVEEDORES
--- =============================================================================
+-- PROVEEDORES
 CALL sp_insertarproveedor('Distribuidora Nacional de Libros', '23001001', 'Zona 1, Ciudad', 'contacto@dnl.com');
 CALL sp_insertarproveedor('Importadora Cultural S.A.', '23001002', 'Zona 4, Ciudad', 'ventas@importcultural.com');
 CALL sp_insertarproveedor('Papelera San Miguel', '23001003', 'Zona 11, Ciudad', 'info@papelerasanmiguel.com');
@@ -928,9 +962,7 @@ CALL sp_insertarproveedor('Distribuidora Central de Libros', '23001018', 'Zona 3
 CALL sp_insertarproveedor('Comercial Andina de Papel', '23001019', 'Zona 17, Ciudad', 'contacto@candinapapel.com');
 CALL sp_insertarproveedor('Grupo Logístico Editorial', '23001020', 'Zona 19, Ciudad', 'ventas@glogisticoeditorial.com');
 
--- =============================================================================
--- 4. AUTORES (20)
--- =============================================================================
+-- AUTORES
 CALL sp_insertarautor('Gabriel', 'García Márquez', 'Colombiana', 'Premio Nobel de Literatura 1982. Exponente del realismo mágico.');
 CALL sp_insertarautor('Julio', 'Cortázar', 'Argentina', 'Maestro del relato corto y creador de Rayuela.');
 CALL sp_insertarautor('Isabel', 'Allende', 'Chilena', 'Autora de La Casa de los Espíritus. Gran exponente latinoamericana.');
@@ -952,10 +984,7 @@ CALL sp_insertarautor('Oscar', 'Wilde', 'Irlandesa', 'Dramaturgo y autor de El R
 CALL sp_insertarautor('Mario', 'Vargas Llosa', 'Peruana', 'Premio Nobel de Literatura 2010.');
 CALL sp_insertarautor('Margaret', 'Atwood', 'Canadiense', 'Autora de El cuento de la criada, fuerte exponente distópica.');
 
-
--- =============================================================================
--- 5. CLIENTES
--- =============================================================================
+-- CLIENTES
 CALL sp_insertarcliente(2000100010101, 'Ana', 'López', 'ana.l@gmail.com');
 CALL sp_insertarcliente(2000100020101, 'Carlos', 'Méndez', 'cmendez@yahoo.com');
 CALL sp_insertarcliente(2000100030101, 'Luis', 'Pérez', 'lperez@hotmail.com');
@@ -977,9 +1006,7 @@ CALL sp_insertarcliente(2000100180101, 'Gabriela', 'Rojas', 'grojas@gmail.com');
 CALL sp_insertarcliente(2000100190101, 'Héctor', 'Salazar', 'hsalazar@yahoo.com');
 CALL sp_insertarcliente(2000100200101, 'Mónica', 'Herrera', 'mherrera@gmail.com');
 
--- =============================================================================
--- 6. USUARIOS 
--- =============================================================================
+-- USUARIOS
 CALL sp_registrar_usuario('admin1', SHA2('Admin#2026',256), 'admin', 'Sofía', 'Reyes', 'sofia.reyes@libreria.com');
 CALL sp_registrar_usuario('admin2', SHA2('Admin#2026',256), 'admin', 'Diego', 'Morales', 'diego.morales@libreria.com');
 CALL sp_registrar_usuario('admin3', SHA2('Admin#2026',256), 'admin', 'Carmen', 'López', 'carmen.lopez@libreria.com');
@@ -1001,10 +1028,7 @@ CALL sp_registrar_usuario('cajero8', SHA2('Cajero#2026',256), 'cajero', 'Christi
 CALL sp_registrar_usuario('cajero9', SHA2('Cajero#2026',256), 'cajero', 'Natalia', 'Sandoval', 'natalia.sandoval@libreria.com');
 CALL sp_registrar_usuario('cajero10', SHA2('Cajero#2026',256), 'cajero', 'Pablo', 'Archila', 'pablo.archila@libreria.com');
 
-
--- =============================================================================
--- 7. LIBROS
--- =============================================================================
+-- LIBROS
 CALL sp_insertarlibro('978-0-123', 'Cien Años de Soledad', '1967-05-30', 150.00, 1, '1001-A', 0, 10);
 CALL sp_insertarlibro('978-0-124', 'Rayuela', '1963-06-28', 135.50, 1, '1002-B', 0, 8);
 CALL sp_insertarlibro('978-0-125', 'El Señor Presidente', '1946-01-01', 120.00, 1, '1019-S', 0, 10);
@@ -1026,33 +1050,29 @@ CALL sp_insertarlibro('978-0-140', 'La Ciudad y los Perros', '1963-01-01', 130.0
 CALL sp_insertarlibro('978-0-141', 'Juego de Tronos', '1996-08-01', 200.00, 2, '1011-K', 0, 10);
 CALL sp_insertarlibro('978-0-142', 'Los Hermanos Karamazov', '1880-11-01', 190.00, 1, '1007-G', 0, 5);
 
--- =============================================================================
--- 8. AUTORES_LIBRO
--- =============================================================================
-CALL sp_insertarautorlibro(1, '978-0-123');   -- García Márquez
-CALL sp_insertarautorlibro(2, '978-0-124');   -- Cortázar
-CALL sp_insertarautorlibro(5, '978-0-125');   -- Asturias
-CALL sp_insertarautorlibro(6, '978-0-126');   -- Rowling
-CALL sp_insertarautorlibro(8, '978-0-127');   -- King
-CALL sp_insertarautorlibro(13, '978-0-128');  -- Asimov
-CALL sp_insertarautorlibro(14, '978-0-129');  -- Tolkien
-CALL sp_insertarautorlibro(16, '978-0-130');  -- Dostoievski
-CALL sp_insertarautorlibro(12, '978-0-131');  -- Christie
-CALL sp_insertarautorlibro(10, '978-0-132');  -- Austen
-CALL sp_insertarautorlibro(3, '978-0-133');   -- Allende
-CALL sp_insertarautorlibro(20, '978-0-134');  -- Atwood
-CALL sp_insertarautorlibro(17, '978-0-135');  -- Kafka
-CALL sp_insertarautorlibro(9, '978-0-136');   -- Murakami
-CALL sp_insertarautorlibro(11, '978-0-137');  -- Poe
-CALL sp_insertarautorlibro(18, '978-0-138');  -- Wilde
-CALL sp_insertarautorlibro(15, '978-0-139');  -- Woolf
-CALL sp_insertarautorlibro(19, '978-0-140');  -- Vargas Llosa
-CALL sp_insertarautorlibro(7, '978-0-141');   -- Martin
-CALL sp_insertarautorlibro(16, '978-0-142');  -- Dostoievski (2do título)
+-- AUTORES_LIBRO
+CALL sp_insertarautorlibro(1, '978-0-123');   
+CALL sp_insertarautorlibro(2, '978-0-124');   
+CALL sp_insertarautorlibro(5, '978-0-125');   
+CALL sp_insertarautorlibro(6, '978-0-126');   
+CALL sp_insertarautorlibro(8, '978-0-127');   
+CALL sp_insertarautorlibro(13, '978-0-128');  
+CALL sp_insertarautorlibro(14, '978-0-129');  
+CALL sp_insertarautorlibro(16, '978-0-130');  
+CALL sp_insertarautorlibro(12, '978-0-131');  
+CALL sp_insertarautorlibro(10, '978-0-132');  
+CALL sp_insertarautorlibro(3, '978-0-133');   
+CALL sp_insertarautorlibro(20, '978-0-134');  
+CALL sp_insertarautorlibro(17, '978-0-135');  
+CALL sp_insertarautorlibro(9, '978-0-136');   
+CALL sp_insertarautorlibro(11, '978-0-137');  
+CALL sp_insertarautorlibro(18, '978-0-138');  
+CALL sp_insertarautorlibro(15, '978-0-139');  
+CALL sp_insertarautorlibro(19, '978-0-140');  
+CALL sp_insertarautorlibro(7, '978-0-141');   
+CALL sp_insertarautorlibro(16, '978-0-142');  
 
--- =============================================================================
--- 9. MOVIMIENTOS_INVENTARIO 
--- =============================================================================
+-- MOVIMIENTOS_INVENTARIO 
 CALL sp_registrar_movimiento_inventario('978-0-123', 'INGRESO', 40, 4,  'Carga inicial de stock');
 CALL sp_registrar_movimiento_inventario('978-0-124', 'INGRESO', 25, 5,  'Carga inicial de stock');
 CALL sp_registrar_movimiento_inventario('978-0-125', 'INGRESO', 30, 6,  'Carga inicial de stock');
@@ -1074,9 +1094,7 @@ CALL sp_registrar_movimiento_inventario('978-0-140', 'INGRESO', 22, 7,  'Carga i
 CALL sp_registrar_movimiento_inventario('978-0-141', 'INGRESO', 35, 8,  'Carga inicial de stock');
 CALL sp_registrar_movimiento_inventario('978-0-142', 'INGRESO', 15, 9,  'Carga inicial de stock');
 
--- =============================================================================
--- 10. VENTAS y DETALLE_VENTA 
--- =============================================================================
+-- VENTAS Y DETALLE_VENTA 
 CALL sp_insertarventa(2000100010101, 11, @v1);  CALL sp_agregardetalleventa(@v1, '978-0-123', 2, 11);
 CALL sp_insertarventa(2000100020101, 12, @v2);  CALL sp_agregardetalleventa(@v2, '978-0-124', 3, 12);
 CALL sp_insertarventa(2000100030101, 13, @v3);  CALL sp_agregardetalleventa(@v3, '978-0-125', 1, 13);
@@ -1097,7 +1115,6 @@ CALL sp_insertarventa(2000100170101, 17, @v17); CALL sp_agregardetalleventa(@v17
 CALL sp_insertarventa(2000100180101, 18, @v18); CALL sp_agregardetalleventa(@v18, '978-0-140', 1, 18);
 CALL sp_insertarventa(2000100190101, 19, @v19); CALL sp_agregardetalleventa(@v19, '978-0-141', 2, 19);
 CALL sp_insertarventa(2000100200101, 20, @v20); CALL sp_agregardetalleventa(@v20, '978-0-142', 3, 20);
-
 
 SELECT * FROM vw_lista_categorias;
 SELECT * FROM vw_lista_editoriales;

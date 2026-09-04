@@ -1,13 +1,11 @@
-
 package org.paginalibre.dao;
-
 
 import java.util.List;
 
 public interface CRUD<T, ID> {
-    boolean insertar(T objeto);
-    List<T> listar();
-    T buscar(ID id);
-    boolean actualizar(T objeto);
-    boolean eliminar(ID id);
+    public boolean insertar(T objeto);
+    public List<T> listar();
+    public T buscar(ID id);
+    public boolean actualizar(T objeto);
+    public boolean eliminar(ID id);
 }
