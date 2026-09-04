@@ -28,6 +28,8 @@ public class LoginController implements Initializable {
     @FXML
     private PasswordField txtPassword;
     @FXML
+    private PasswordField txtConfirmarPassword;
+    @FXML
     private Button btnIniciarSesion;
     @FXML
     private Label lblMensaje;
@@ -54,10 +56,20 @@ public class LoginController implements Initializable {
     public void eventoInicioSesion(ActionEvent evento) {
         String usuarioIngresado = txtUsuario != null ? txtUsuario.getText().trim() : "";
         String passwordIngresada = txtPassword != null ? txtPassword.getText().trim() : "";
+        String confirmarPasswordIngresada = txtConfirmarPassword != null ? txtConfirmarPassword.getText().trim() : "";
 
-        if (usuarioIngresado.isEmpty() || passwordIngresada.isEmpty()) {
+        // 1. Validar que no haya campos vacíos
+        if (usuarioIngresado.isEmpty() || passwordIngresada.isEmpty() || confirmarPasswordIngresada.isEmpty()) {
             if (lblMensaje != null) {
-                lblMensaje.setText("Por favor, complete todos sus datos.");
+                lblMensaje.setText("Por favor, complete todos los campos.");
+            }
+            return;
+        }
+
+        // 2. Validar que la contraseña y la confirmación coincidan
+        if (!passwordIngresada.equals(confirmarPasswordIngresada)) {
+            if (lblMensaje != null) {
+                lblMensaje.setText("Las contraseñas no coinciden.");
             }
             return;
         }
