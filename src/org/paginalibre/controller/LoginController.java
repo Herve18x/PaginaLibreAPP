@@ -28,8 +28,6 @@ public class LoginController implements Initializable {
     @FXML
     private PasswordField txtPassword;
     @FXML
-    private PasswordField txtConfirmarPassword;
-    @FXML
     private Button btnIniciarSesion;
     @FXML
     private Label lblMensaje;
@@ -56,24 +54,16 @@ public class LoginController implements Initializable {
     public void eventoInicioSesion(ActionEvent evento) {
         String usuarioIngresado = txtUsuario != null ? txtUsuario.getText().trim() : "";
         String passwordIngresada = txtPassword != null ? txtPassword.getText().trim() : "";
-        String confirmarPasswordIngresada = txtConfirmarPassword != null ? txtConfirmarPassword.getText().trim() : "";
 
         // 1. Validar que no haya campos vacíos
-        if (usuarioIngresado.isEmpty() || passwordIngresada.isEmpty() || confirmarPasswordIngresada.isEmpty()) {
+        if (usuarioIngresado.isEmpty() || passwordIngresada.isEmpty()) {
             if (lblMensaje != null) {
                 lblMensaje.setText("Por favor, complete todos los campos.");
             }
             return;
         }
 
-        // 2. Validar que la contraseña y la confirmación coincidan
-        if (!passwordIngresada.equals(confirmarPasswordIngresada)) {
-            if (lblMensaje != null) {
-                lblMensaje.setText("Las contraseñas no coinciden.");
-            }
-            return;
-        }
-
+        // Hash de la contraseña ingresada
         String passwordHash = SecurityUtil.hashSHA256(passwordIngresada);
         Usuario usuarioEncontrado = null;
 
@@ -82,6 +72,7 @@ public class LoginController implements Initializable {
         if (usuarios != null) {
             for (Usuario u : usuarios) {
                 if (u.getUsername() != null && u.getUsername().equalsIgnoreCase(usuarioIngresado)) {
+                    // Verifica comparando el Hash SHA-256 o el texto plano (por compatibilidad con usuarios antiguos)
                     if (u.getPasswordHash() != null && 
                        (u.getPasswordHash().equals(passwordHash) || u.getPasswordHash().equals(passwordIngresada))) {
                         usuarioEncontrado = u;

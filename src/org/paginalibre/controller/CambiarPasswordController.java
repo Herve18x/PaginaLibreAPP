@@ -50,9 +50,8 @@ public class CambiarPasswordController {
             return;
         }
 
-        // Se asigna la nueva contraseña encriptada y se actualiza mediante el DAO
-        String nuevoHash = SecurityUtil.hashSHA256(nueva);
-        usuarioActual.setPasswordHash(nuevoHash);
+        // Se asigna la nueva contraseña en texto plano para que el DAO la encripté UNA SOLA VEZ
+        usuarioActual.setPasswordHash(nueva);
 
         if (usuarioDAO.actualizar(usuarioActual)) {
             cerrarVentana();
