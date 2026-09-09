@@ -55,13 +55,15 @@ public class LoginController implements Initializable {
         String usuarioIngresado = txtUsuario != null ? txtUsuario.getText().trim() : "";
         String passwordIngresada = txtPassword != null ? txtPassword.getText().trim() : "";
 
+        // 1. Validar que no haya campos vacíos
         if (usuarioIngresado.isEmpty() || passwordIngresada.isEmpty()) {
             if (lblMensaje != null) {
-                lblMensaje.setText("Por favor, complete todos sus datos.");
+                lblMensaje.setText("Por favor, complete todos los campos.");
             }
             return;
         }
 
+        // Hash de la contraseña ingresada
         String passwordHash = SecurityUtil.hashSHA256(passwordIngresada);
         Usuario usuarioEncontrado = null;
 
@@ -70,6 +72,7 @@ public class LoginController implements Initializable {
         if (usuarios != null) {
             for (Usuario u : usuarios) {
                 if (u.getUsername() != null && u.getUsername().equalsIgnoreCase(usuarioIngresado)) {
+                    // Verifica comparando el Hash SHA-256 o el texto plano (por compatibilidad con usuarios antiguos)
                     if (u.getPasswordHash() != null && 
                        (u.getPasswordHash().equals(passwordHash) || u.getPasswordHash().equals(passwordIngresada))) {
                         usuarioEncontrado = u;

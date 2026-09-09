@@ -9,24 +9,22 @@
     -fx-text-fill: #b81db3;
     -fx-font-family: "System";
     -fx-font-weight: bold;
-    -fx-font-size: 67px;
+    -fx-font-size: 32px;
 }
 
-/* Subtítulo */
 .subtitulo-login {
-  -fx-text-fill: #b81db3;
+    -fx-text-fill: #f872e9;
     -fx-font-family: "System";
-    -fx-font-size: 25px;
+    -fx-font-size: 18px;
 }
 
-/* Mensaje de Error / Estado */
 #lblMensaje, .mensaje-error {
     -fx-text-fill: #e74c3c;
-    -fx-font-size: 20px;
+    -fx-font-size: 14px;
     -fx-alignment: center;
 }
 
-#txtUsuario, #txtPassword {
+#txtUsuario, #txtPassword, #txtConfirmarPassword {
     -fx-background-color: #ffffff;
     -fx-text-fill: #333333;
     -fx-prompt-text-fill: #a0a0a0;
@@ -39,13 +37,11 @@
     -fx-padding: 8px 12px;
 }
 
-#txtUsuario:focused, #txtPassword:focused {
+#txtUsuario:focused, #txtPassword:focused, #txtConfirmarPassword:focused {
     -fx-border-color: #b81db3;
     -fx-border-width: 2px;
     -fx-background-color: #ffffff;
 }
-
-
 
 #btnIniciarSesion {
     -fx-background-color: #FF87AC;
