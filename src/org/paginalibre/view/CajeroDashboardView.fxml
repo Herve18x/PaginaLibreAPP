@@ -32,7 +32,8 @@
                         <ToggleGroup fx:id="grupoMenu" />
                      </toggleGroup>
                   </ToggleButton>
-                  <ToggleButton maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: white; -fx-border-color: #333;" text="ventas" toggleGroup="$grupoMenu" />
+                  <!-- Botón de ventas actualizado con onAction y fx:id -->
+                  <ToggleButton fx:id="btnVentas" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#abrirVentas" style="-fx-background-color: white; -fx-border-color: #333;" text="ventas" toggleGroup="$grupoMenu" />
                   <ToggleButton maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: white; -fx-border-color: #333;" text="inventario" toggleGroup="$grupoMenu" />
                   <ToggleButton maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: white; -fx-border-color: #333;" text="reportes" toggleGroup="$grupoMenu" />
                   <ToggleButton maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: white; -fx-border-color: #333;" text="vistas" toggleGroup="$grupoMenu" />
