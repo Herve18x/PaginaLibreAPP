@@ -27,6 +27,15 @@ public class CajeroDashboardController implements BaseDashboardController {
     }
 
     @FXML
+    private void abrirVentas(ActionEvent event) {
+        try {
+            Main.cambiarVista("/org/paginalibre/view/ventasventas.fxml");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     private void cerrarSesion(ActionEvent event) {
         try {
             Main.cambiarVista("/org/paginalibre/view/login.fxml");

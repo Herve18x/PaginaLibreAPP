@@ -2,27 +2,6 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/controller/LoginController.java</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/model/Usuario.java</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/view/UsuarioConsoleView.java</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/controller/BodegaDashboardController.java</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/controller/AdminDashboardController.java</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/dao/impl/UsuarioDAOImpl.java</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/controller/JefeCajaDashboardController.java</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/controller/CajeroDashboardController.java</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/controller/UsuarioController.java</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/dao/UsuarioInactivoException.java</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/system/Main.java</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/util/SecurityUtil.java</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/util/Conexion.java</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/dao/CredencialesInvalidasException.java</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/controller/BaseDashboardController.java</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/view/login.css</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/dao/UsuarioDAO.java</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/view/login.fxml</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/dao/CRUD.java</file>
-            <file>file:/C:/alexisdieguez/bim4/s3/PaginaLibreAPP/src/org/paginalibre/controller/JefeBodegaDashboardController.java</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>

@@ -15,7 +15,7 @@ public class DetalleVentaDAOImpl implements DetalleVentaDAO {
 
     @Override
     public boolean registrarDetalle(DetalleVenta detalle, Connection conn) throws Exception {
-        // Se puede usar la llamada al procedimiento sp_agregardetalleventa o un INSERT directo
+        // Línea 21: Usar la conexión transaccional que entra como parámetro
         String sql = "INSERT INTO detalle_venta (id_venta, isbn, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, detalle.getIdVenta());
@@ -30,24 +30,23 @@ public class DetalleVentaDAOImpl implements DetalleVentaDAO {
     @Override
     public List<DetalleVenta> obtenerDetallesPorVenta(int idVenta) throws Exception {
         List<DetalleVenta> lista = new ArrayList<>();
-        // Uso del procedimiento almacenado existente en la base de datos
         String sql = "{call sp_listardetalleventa(?)}";
         
-        // CORRECCIÓN: Se usa Conexion.getInstancia().conectar() para solicitar la conexión fresca
         try (Connection conn = Conexion.getInstancia().conectar();
              CallableStatement cs = conn.prepareCall(sql)) {
             
             cs.setInt(1, idVenta);
             try (ResultSet rs = cs.executeQuery()) {
                 while (rs.next()) {
-                    DetalleVenta detalle = new DetalleVenta(
-                        rs.getInt("id_detalle"),
-                        rs.getInt("id_venta"),
-                        rs.getString("isbn"),
-                        rs.getInt("cantidad"),
-                        rs.getDouble("precio_unitario"),
-                        rs.getDouble("subtotal")
-                    );
+                    // Línea 43: Se mapean los campos que coinciden con tu clase DetalleVenta
+                    DetalleVenta detalle = new DetalleVenta();
+                    detalle.setIdDetalle(rs.getInt("id_detalle"));
+                    detalle.setIdVenta(rs.getInt("id_venta"));
+                    detalle.setIsbn(rs.getString("isbn"));
+                    detalle.setCantidad(rs.getInt("cantidad"));
+                    detalle.setPrecioUnitario(rs.getDouble("precio_unitario"));
+                    detalle.setSubtotal(rs.getDouble("subtotal"));
+                    
                     lista.add(detalle);
                 }
             }

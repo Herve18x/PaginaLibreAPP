@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.paginalibre.controller.VentaController"
+            prefHeight="700.0" prefWidth="900.0">
+
+    <center>
+        <VBox spacing="15.0">
+            <padding>
+                <Insets top="20" right="30" bottom="20" left="30" />
+            </padding>
+
+            <Label text="Registrar Venta" style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+
+            <!-- Búsqueda, Agregar y Ver Carrito -->
+            <HBox spacing="10.0" alignment="CENTER_LEFT">
+                <Label text="Buscar libro:" />
+                <TextField fx:id="txtBusqueda" promptText="Ingrese ISBN o título del libro..." prefWidth="250.0" HBox.hgrow="ALWAYS" />
+                <Button fx:id="btnBuscar" text="Buscar" onAction="#buscarLibro" />
+                
+                <Label text="Cantidad:" />
+                <Spinner fx:id="spinnerCantidad" prefWidth="80.0" editable="true" />
+                
+                <Button fx:id="btnAgregarCarrito" text="+ Agregar al carrito" onAction="#agregarAlCarrito" style="-fx-background-color: #2e7d32; -fx-text-fill: white;" />
+                <Button fx:id="btnVerCarrito" text="Ver carrito" onAction="#abrirModalCarrito" style="-fx-background-color: #f57c00; -fx-text-fill: white; -fx-font-weight: bold;" />
+            </HBox>
+
+            <!-- Tabla Detalle de Venta -->
+            <TableView fx:id="tablaDetalleVenta" prefHeight="280.0" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colIsbn" text="ISBN" prefWidth="120.0" />
+                    <TableColumn fx:id="colTitulo" text="Título" prefWidth="240.0" />
+                    <TableColumn fx:id="colCantidad" text="Cantidad" prefWidth="90.0" />
+                    <TableColumn fx:id="colPrecioUnit" text="Precio Unit." prefWidth="110.0" />
+                    <TableColumn fx:id="colSubtotal" text="Subtotal" prefWidth="110.0" />
+                    <TableColumn fx:id="colAccion" text="Acción" prefWidth="100.0" />
+                </columns>
+            </TableView>
+
+            <Separator />
+
+            <!-- Totales y Cliente -->
+            <GridPane hgap="15.0" vgap="12.0">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="100.0" />
+                    <ColumnConstraints minWidth="300.0" />
+                </columnConstraints>
+
+                <Label text="Cliente:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <ComboBox fx:id="cbCliente" promptText="Seleccione un cliente..." prefWidth="300.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                <Label text="Descuento:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <Spinner fx:id="spinnerDescuento" editable="true" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                <Label text="Subtotal:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <TextField fx:id="txtSubtotal" text="0.00" editable="false" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                <Label text="Total:" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-weight: bold;" />
+                <TextField fx:id="txtTotal" text="0.00" editable="false" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" style="-fx-font-weight: bold;" />
+            </GridPane>
+
+            <!-- Acciones -->
+            <HBox spacing="10.0" alignment="CENTER_RIGHT">
+                <Button fx:id="btnCancelar" text="Cancelar" onAction="#cancelarVenta" />
+                <Button fx:id="btnRegistrarVenta" text="Registrar Venta" onAction="#registrarVenta" style="-fx-background-color: #2f6fed; -fx-text-fill: white;" />
+            </HBox>
+        </VBox>
+    </center>
+
+</BorderPane>
