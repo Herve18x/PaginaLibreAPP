@@ -3,6 +3,7 @@ package org.paginalibre.controller;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,7 +20,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.paginalibre.dao.LibroDAO;
+import org.paginalibre.dao.impl.LibroDAOImpl;
 import org.paginalibre.model.DetalleVenta;
+import org.paginalibre.model.Libro;
 import org.paginalibre.system.Main;
 
 public class VentaController implements Initializable {
@@ -40,20 +44,23 @@ public class VentaController implements Initializable {
     @FXML private TextField txtSubtotal;
     @FXML private TextField txtTotal;
 
-    private ObservableList<DetalleVenta> listaCarrito = FXCollections.observableArrayList();
+    private final ObservableList<DetalleVenta> listaTabla = FXCollections.observableArrayList();
+    private final LibroDAO libroDAO = new LibroDAOImpl();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Configuración de Spinners y Clientes
-        spinnerCantidad.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1));
-        spinnerDescuento.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 100.0, 0.0, 5.0));
+        if (spinnerCantidad != null && spinnerCantidad.getValueFactory() == null) {
+            spinnerCantidad.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1));
+        }
+        if (spinnerDescuento != null && spinnerDescuento.getValueFactory() == null) {
+            spinnerDescuento.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 100.0, 0.0, 5.0));
+        }
 
         if (cbCliente != null) {
             cbCliente.setItems(FXCollections.observableArrayList("Consumidor Final", "Cliente Frecuente"));
             cbCliente.getSelectionModel().selectFirst();
         }
 
-        // Binding de columnas
         colIsbn.setCellValueFactory(new PropertyValueFactory<>("isbn"));
         colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
         colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
@@ -62,48 +69,120 @@ public class VentaController implements Initializable {
 
         configurarColumnaAccion();
 
-        tablaDetalleVenta.setItems(listaCarrito);
-        spinnerDescuento.valueProperty().addListener((obs, oldValue, newValue) -> calcularTotales());
+        tablaDetalleVenta.setItems(listaTabla);
+
+        if (spinnerDescuento != null) {
+            spinnerDescuento.valueProperty().addListener((obs, oldValue, newValue) -> calcularTotales());
+        }
+
+        // Cargar todos los libros al entrar a la vista
+        cargarLibrosIniciales();
+    }
+
+    private void cargarLibrosIniciales() {
+        listaTabla.clear();
+        List<Libro> listaLibrosBD = libroDAO.listar();
+
+        if (listaLibrosBD != null && !listaLibrosBD.isEmpty()) {
+            for (Libro libro : listaLibrosBD) {
+                if (libro.isActivo() && libro.getStockActual() > 0) {
+                    DetalleVenta detalle = new DetalleVenta();
+                    detalle.setIsbn(libro.getIsbn());
+                    detalle.setTitulo(libro.getTitulo());
+                    detalle.setCantidad(0); // Cantidad 0 al inicio
+                    detalle.setPrecioUnitario(libro.getPrecio());
+                    detalle.setSubtotal(0.0);
+
+                    listaTabla.add(detalle);
+                }
+            }
+            calcularTotales();
+        }
     }
 
     @FXML
     void buscarLibro(ActionEvent event) {
-        String isbnInput = txtBusqueda.getText().trim();
-        if (isbnInput.isEmpty()) {
-            mostrarAlerta("Advertencia", "Ingrese un código o ISBN para simular la búsqueda.", Alert.AlertType.WARNING);
+        String query = txtBusqueda.getText().trim().toLowerCase();
+        
+        if (query.isEmpty()) {
+            cargarLibrosIniciales();
             return;
         }
-        mostrarAlerta("Búsqueda Lista", "Libro " + isbnInput + " listo para agregar al detalle.", Alert.AlertType.INFORMATION);
+
+        ObservableList<DetalleVenta> filtrados = FXCollections.observableArrayList();
+        for (DetalleVenta item : listaTabla) {
+            if (item.getIsbn().toLowerCase().contains(query) || item.getTitulo().toLowerCase().contains(query)) {
+                filtrados.add(item);
+            }
+        }
+
+        if (filtrados.isEmpty()) {
+            mostrarAlerta("No Encontrado", "No se encontraron libros coincidentes con: " + query, Alert.AlertType.INFORMATION);
+        } else {
+            tablaDetalleVenta.setItems(filtrados);
+        }
     }
 
     @FXML
     void agregarAlCarrito(ActionEvent event) {
-        String isbnInput = txtBusqueda.getText().trim();
-        if (isbnInput.isEmpty()) {
-            mostrarAlerta("Atención", "Escriba un ISBN/Código antes de agregar.", Alert.AlertType.WARNING);
+        String input = txtBusqueda.getText().trim();
+        DetalleVenta itemSeleccionado = tablaDetalleVenta.getSelectionModel().getSelectedItem();
+
+        if (itemSeleccionado == null && !input.isEmpty()) {
+            for (DetalleVenta item : listaTabla) {
+                if (item.getIsbn().equalsIgnoreCase(input) || item.getTitulo().equalsIgnoreCase(input)) {
+                    itemSeleccionado = item;
+                    break;
+                }
+            }
+        }
+
+        if (itemSeleccionado == null) {
+            mostrarAlerta("Atención", "Seleccione un libro de la lista o escriba su ISBN/Título exacto.", Alert.AlertType.WARNING);
             return;
         }
 
-        int cantidad = spinnerCantidad.getValue();
-        double precioSimulado = 150.00;
+        Libro libroBD = libroDAO.buscar(itemSeleccionado.getIsbn());
+        if (libroBD == null || !libroBD.isActivo()) {
+            mostrarAlerta("Error", "El libro no se encuentra disponible.", Alert.AlertType.ERROR);
+            return;
+        }
 
-        DetalleVenta detalle = new DetalleVenta();
-        detalle.setIsbn(isbnInput);
-        detalle.setTitulo("Libro Muestra (" + isbnInput + ")");
-        detalle.setCantidad(cantidad);
-        detalle.setPrecioUnitario(precioSimulado);
-        detalle.setSubtotal(cantidad * precioSimulado);
+        int cantidadAgregar = (spinnerCantidad != null && spinnerCantidad.getValue() != null) ? spinnerCantidad.getValue() : 1;
+        int nuevaCantidadTotal = itemSeleccionado.getCantidad() + cantidadAgregar;
 
-        listaCarrito.add(detalle);
+        if (nuevaCantidadTotal > libroBD.getStockActual()) {
+            mostrarAlerta("Stock Insuficiente", "Solo hay " + libroBD.getStockActual() + " unidades disponibles.", Alert.AlertType.WARNING);
+            return;
+        }
+
+        itemSeleccionado.setCantidad(nuevaCantidadTotal);
+        itemSeleccionado.setSubtotal(nuevaCantidadTotal * itemSeleccionado.getPrecioUnitario());
+
+        tablaDetalleVenta.refresh();
         calcularTotales();
 
         txtBusqueda.clear();
-        spinnerCantidad.getValueFactory().setValue(1);
+        tablaDetalleVenta.setItems(listaTabla);
+        if (spinnerCantidad != null && spinnerCantidad.getValueFactory() != null) {
+            spinnerCantidad.getValueFactory().setValue(1);
+        }
     }
 
-    // Modal del Carrito de Venta (Imagen 2)
     @FXML
     void abrirModalCarrito(ActionEvent event) {
+        ObservableList<DetalleVenta> productosEnCarrito = FXCollections.observableArrayList();
+        for (DetalleVenta item : listaTabla) {
+            if (item.getCantidad() > 0) {
+                productosEnCarrito.add(item);
+            }
+        }
+
+        if (productosEnCarrito.isEmpty()) {
+            mostrarAlerta("Carrito Vacío", "No ha agregado unidades a ningún libro.", Alert.AlertType.INFORMATION);
+            return;
+        }
+
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Panel de Caja y Ventas - Página Viva");
@@ -115,7 +194,7 @@ public class VentaController implements Initializable {
         Label lblTitulo = new Label("Carrito de Venta");
         lblTitulo.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
-        TableView<DetalleVenta> tablaCarritoModal = new TableView<>(listaCarrito);
+        TableView<DetalleVenta> tablaCarritoModal = new TableView<>(productosEnCarrito);
         
         TableColumn<DetalleVenta, String> colProd = new TableColumn<>("Producto");
         colProd.setCellValueFactory(new PropertyValueFactory<>("titulo"));
@@ -136,7 +215,6 @@ public class VentaController implements Initializable {
         tablaCarritoModal.getColumns().addAll(colProd, colCant, colPrec, colSub);
         tablaCarritoModal.setPrefHeight(250);
 
-        // Fila de Controles Inferiores
         HBox controles = new HBox(10);
         controles.setAlignment(Pos.CENTER_LEFT);
 
@@ -144,14 +222,16 @@ public class VentaController implements Initializable {
         Spinner<Integer> spCantModal = new Spinner<>(1, 100, 1);
         spCantModal.setPrefWidth(70);
 
-        Button btnAgregar = new Button("Agregar Producto");
-        Button btnEliminar = new Button("Eliminar Producto");
+        Button btnEliminar = new Button("Quitar del Carrito");
         Button btnActualizar = new Button("Actualizar Cantidad");
 
         btnEliminar.setOnAction(e -> {
             DetalleVenta seleccionado = tablaCarritoModal.getSelectionModel().getSelectedItem();
             if (seleccionado != null) {
-                listaCarrito.remove(seleccionado);
+                seleccionado.setCantidad(0);
+                seleccionado.setSubtotal(0.0);
+                productosEnCarrito.remove(seleccionado);
+                tablaDetalleVenta.refresh();
                 calcularTotales();
             }
         });
@@ -167,20 +247,24 @@ public class VentaController implements Initializable {
             }
         });
 
-        controles.getChildren().addAll(lblCant, spCantModal, btnAgregar, btnEliminar, btnActualizar);
+        controles.getChildren().addAll(lblCant, spCantModal, btnEliminar, btnActualizar);
 
-        // Fila Inferior de Totales y Salida
         HBox pieModal = new HBox(15);
         pieModal.setAlignment(Pos.CENTER_RIGHT);
 
-        Label lblTotalModal = new Label("Total: " + txtTotal.getText());
+        Label lblTotalModal = new Label("Total: Q" + txtTotal.getText());
         lblTotalModal.setStyle("-fx-font-weight: bold;");
 
         Button btnVaciar = new Button("Vaciar Carrito");
         btnVaciar.setOnAction(e -> {
-            listaCarrito.clear();
+            for (DetalleVenta item : listaTabla) {
+                item.setCantidad(0);
+                item.setSubtotal(0.0);
+            }
+            productosEnCarrito.clear();
+            tablaDetalleVenta.refresh();
             calcularTotales();
-            lblTotalModal.setText("Total: 0.00");
+            lblTotalModal.setText("Total: Q0.00");
         });
 
         Button btnContinuar = new Button("Continuar a Venta");
@@ -195,26 +279,32 @@ public class VentaController implements Initializable {
         stage.showAndWait();
     }
 
-    // Modal de Factura / Ticket (Imagen 4)
     @FXML
     void registrarVenta(ActionEvent event) {
-        if (listaCarrito.isEmpty()) {
-            mostrarAlerta("Atención", "El carrito está vacío. Agregue productos antes de registrar.", Alert.AlertType.WARNING);
+        ObservableList<DetalleVenta> itemsAComprar = FXCollections.observableArrayList();
+        for (DetalleVenta item : listaTabla) {
+            if (item.getCantidad() > 0) {
+                itemsAComprar.add(item);
+            }
+        }
+
+        if (itemsAComprar.isEmpty()) {
+            mostrarAlerta("Atención", "El carrito está vacío. Asigne cantidades a los productos antes de registrar la venta.", Alert.AlertType.WARNING);
             return;
         }
 
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setTitle("Panel de Caja y Ventas - Página Viva");
+        stage.setTitle("Comprobante de Venta - Página Viva");
 
         VBox layout = new VBox(10);
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.TOP_CENTER);
 
-        Label lblEmpresa = new Label("Nombre de la Libreria");
+        Label lblEmpresa = new Label("Página Viva");
         lblEmpresa.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-        Label lblDir = new Label("Direccion de la tienda");
-        Label lblTel = new Label("Tel: 0000-0000");
+        Label lblDir = new Label("Dirección de la Tienda");
+        Label lblTel = new Label("Tel: 2200-0000");
 
         Separator sep1 = new Separator();
 
@@ -232,11 +322,7 @@ public class VentaController implements Initializable {
         String clienteSel = (cbCliente != null && cbCliente.getValue() != null) ? cbCliente.getValue() : "Consumidor Final";
         infoGrid.add(new Label(clienteSel), 1, 2);
 
-        infoGrid.add(new Label("Vendedor:"), 0, 3);
-        infoGrid.add(new Label("-"), 1, 3);
-
-        // Tabla del Comprobante
-        TableView<DetalleVenta> tablaComprobante = new TableView<>(FXCollections.observableArrayList(listaCarrito));
+        TableView<DetalleVenta> tablaComprobante = new TableView<>(itemsAComprar);
         
         TableColumn<DetalleVenta, String> colProd = new TableColumn<>("Producto");
         colProd.setCellValueFactory(new PropertyValueFactory<>("titulo"));
@@ -278,14 +364,13 @@ public class VentaController implements Initializable {
         totalesGrid.add(lblTotNombre, 0, 2);
         totalesGrid.add(lblTotValor, 1, 2);
 
-        Label lblGracias = new Label("Gracias por su compra");
+        Label lblGracias = new Label("¡Gracias por su compra!");
         lblGracias.setStyle("-fx-font-style: italic;");
 
         HBox botones = new HBox(10);
         botones.setAlignment(Pos.CENTER);
 
         Button btnImprimir = new Button("Imprimir");
-        Button btnVistaPrevia = new Button("Vista Previa");
         Button btnCerrar = new Button("Cerrar");
 
         btnCerrar.setOnAction(e -> {
@@ -293,11 +378,11 @@ public class VentaController implements Initializable {
             limpiarFormulario();
         });
 
-        botones.getChildren().addAll(btnImprimir, btnVistaPrevia, btnCerrar);
+        botones.getChildren().addAll(btnImprimir, btnCerrar);
 
         layout.getChildren().addAll(lblEmpresa, lblDir, lblTel, sep1, infoGrid, tablaComprobante, sep2, totalesGrid, lblGracias, botones);
 
-        Scene scene = new Scene(layout, 450, 620);
+        Scene scene = new Scene(layout, 450, 600);
         stage.setScene(scene);
         stage.showAndWait();
     }
@@ -315,13 +400,15 @@ public class VentaController implements Initializable {
         if (colAccion == null) return;
 
         colAccion.setCellFactory(param -> new TableCell<>() {
-            private final Button btnEliminar = new Button("Eliminar");
+            private final Button btnEliminar = new Button("Quitar");
 
             {
                 btnEliminar.setStyle("-fx-background-color: #e53935; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
                 btnEliminar.setOnAction(event -> {
                     DetalleVenta item = getTableView().getItems().get(getIndex());
-                    listaCarrito.remove(item);
+                    item.setCantidad(0);
+                    item.setSubtotal(0.0);
+                    tablaDetalleVenta.refresh();
                     calcularTotales();
                 });
             }
@@ -329,10 +416,16 @@ public class VentaController implements Initializable {
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
+                if (empty || getIndex() >= getTableView().getItems().size()) {
                     setGraphic(null);
                 } else {
-                    setGraphic(btnEliminar);
+                    DetalleVenta detalle = getTableView().getItems().get(getIndex());
+                    // Únicamente renderizar el botón rojj si la cantidad agregada es mayor a cero
+                    if (detalle != null && detalle.getCantidad() > 0) {
+                        setGraphic(btnEliminar);
+                    } else {
+                        setGraphic(null);
+                    }
                 }
             }
         });
@@ -340,8 +433,10 @@ public class VentaController implements Initializable {
 
     private void calcularTotales() {
         double subtotalAcumulado = 0.0;
-        for (DetalleVenta item : listaCarrito) {
-            subtotalAcumulado += item.getSubtotal();
+        for (DetalleVenta item : listaTabla) {
+            if (item.getCantidad() > 0) {
+                subtotalAcumulado += item.getSubtotal();
+            }
         }
 
         double porcentajeDescuento = (spinnerDescuento != null && spinnerDescuento.getValue() != null) ? spinnerDescuento.getValue() : 0.0;
@@ -353,7 +448,7 @@ public class VentaController implements Initializable {
     }
 
     private void limpiarFormulario() {
-        listaCarrito.clear();
+        cargarLibrosIniciales();
         if (txtBusqueda != null) txtBusqueda.clear();
         if (spinnerCantidad != null && spinnerCantidad.getValueFactory() != null) spinnerCantidad.getValueFactory().setValue(1);
         if (spinnerDescuento != null && spinnerDescuento.getValueFactory() != null) spinnerDescuento.getValueFactory().setValue(0.0);
