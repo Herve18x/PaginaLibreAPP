@@ -6,7 +6,11 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.paginalibre.dao.UsuarioDAO;
 import org.paginalibre.dao.impl.UsuarioDAOImpl;
@@ -27,7 +31,6 @@ public class UsuarioController {
     // Componentes del Formulario
     @FXML private Label lblTituloFormulario;
     @FXML private TextField txtUsername;
-    @FXML private PasswordField txtPassword;
     @FXML private TextField txtNombre;
     @FXML private TextField txtApellido;
     @FXML private TextField txtCorreo;
@@ -75,13 +78,11 @@ public class UsuarioController {
         txtApellido.setText(usuario.getApellido());
         txtCorreo.setText(usuario.getCorreo());
         cmbRol.setValue(usuario.getRol());
-        txtPassword.clear();
     }
 
     @FXML
     private void guardarUsuario() {
         String username = txtUsername.getText().trim();
-        String password = txtPassword.getText().trim();
         String nombre = txtNombre.getText().trim();
         String apellido = txtApellido.getText().trim();
         String correo = txtCorreo.getText().trim();
@@ -93,13 +94,8 @@ public class UsuarioController {
         }
 
         if (usuarioEdicion == null) {
-            if (password.isEmpty()) {
-                mostrarAlerta("Campo Requerido", "Debe ingresar una contraseña para el nuevo usuario.", Alert.AlertType.WARNING);
-                return;
-            }
             Usuario nuevo = new Usuario();
             nuevo.setUsername(username);
-            nuevo.setPasswordHash(password);
             nuevo.setRol(rol);
             nuevo.setNombre(nombre);
             nuevo.setApellido(apellido);
@@ -119,10 +115,6 @@ public class UsuarioController {
             usuarioEdicion.setCorreo(correo);
             usuarioEdicion.setRol(rol);
 
-            if (!password.isEmpty()) {
-                usuarioEdicion.setPasswordHash(password);
-            }
-
             if (usuarioDAO.actualizar(usuarioEdicion)) {
                 mostrarAlerta("Éxito", "Usuario actualizado correctamente.", Alert.AlertType.INFORMATION);
                 cargarUsuarios();
@@ -134,12 +126,40 @@ public class UsuarioController {
     }
 
     @FXML
+    private void abrirCambiarPassword() {
+        Usuario seleccionado = tblUsuarios.getSelectionModel().getSelectedItem();
+        if (seleccionado == null) {
+            mostrarAlerta("Selección Requerida", "Seleccione un usuario de la tabla para cambiar su contraseña.", Alert.AlertType.INFORMATION);
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre/view/CambiarPasswordView.fxml"));
+            Parent root = loader.load();
+
+            CambiarPasswordController controller = loader.getController();
+            controller.setUsuarioActual(seleccionado);
+
+            Stage stage = new Stage();
+            stage.setTitle("Cambiar Contraseña - Página Libre");
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            stage.showAndWait();
+
+        } catch (Exception e) {
+            System.err.println("Error al abrir la ventana de cambio de contraseña: " + e.getMessage());
+            e.printStackTrace();
+            mostrarAlerta("Error", "No se pudo abrir la ventana de cambio de contraseña.", Alert.AlertType.ERROR);
+        }
+    }
+
+    @FXML
     private void limpiarFormulario() {
         tblUsuarios.getSelectionModel().clearSelection();
         this.usuarioEdicion = null;
         lblTituloFormulario.setText("REGISTRAR NUEVO USUARIO");
         txtUsername.clear();
-        txtPassword.clear();
         txtNombre.clear();
         txtApellido.clear();
         txtCorreo.clear();
