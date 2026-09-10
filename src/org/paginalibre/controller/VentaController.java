@@ -267,6 +267,13 @@ public class VentaController implements Initializable {
         Spinner<Integer> spCantModal = new Spinner<>(1, 100, 1);
         spCantModal.setPrefWidth(70);
 
+        // Actualizar el Spinner con la cantidad del producto seleccionado
+        tablaCarritoModal.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null && newSelection.getCantidad() > 0) {
+                spCantModal.getValueFactory().setValue(newSelection.getCantidad());
+            }
+        });
+
         Button btnEliminar = new Button("Quitar del Carrito");
         Button btnActualizar = new Button("Actualizar Cantidad");
 
@@ -466,6 +473,28 @@ public class VentaController implements Initializable {
         }
     }
 
+<<<<<<< HEAD
+=======
+    @FXML private Button btnQuitar;
+
+    @FXML
+    void quitarProducto(ActionEvent event) {
+        DetalleVenta seleccionado = tablaDetalleVenta.getSelectionModel().getSelectedItem();
+        if (seleccionado != null) {
+            if (seleccionado.getCantidad() > 0) {
+                seleccionado.setCantidad(0);
+                seleccionado.setSubtotal(0.0);
+                tablaDetalleVenta.refresh();
+                calcularTotales();
+            } else {
+                mostrarAlerta("Atención", "El producto seleccionado ya está en 0.", Alert.AlertType.INFORMATION);
+            }
+        } else {
+            mostrarAlerta("Atención", "Seleccione un producto de la tabla para quitarlo.", Alert.AlertType.WARNING);
+        }
+    }
+
+>>>>>>> e54fd341214fe9b82ce3dd2439f176e52f97c914
     private void calcularTotales() {
         double subtotalAcumulado = 0.0;
         for (DetalleVenta item : listaTabla) {
