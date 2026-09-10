@@ -1,6 +1,7 @@
 package org.paginalibre.controller;
 
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -23,11 +24,21 @@ public class LibroController implements Initializable {
     @FXML
     private TableColumn<Libro, String> colIsbn;
     @FXML
-    private TableColumn<Libro, String> colTitulo;
+    private TableColumn<Libro, String> colTitulo;    
+    @FXML
+    private TableColumn<Libro, Date> colFechaPublicacion;
     @FXML
     private TableColumn<Libro, Double> colPrecio;
     @FXML
-    private TableColumn<Libro, Integer> colStock;
+    private TableColumn<Libro, Integer> colIdCategoria;
+    @FXML
+    private TableColumn<Libro, String> colNitEditorial;
+    @FXML
+    private TableColumn<Libro, Integer> colStockActual;
+    @FXML
+    private TableColumn<Libro, Integer> colStockMinimo;
+    
+    
     
     private LibroDAO libroDAO;
     
@@ -44,9 +55,17 @@ public class LibroController implements Initializable {
         
         colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
         
-        colPrecio.setCellValueFactory(new PropertyValueFactory<>("Precio"));                
+        colFechaPublicacion.setCellValueFactory(new PropertyValueFactory<>("fechaPublicacion"));
         
-        colStock.setCellValueFactory(new PropertyValueFactory<>("stockActual"));
+        colPrecio.setCellValueFactory(new PropertyValueFactory<>("Precio")); 
+        
+        colIdCategoria.setCellValueFactory(new PropertyValueFactory<>("idCategoria"));
+        
+        colNitEditorial.setCellValueFactory(new PropertyValueFactory<>("nitEditorial"));
+        
+        colStockActual.setCellValueFactory(new PropertyValueFactory<>("stockActual"));
+        
+        colStockMinimo.setCellValueFactory(new PropertyValueFactory<>("stockMinimo"));
         
         cargarLibros();
     }
