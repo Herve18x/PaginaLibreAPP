@@ -35,26 +35,38 @@ import org.paginalibre.system.Main;
 
 public class VentaController implements Initializable {
 
-    @FXML private TextField txtBusqueda;
-    @FXML private Spinner<Integer> spinnerCantidad;
+    @FXML
+    private TextField txtBusqueda;
+    @FXML
+    private Spinner<Integer> spinnerCantidad;
 
-    @FXML private TableView<DetalleVenta> tablaDetalleVenta;
-    @FXML private TableColumn<DetalleVenta, String> colIsbn;
-    @FXML private TableColumn<DetalleVenta, String> colTitulo;
-    @FXML private TableColumn<DetalleVenta, Integer> colCantidad;
-    @FXML private TableColumn<DetalleVenta, Double> colPrecioUnit;
-    @FXML private TableColumn<DetalleVenta, Double> colSubtotal;
+    @FXML
+    private TableView<DetalleVenta> tablaDetalleVenta;
+    @FXML
+    private TableColumn<DetalleVenta, String> colIsbn;
+    @FXML
+    private TableColumn<DetalleVenta, String> colTitulo;
+    @FXML
+    private TableColumn<DetalleVenta, Integer> colCantidad;
+    @FXML
+    private TableColumn<DetalleVenta, Double> colPrecioUnit;
+    @FXML
+    private TableColumn<DetalleVenta, Double> colSubtotal;
 
-    @FXML private ComboBox<String> cbCliente;
-    @FXML private Spinner<Double> spinnerDescuento;
-    @FXML private TextField txtSubtotal;
-    @FXML private TextField txtTotal;
+    @FXML
+    private ComboBox<String> cbCliente;
+    @FXML
+    private Spinner<Double> spinnerDescuento;
+    @FXML
+    private TextField txtSubtotal;
+    @FXML
+    private TextField txtTotal;
 
     private final ObservableList<DetalleVenta> listaTabla = FXCollections.observableArrayList();
     private final LibroDAO libroDAO = new LibroDAOImpl();
     private final ClienteDAO clienteDAO = new ClienteDAOImpl();
     private final VentaDAOImpl ventaDAO = new VentaDAOImpl();
-    
+
     private Cliente clienteSeleccionadoBD = null;
 
     @Override
@@ -69,7 +81,7 @@ public class VentaController implements Initializable {
         if (cbCliente != null) {
             cbCliente.setItems(FXCollections.observableArrayList("Consumidor Final", "Cliente Frecuente"));
             cbCliente.getSelectionModel().selectFirst();
-            
+
             cbCliente.setOnAction(e -> {
                 String seleccion = cbCliente.getValue();
                 if ("Cliente Frecuente".equals(seleccion)) {
@@ -124,31 +136,31 @@ public class VentaController implements Initializable {
     }
 
     private void cargarLibrosIniciales() {
-    listaTabla.clear();
-    List<Libro> listaLibrosBD = libroDAO.listar();
+        listaTabla.clear();
+        List<Libro> listaLibrosBD = libroDAO.listar();
 
-    if (listaLibrosBD != null && !listaLibrosBD.isEmpty()) {
-        for (Libro libro : listaLibrosBD) {
-            if (libro.isActivo() && libro.getStockActual() > 0) {
-                DetalleVenta detalle = new DetalleVenta();
-                // Se elimina la línea detalle.setIdLibro(...) que causaba el error
-                detalle.setIsbn(libro.getIsbn());
-                detalle.setTitulo(libro.getTitulo());
-                detalle.setCantidad(0);
-                detalle.setPrecioUnitario(libro.getPrecio());
-                detalle.setSubtotal(0.0);
+        if (listaLibrosBD != null && !listaLibrosBD.isEmpty()) {
+            for (Libro libro : listaLibrosBD) {
+                if (libro.isActivo() && libro.getStockActual() > 0) {
+                    DetalleVenta detalle = new DetalleVenta();
+                    // Se elimina la línea detalle.setIdLibro(...) que causaba el error
+                    detalle.setIsbn(libro.getIsbn());
+                    detalle.setTitulo(libro.getTitulo());
+                    detalle.setCantidad(0);
+                    detalle.setPrecioUnitario(libro.getPrecio());
+                    detalle.setSubtotal(0.0);
 
-                listaTabla.add(detalle);
+                    listaTabla.add(detalle);
+                }
             }
+            calcularTotales();
         }
-        calcularTotales();
     }
-}
 
     @FXML
     void buscarLibro(ActionEvent event) {
         String query = txtBusqueda.getText().trim().toLowerCase();
-        
+
         if (query.isEmpty()) {
             cargarLibrosIniciales();
             return;
@@ -240,7 +252,7 @@ public class VentaController implements Initializable {
         lblTitulo.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
         TableView<DetalleVenta> tablaCarritoModal = new TableView<>(productosEnCarrito);
-        
+
         TableColumn<DetalleVenta, String> colProd = new TableColumn<>("Producto");
         colProd.setCellValueFactory(new PropertyValueFactory<>("titulo"));
         colProd.setPrefWidth(220);
@@ -266,13 +278,6 @@ public class VentaController implements Initializable {
         Label lblCant = new Label("Cantidad:");
         Spinner<Integer> spCantModal = new Spinner<>(1, 100, 1);
         spCantModal.setPrefWidth(70);
-
-        // Actualizar el Spinner con la cantidad del producto seleccionado
-        tablaCarritoModal.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
-            if (newSelection != null && newSelection.getCantidad() > 0) {
-                spCantModal.getValueFactory().setValue(newSelection.getCantidad());
-            }
-        });
 
         Button btnEliminar = new Button("Quitar del Carrito");
         Button btnActualizar = new Button("Actualizar Cantidad");
@@ -392,7 +397,7 @@ public class VentaController implements Initializable {
         infoGrid.add(new Label(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))), 1, 1);
 
         infoGrid.add(new Label("Cliente:"), 0, 2);
-        
+
         String nombreClienteMostrar = "Consumidor Final";
         if (clienteSeleccionadoBD != null) {
             nombreClienteMostrar = clienteSeleccionadoBD.getNombreCompleto() + " (" + clienteSeleccionadoBD.getCui() + ")";
@@ -400,7 +405,7 @@ public class VentaController implements Initializable {
         infoGrid.add(new Label(nombreClienteMostrar), 1, 2);
 
         TableView<DetalleVenta> tablaComprobante = new TableView<>(itemsAComprar);
-        
+
         TableColumn<DetalleVenta, String> colProd = new TableColumn<>("Producto");
         colProd.setCellValueFactory(new PropertyValueFactory<>("titulo"));
         colProd.setPrefWidth(160);
@@ -473,28 +478,6 @@ public class VentaController implements Initializable {
         }
     }
 
-<<<<<<< HEAD
-=======
-    @FXML private Button btnQuitar;
-
-    @FXML
-    void quitarProducto(ActionEvent event) {
-        DetalleVenta seleccionado = tablaDetalleVenta.getSelectionModel().getSelectedItem();
-        if (seleccionado != null) {
-            if (seleccionado.getCantidad() > 0) {
-                seleccionado.setCantidad(0);
-                seleccionado.setSubtotal(0.0);
-                tablaDetalleVenta.refresh();
-                calcularTotales();
-            } else {
-                mostrarAlerta("Atención", "El producto seleccionado ya está en 0.", Alert.AlertType.INFORMATION);
-            }
-        } else {
-            mostrarAlerta("Atención", "Seleccione un producto de la tabla para quitarlo.", Alert.AlertType.WARNING);
-        }
-    }
-
->>>>>>> e54fd341214fe9b82ce3dd2439f176e52f97c914
     private void calcularTotales() {
         double subtotalAcumulado = 0.0;
         for (DetalleVenta item : listaTabla) {
@@ -507,19 +490,35 @@ public class VentaController implements Initializable {
         double descuento = subtotalAcumulado * (porcentajeDescuento / 100.0);
         double totalFinal = subtotalAcumulado - descuento;
 
-        if (txtSubtotal != null) txtSubtotal.setText(String.format("%.2f", subtotalAcumulado));
-        if (txtTotal != null) txtTotal.setText(String.format("%.2f", totalFinal));
+        if (txtSubtotal != null) {
+            txtSubtotal.setText(String.format("%.2f", subtotalAcumulado));
+        }
+        if (txtTotal != null) {
+            txtTotal.setText(String.format("%.2f", totalFinal));
+        }
     }
 
     private void limpiarFormulario() {
         cargarLibrosIniciales();
         clienteSeleccionadoBD = null;
-        if (cbCliente != null) cbCliente.getSelectionModel().select("Consumidor Final");
-        if (txtBusqueda != null) txtBusqueda.clear();
-        if (spinnerCantidad != null && spinnerCantidad.getValueFactory() != null) spinnerCantidad.getValueFactory().setValue(1);
-        if (spinnerDescuento != null && spinnerDescuento.getValueFactory() != null) spinnerDescuento.getValueFactory().setValue(0.0);
-        if (txtSubtotal != null) txtSubtotal.setText("0.00");
-        if (txtTotal != null) txtTotal.setText("0.00");
+        if (cbCliente != null) {
+            cbCliente.getSelectionModel().select("Consumidor Final");
+        }
+        if (txtBusqueda != null) {
+            txtBusqueda.clear();
+        }
+        if (spinnerCantidad != null && spinnerCantidad.getValueFactory() != null) {
+            spinnerCantidad.getValueFactory().setValue(1);
+        }
+        if (spinnerDescuento != null && spinnerDescuento.getValueFactory() != null) {
+            spinnerDescuento.getValueFactory().setValue(0.0);
+        }
+        if (txtSubtotal != null) {
+            txtSubtotal.setText("0.00");
+        }
+        if (txtTotal != null) {
+            txtTotal.setText("0.00");
+        }
     }
 
     private void mostrarAlerta(String titulo, String contenido, Alert.AlertType tipo) {

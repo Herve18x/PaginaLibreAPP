@@ -44,52 +44,35 @@
             <!-- Tabla Detalle de Venta -->
             <TableView fx:id="tablaDetalleVenta" prefHeight="280.0" VBox.vgrow="ALWAYS">
                 <columns>
-<<<<<<< HEAD
                     <TableColumn fx:id="colIsbn" text="ISBN" prefWidth="140.0" />
                     <TableColumn fx:id="colTitulo" text="Título" prefWidth="300.0" />
                     <TableColumn fx:id="colCantidad" text="Cantidad" prefWidth="100.0" />
                     <TableColumn fx:id="colPrecioUnit" text="Precio Unit." prefWidth="140.0" />
                     <TableColumn fx:id="colSubtotal" text="Subtotal" prefWidth="140.0" />
-=======
-                    <TableColumn fx:id="colIsbn" text="ISBN" prefWidth="120.0" />
-                    <TableColumn fx:id="colTitulo" text="Título" prefWidth="240.0" />
-                    <TableColumn fx:id="colCantidad" text="Cantidad" prefWidth="90.0" />
-                    <TableColumn fx:id="colPrecioUnit" text="Precio Unit." prefWidth="110.0" />
-                    <TableColumn fx:id="colSubtotal" text="Subtotal" prefWidth="110.0" />
->>>>>>> e54fd341214fe9b82ce3dd2439f176e52f97c914
                 </columns>
             </TableView>
 
             <Separator />
 
-            <!-- Totales, Cliente y Botón Quitar -->
-            <BorderPane>
-                <left>
-                    <GridPane hgap="15.0" vgap="12.0">
-                        <columnConstraints>
-                            <ColumnConstraints minWidth="100.0" />
-                            <ColumnConstraints minWidth="300.0" />
-                        </columnConstraints>
+            <!-- Totales y Cliente -->
+            <GridPane hgap="15.0" vgap="12.0">
+                <columnConstraints>
+                    <ColumnConstraints minWidth="100.0" />
+                    <ColumnConstraints minWidth="300.0" />
+                </columnConstraints>
 
-                        <Label text="Cliente:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-                        <ComboBox fx:id="cbCliente" promptText="Seleccione un cliente..." prefWidth="300.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                <Label text="Cliente:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <ComboBox fx:id="cbCliente" promptText="Seleccione un cliente..." prefWidth="300.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
 
-                        <Label text="Descuento:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
-                        <Spinner fx:id="spinnerDescuento" editable="true" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                <Label text="Descuento:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <Spinner fx:id="spinnerDescuento" editable="true" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
 
-                        <Label text="Subtotal:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                        <TextField fx:id="txtSubtotal" text="0.00" editable="false" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                <Label text="Subtotal:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <TextField fx:id="txtSubtotal" text="0.00" editable="false" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-                        <Label text="Total:" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-weight: bold;" />
-                        <TextField fx:id="txtTotal" text="0.00" editable="false" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" style="-fx-font-weight: bold;" />
-                    </GridPane>
-                </left>
-                <right>
-                    <VBox alignment="BOTTOM_RIGHT">
-                        <Button fx:id="btnQuitar" text="Quitar del Carrito" onAction="#quitarProducto" style="-fx-background-color: #e53935; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20; -fx-font-size: 14px; -fx-cursor: hand;" />
-                    </VBox>
-                </right>
-            </BorderPane>
+                <Label text="Total:" GridPane.columnIndex="0" GridPane.rowIndex="3" style="-fx-font-weight: bold;" />
+                <TextField fx:id="txtTotal" text="0.00" editable="false" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="3" style="-fx-font-weight: bold;" />
+            </GridPane>
 
             <!-- Acciones -->
             <HBox spacing="10.0" alignment="CENTER_RIGHT">
