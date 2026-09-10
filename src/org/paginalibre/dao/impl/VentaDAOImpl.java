@@ -1,5 +1,5 @@
 package org.paginalibre.dao.impl;
-
+ 
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,43 +13,39 @@ import org.paginalibre.dao.VentaDAO;
 import org.paginalibre.model.DetalleVenta;
 import org.paginalibre.model.Venta;
 import org.paginalibre.util.Conexion;
-
+ 
 public class VentaDAOImpl implements VentaDAO {
-
     private final DetalleVentaDAO detalleVentaDAO = new DetalleVentaDAOImpl();
-
     @Override
     public boolean insertar(Venta objeto) {
         return false;
     }
-
     public boolean guardarVentaConDetalles(Venta venta, List<DetalleVenta> detalles) {
-        String sqlVenta = "INSERT INTO ventas (fecha_venta, total, estado, cui_cliente, id_usuario) VALUES (NOW(), ?, ?, ?, ?)";
-        
+        String sqlVenta = "INSERT INTO ventas (fecha_venta, subtotal, descuento, total, estado, cui_cliente, id_usuario) VALUES (NOW(), ?, ?, ?, ?, ?, ?)";
         Connection conexion = null;
         try {
             conexion = Conexion.getInstancia().conectar();
             conexion.setAutoCommit(false);
-
+            // Validar CUI de Consumidor Final (si viene 0 o nulo, asigna 0 por defecto)
+            long cuiClienteFinal = (venta.getCuiCliente() <= 0) ? 0L : venta.getCuiCliente();
             try (PreparedStatement ps = conexion.prepareStatement(sqlVenta, Statement.RETURN_GENERATED_KEYS)) {
-                ps.setDouble(1, venta.getTotal());
-                ps.setString(2, venta.getEstado());
-                ps.setLong(3, venta.getCuiCliente());
-                ps.setInt(4, venta.getIdUsuario());
-
+                ps.setDouble(1, venta.getSubtotal());
+                ps.setDouble(2, venta.getDescuento());
+                ps.setDouble(3, venta.getTotal());
+                ps.setString(4, venta.getEstado() != null ? venta.getEstado() : "COMPLETADA");
+                ps.setLong(5, cuiClienteFinal);
+                ps.setInt(6, venta.getIdUsuario() > 0 ? venta.getIdUsuario() : 1); // Asigna usuario 1 por defecto si no viene especificado
                 int filas = ps.executeUpdate();
                 if (filas == 0) {
                     conexion.rollback();
                     return false;
                 }
-
                 try (ResultSet rs = ps.getGeneratedKeys()) {
                     if (rs.next()) {
                         venta.setIdVenta(rs.getInt(1));
                     }
                 }
             }
-
             for (DetalleVenta detalle : detalles) {
                 detalle.setIdVenta(venta.getIdVenta());
                 boolean exitoDetalle = detalleVentaDAO.registrarDetalle(detalle, conexion);
@@ -58,10 +54,8 @@ public class VentaDAOImpl implements VentaDAO {
                     return false;
                 }
             }
-
             conexion.commit();
             return true;
-
         } catch (Exception e) {
             if (conexion != null) {
                 try {
@@ -83,16 +77,11 @@ public class VentaDAOImpl implements VentaDAO {
             }
         }
     }
-
     @Override
     public List<Venta> listar() {
         List<Venta> lista = new ArrayList<>();
         String sql = "{call sp_listarventas()}";
-
-        try (Connection conexion = Conexion.getInstancia().conectar();
-             CallableStatement cs = conexion.prepareCall(sql);
-             ResultSet rs = cs.executeQuery()) {
-
+        try (Connection conexion = Conexion.getInstancia().conectar(); CallableStatement cs = conexion.prepareCall(sql); ResultSet rs = cs.executeQuery()) {
             while (rs.next()) {
                 Venta venta = new Venta();
                 venta.setIdVenta(rs.getInt("id_venta"));
@@ -103,7 +92,6 @@ public class VentaDAOImpl implements VentaDAO {
                 venta.setEstado(rs.getString("estado"));
                 venta.setCuiCliente(rs.getLong("cui_cliente"));
                 venta.setIdUsuario(rs.getInt("id_usuario"));
-
                 lista.add(venta);
             }
         } catch (SQLException e) {
@@ -111,28 +99,23 @@ public class VentaDAOImpl implements VentaDAO {
         }
         return lista;
     }
-
     @Override
     public Venta buscar(Integer id) {
         return null;
     }
-
     @Override
     public boolean actualizar(Venta objeto) {
         return false;
     }
-
-   @Override
-public boolean eliminar(Integer id) {
-    String sql = "UPDATE ventas SET estado = 'DEVUELTA' WHERE id_venta = ? AND estado = 'COMPLETADA'";
-    try (Connection conexion = Conexion.getInstancia().conectar();
-         PreparedStatement ps = conexion.prepareStatement(sql)) {
-
-        ps.setInt(1, id);
-        return ps.executeUpdate() > 0;
-    } catch (SQLException e) {
-        System.err.println("Error al reembolsar venta: " + e.getMessage());
-        return false;
+    @Override
+    public boolean eliminar(Integer id) {
+        String sql = "UPDATE ventas SET estado = 'DEVUELTA' WHERE id_venta = ? AND estado = 'COMPLETADA'";
+        try (Connection conexion = Conexion.getInstancia().conectar(); PreparedStatement ps = conexion.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al reembolsar venta: " + e.getMessage());
+            return false;
+        }
     }
-}
 }

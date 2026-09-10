@@ -1006,6 +1006,10 @@ CALL sp_insertarcliente(2000100180101, 'Gabriela', 'Rojas', 'grojas@gmail.com');
 CALL sp_insertarcliente(2000100190101, 'Héctor', 'Salazar', 'hsalazar@yahoo.com');
 CALL sp_insertarcliente(2000100200101, 'Mónica', 'Herrera', 'mherrera@gmail.com');
 
+INSERT INTO clientes (cui, nombre_cliente, apellido_cliente, correo_electronico) 
+VALUES (0, 'Consumidor', 'Final', 'cf@correo.com')
+ON DUPLICATE KEY UPDATE nombre_cliente = 'Consumidor';
+
 -- USUARIOS
 CALL sp_registrar_usuario('admin1', SHA2('Admin#2026',256), 'admin', 'Sofía', 'Reyes', 'sofia.reyes@libreria.com');
 CALL sp_registrar_usuario('admin2', SHA2('Admin#2026',256), 'admin', 'Diego', 'Morales', 'diego.morales@libreria.com');
