@@ -16,7 +16,7 @@ public class LibroDAOImpl implements LibroDAO {
 
     @Override
     public boolean insertar(Libro libros) {
-        String consulta = "{call sp_insertarlibro(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
+        String consulta = "{call sp_insertarlibro(?, ?, ?, ?, ?, ?, ?, ?)}";
         try (Connection conexion = Conexion.getInstancia().conectar(); 
              CallableStatement consultaCall = conexion.prepareCall(consulta)) {
             
@@ -28,8 +28,6 @@ public class LibroDAOImpl implements LibroDAO {
             consultaCall.setString(6, libros.getNitEditorial());
             consultaCall.setInt(7, libros.getStockActual());
             consultaCall.setInt(8, libros.getStockMinimo());
-            consultaCall.setBoolean(9, libros.isActivo());
-            consultaCall.setTimestamp(10, libros.getFechaActualizacion());
 
             return consultaCall.executeUpdate() > 0;
         } catch (SQLException e) {

@@ -7,6 +7,7 @@ import java.util.ResourceBundle;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TableColumn;
@@ -16,6 +17,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import org.paginalibre.dao.LibroDAO;
 import org.paginalibre.dao.impl.LibroDAOImpl;
 import org.paginalibre.model.Libro;
+import org.paginalibre.system.Main;
 
 public class LibroController implements Initializable {
     
@@ -44,6 +46,8 @@ public class LibroController implements Initializable {
     
     private ObservableList<Libro> listaLibros;
     
+    
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
@@ -68,7 +72,20 @@ public class LibroController implements Initializable {
         colStockMinimo.setCellValueFactory(new PropertyValueFactory<>("stockMinimo"));
         
         cargarLibros();
+        
+        
     }
+        @FXML 
+        private void agregarLibro(ActionEvent event) {
+    
+        try {
+            Main.cambiarVista("/org/paginalibre/view/FormularioLibro.fxml");
+        } catch (Exception e) {
+        }
+    
+    }
+    
+    
         private void cargarLibros(){
             
             listaLibros.clear();
@@ -81,5 +98,11 @@ public class LibroController implements Initializable {
             
             }
         tablaLibros.setItems(listaLibros);
+        }
+        
+        private void agregarNuevoLibro(){
+            Libro nuevolibro = new Libro();
+            
+            libroDAO.insertar(nuevolibro);
         }
 }

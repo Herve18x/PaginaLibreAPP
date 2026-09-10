@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefWidth="420" spacing="12" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.paginalibre.controller.LibroController">
+
+    <padding><Insets bottom="16" left="16" right="16" top="16" /></padding>
+
+    <Label fx:id="lblTitulo" style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Nuevo libro" />
+
+    <GridPane hgap="10" vgap="10">
+        <Label text="ISBN" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+        <TextField fx:id="txtIsbn" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+        <Label text="Título" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+        <TextField fx:id="txtTituloLibro" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+        <Label text="Autor" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+        <TextField fx:id="txtAutor" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+        <Label text="Categoría" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+        <ComboBox fx:id="cbCategoria" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+        <Label text="Editorial" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+        <ComboBox fx:id="cbEditorial" prefWidth="200" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+
+        <Label text="Precio" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+        <TextField fx:id="txtPrecio" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+
+        <Label text="Stock mínimo" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+        <TextField fx:id="txtStockMinimo" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+
+        <Label text="Activo" GridPane.columnIndex="0" GridPane.rowIndex="7" />
+        <CheckBox fx:id="chkActivo" selected="true" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+      <columnConstraints>
+         <ColumnConstraints />
+         <ColumnConstraints />
+      </columnConstraints>
+      <rowConstraints>
+         <RowConstraints />
+         <RowConstraints />
+         <RowConstraints />
+         <RowConstraints />
+         <RowConstraints />
+         <RowConstraints />
+         <RowConstraints />
+         <RowConstraints />
+      </rowConstraints>
+    </GridPane>
+
+    <Label fx:id="lblError" style="-fx-text-fill: red;" wrapText="true" />
+
+    <HBox alignment="CENTER_RIGHT" spacing="10">
+        <Button fx:id="btnCancelar" text="Cancelar" />
+        <Button fx:id="btnGuardar" defaultButton="true" text="Guardar" />
+    </HBox>
+
+</VBox>

@@ -64,6 +64,7 @@ private void mostrarGestionUsuarios(ActionEvent event) {
         }
     }
 
+    
     @FXML
     private void cerrarSesion(ActionEvent event) {
         try {
