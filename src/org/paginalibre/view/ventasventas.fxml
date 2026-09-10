@@ -44,12 +44,11 @@
             <!-- Tabla Detalle de Venta -->
             <TableView fx:id="tablaDetalleVenta" prefHeight="280.0" VBox.vgrow="ALWAYS">
                 <columns>
-                    <TableColumn fx:id="colIsbn" text="ISBN" prefWidth="120.0" />
-                    <TableColumn fx:id="colTitulo" text="Título" prefWidth="240.0" />
-                    <TableColumn fx:id="colCantidad" text="Cantidad" prefWidth="90.0" />
-                    <TableColumn fx:id="colPrecioUnit" text="Precio Unit." prefWidth="110.0" />
-                    <TableColumn fx:id="colSubtotal" text="Subtotal" prefWidth="110.0" />
-                    <TableColumn fx:id="colAccion" text="Acción" prefWidth="100.0" />
+                    <TableColumn fx:id="colIsbn" text="ISBN" prefWidth="140.0" />
+                    <TableColumn fx:id="colTitulo" text="Título" prefWidth="300.0" />
+                    <TableColumn fx:id="colCantidad" text="Cantidad" prefWidth="100.0" />
+                    <TableColumn fx:id="colPrecioUnit" text="Precio Unit." prefWidth="140.0" />
+                    <TableColumn fx:id="colSubtotal" text="Subtotal" prefWidth="140.0" />
                 </columns>
             </TableView>
 

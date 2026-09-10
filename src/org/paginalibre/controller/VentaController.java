@@ -9,9 +9,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -20,10 +22,15 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.paginalibre.dao.ClienteDAO;
 import org.paginalibre.dao.LibroDAO;
+import org.paginalibre.dao.impl.ClienteDAOImpl;
 import org.paginalibre.dao.impl.LibroDAOImpl;
+import org.paginalibre.dao.impl.VentaDAOImpl;
+import org.paginalibre.model.Cliente;
 import org.paginalibre.model.DetalleVenta;
 import org.paginalibre.model.Libro;
+import org.paginalibre.model.Venta;
 import org.paginalibre.system.Main;
 
 public class VentaController implements Initializable {
@@ -37,7 +44,6 @@ public class VentaController implements Initializable {
     @FXML private TableColumn<DetalleVenta, Integer> colCantidad;
     @FXML private TableColumn<DetalleVenta, Double> colPrecioUnit;
     @FXML private TableColumn<DetalleVenta, Double> colSubtotal;
-    @FXML private TableColumn<DetalleVenta, Void> colAccion;
 
     @FXML private ComboBox<String> cbCliente;
     @FXML private Spinner<Double> spinnerDescuento;
@@ -46,6 +52,10 @@ public class VentaController implements Initializable {
 
     private final ObservableList<DetalleVenta> listaTabla = FXCollections.observableArrayList();
     private final LibroDAO libroDAO = new LibroDAOImpl();
+    private final ClienteDAO clienteDAO = new ClienteDAOImpl();
+    private final VentaDAOImpl ventaDAO = new VentaDAOImpl();
+    
+    private Cliente clienteSeleccionadoBD = null;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -59,6 +69,15 @@ public class VentaController implements Initializable {
         if (cbCliente != null) {
             cbCliente.setItems(FXCollections.observableArrayList("Consumidor Final", "Cliente Frecuente"));
             cbCliente.getSelectionModel().selectFirst();
+            
+            cbCliente.setOnAction(e -> {
+                String seleccion = cbCliente.getValue();
+                if ("Cliente Frecuente".equals(seleccion)) {
+                    abrirModalSeleccionCliente();
+                } else {
+                    clienteSeleccionadoBD = null;
+                }
+            });
         }
 
         colIsbn.setCellValueFactory(new PropertyValueFactory<>("isbn"));
@@ -67,38 +86,64 @@ public class VentaController implements Initializable {
         colPrecioUnit.setCellValueFactory(new PropertyValueFactory<>("precioUnitario"));
         colSubtotal.setCellValueFactory(new PropertyValueFactory<>("subtotal"));
 
-        configurarColumnaAccion();
-
         tablaDetalleVenta.setItems(listaTabla);
 
         if (spinnerDescuento != null) {
             spinnerDescuento.valueProperty().addListener((obs, oldValue, newValue) -> calcularTotales());
         }
 
-        // Cargar todos los libros al entrar a la vista
         cargarLibrosIniciales();
     }
 
-    private void cargarLibrosIniciales() {
-        listaTabla.clear();
-        List<Libro> listaLibrosBD = libroDAO.listar();
+    private void abrirModalSeleccionCliente() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/paginalibre/view/SeleccionarClienteView.fxml"));
+            Parent root = loader.load();
 
-        if (listaLibrosBD != null && !listaLibrosBD.isEmpty()) {
-            for (Libro libro : listaLibrosBD) {
-                if (libro.isActivo() && libro.getStockActual() > 0) {
-                    DetalleVenta detalle = new DetalleVenta();
-                    detalle.setIsbn(libro.getIsbn());
-                    detalle.setTitulo(libro.getTitulo());
-                    detalle.setCantidad(0); // Cantidad 0 al inicio
-                    detalle.setPrecioUnitario(libro.getPrecio());
-                    detalle.setSubtotal(0.0);
+            SeleccionarClienteController controller = loader.getController();
 
-                    listaTabla.add(detalle);
-                }
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.setTitle("Seleccionar Cliente Frecuente");
+            stage.setScene(new Scene(root));
+            stage.showAndWait();
+
+            Cliente seleccionado = controller.getClienteSeleccionado();
+            if (seleccionado != null) {
+                this.clienteSeleccionadoBD = seleccionado;
+            } else {
+                this.clienteSeleccionadoBD = null;
+                cbCliente.getSelectionModel().select("Consumidor Final");
             }
-            calcularTotales();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarAlerta("Error", "No se pudo cargar la vista de selección de cliente.", Alert.AlertType.ERROR);
+            cbCliente.getSelectionModel().select("Consumidor Final");
         }
     }
+
+    private void cargarLibrosIniciales() {
+    listaTabla.clear();
+    List<Libro> listaLibrosBD = libroDAO.listar();
+
+    if (listaLibrosBD != null && !listaLibrosBD.isEmpty()) {
+        for (Libro libro : listaLibrosBD) {
+            if (libro.isActivo() && libro.getStockActual() > 0) {
+                DetalleVenta detalle = new DetalleVenta();
+                // Se elimina la línea detalle.setIdLibro(...) que causaba el error
+                detalle.setIsbn(libro.getIsbn());
+                detalle.setTitulo(libro.getTitulo());
+                detalle.setCantidad(0);
+                detalle.setPrecioUnitario(libro.getPrecio());
+                detalle.setSubtotal(0.0);
+
+                listaTabla.add(detalle);
+            }
+        }
+        calcularTotales();
+    }
+}
 
     @FXML
     void buscarLibro(ActionEvent event) {
@@ -293,6 +338,27 @@ public class VentaController implements Initializable {
             return;
         }
 
+        Venta venta = new Venta();
+        double totalVenta = Double.parseDouble(txtTotal.getText().replace(",", "."));
+        venta.setTotal(totalVenta);
+        venta.setEstado("COMPLETADA");
+
+        if (clienteSeleccionadoBD != null) {
+            venta.setCuiCliente(clienteSeleccionadoBD.getCui());
+        } else {
+            venta.setCuiCliente(0L);
+        }
+
+        venta.setIdUsuario(1);
+
+        // Guardar la venta con sus detalles en una sola transacción
+        boolean exito = ventaDAO.guardarVentaConDetalles(venta, itemsAComprar);
+
+        if (!exito) {
+            mostrarAlerta("Error", "No se pudo registrar la venta en la base de datos.", Alert.AlertType.ERROR);
+            return;
+        }
+
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Comprobante de Venta - Página Viva");
@@ -313,14 +379,18 @@ public class VentaController implements Initializable {
         infoGrid.setVgap(5);
 
         infoGrid.add(new Label("No. Venta:"), 0, 0);
-        infoGrid.add(new Label("000001"), 1, 0);
+        infoGrid.add(new Label(String.valueOf(venta.getIdVenta())), 1, 0);
 
         infoGrid.add(new Label("Fecha:"), 0, 1);
         infoGrid.add(new Label(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))), 1, 1);
 
         infoGrid.add(new Label("Cliente:"), 0, 2);
-        String clienteSel = (cbCliente != null && cbCliente.getValue() != null) ? cbCliente.getValue() : "Consumidor Final";
-        infoGrid.add(new Label(clienteSel), 1, 2);
+        
+        String nombreClienteMostrar = "Consumidor Final";
+        if (clienteSeleccionadoBD != null) {
+            nombreClienteMostrar = clienteSeleccionadoBD.getNombreCompleto() + " (" + clienteSeleccionadoBD.getCui() + ")";
+        }
+        infoGrid.add(new Label(nombreClienteMostrar), 1, 2);
 
         TableView<DetalleVenta> tablaComprobante = new TableView<>(itemsAComprar);
         
@@ -396,41 +466,6 @@ public class VentaController implements Initializable {
         }
     }
 
-    private void configurarColumnaAccion() {
-        if (colAccion == null) return;
-
-        colAccion.setCellFactory(param -> new TableCell<>() {
-            private final Button btnEliminar = new Button("Quitar");
-
-            {
-                btnEliminar.setStyle("-fx-background-color: #e53935; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
-                btnEliminar.setOnAction(event -> {
-                    DetalleVenta item = getTableView().getItems().get(getIndex());
-                    item.setCantidad(0);
-                    item.setSubtotal(0.0);
-                    tablaDetalleVenta.refresh();
-                    calcularTotales();
-                });
-            }
-
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || getIndex() >= getTableView().getItems().size()) {
-                    setGraphic(null);
-                } else {
-                    DetalleVenta detalle = getTableView().getItems().get(getIndex());
-                    // Únicamente renderizar el botón rojj si la cantidad agregada es mayor a cero
-                    if (detalle != null && detalle.getCantidad() > 0) {
-                        setGraphic(btnEliminar);
-                    } else {
-                        setGraphic(null);
-                    }
-                }
-            }
-        });
-    }
-
     private void calcularTotales() {
         double subtotalAcumulado = 0.0;
         for (DetalleVenta item : listaTabla) {
@@ -449,6 +484,8 @@ public class VentaController implements Initializable {
 
     private void limpiarFormulario() {
         cargarLibrosIniciales();
+        clienteSeleccionadoBD = null;
+        if (cbCliente != null) cbCliente.getSelectionModel().select("Consumidor Final");
         if (txtBusqueda != null) txtBusqueda.clear();
         if (spinnerCantidad != null && spinnerCantidad.getValueFactory() != null) spinnerCantidad.getValueFactory().setValue(1);
         if (spinnerDescuento != null && spinnerDescuento.getValueFactory() != null) spinnerDescuento.getValueFactory().setValue(0.0);

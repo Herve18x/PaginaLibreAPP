@@ -41,7 +41,7 @@ public class LibroDAOImpl implements LibroDAO {
     @Override
     public List<Libro> listar() {
         List<Libro> lista = new ArrayList<>();
-        String consultaSQL = "SELECT isbn, titulo, fecha_publicacion, precio, id_categoria, nit_editorial, stock_actual, stock_minimo, activo, fecha_actualizacion FROM libros";
+        String consultaSQL = "SELECT isbn, titulo, fecha_publicacion, precio, id_categoria, nit_editorial, stock_actual, stock_minimo, activo, fecha_actualizacion FROM libros WHERE activo = 1";
 
         try (Connection conexion = Conexion.getInstancia().conectar(); 
              PreparedStatement ps = conexion.prepareStatement(consultaSQL); 
@@ -109,11 +109,38 @@ public class LibroDAOImpl implements LibroDAO {
 
     @Override
     public boolean actualizar(Libro libro) {
-        return false;
+        String consultaSQL = "UPDATE libros SET titulo = ?, fecha_publicacion = ?, precio = ?, id_categoria = ?, nit_editorial = ?, stock_actual = ?, stock_minimo = ?, activo = ? WHERE isbn = ?";
+        try (Connection conexion = Conexion.getInstancia().conectar();
+             PreparedStatement ps = conexion.prepareStatement(consultaSQL)) {
+
+            ps.setString(1, libro.getTitulo());
+            ps.setDate(2, libro.getFechaPublicacion() != null ? java.sql.Date.valueOf(libro.getFechaPublicacion()) : null);
+            ps.setDouble(3, libro.getPrecio());
+            ps.setInt(4, libro.getIdCategoria());
+            ps.setString(5, libro.getNitEditorial());
+            ps.setInt(6, libro.getStockActual());
+            ps.setInt(7, libro.getStockMinimo());
+            ps.setBoolean(8, libro.isActivo());
+            ps.setString(9, libro.getIsbn());
+
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar Libro: " + e.getMessage());
+            return false;
+        }
     }
 
     @Override
     public boolean eliminar(String isbn) {
-        return false;
+        String consultaSQL = "UPDATE libros SET activo = 0 WHERE isbn = ?";
+        try (Connection conexion = Conexion.getInstancia().conectar();
+             PreparedStatement ps = conexion.prepareStatement(consultaSQL)) {
+
+            ps.setString(1, isbn);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar Libro (desactivar): " + e.getMessage());
+            return false;
+        }
     }
 }

@@ -15,7 +15,6 @@ public class DetalleVentaDAOImpl implements DetalleVentaDAO {
 
     @Override
     public boolean registrarDetalle(DetalleVenta detalle, Connection conn) throws Exception {
-        // Línea 21: Usar la conexión transaccional que entra como parámetro
         String sql = "INSERT INTO detalle_venta (id_venta, isbn, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, detalle.getIdVenta());
@@ -38,7 +37,6 @@ public class DetalleVentaDAOImpl implements DetalleVentaDAO {
             cs.setInt(1, idVenta);
             try (ResultSet rs = cs.executeQuery()) {
                 while (rs.next()) {
-                    // Línea 43: Se mapean los campos que coinciden con tu clase DetalleVenta
                     DetalleVenta detalle = new DetalleVenta();
                     detalle.setIdDetalle(rs.getInt("id_detalle"));
                     detalle.setIdVenta(rs.getInt("id_venta"));

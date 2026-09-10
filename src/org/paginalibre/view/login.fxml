@@ -38,12 +38,6 @@
         </font>
     </PasswordField>
 
-    <PasswordField fx:id="txtConfirmarPassword" maxWidth="Infinity" promptText="Confirmar Contraseña">
-        <font>
-            <Font name="System" size="12.0" />
-        </font>
-    </PasswordField>
-
     <Label fx:id="lblMensaje" styleClass="mensaje-error" wrapText="true" />
 
     <Button fx:id="btnIniciarSesion" defaultButton="true" maxWidth="Infinity" onAction="#eventoInicioSesion" style="-fx-background-color: FF87AC;" text="Ingresar" textFill="WHITE">

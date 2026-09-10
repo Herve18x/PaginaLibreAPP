@@ -1,13 +1,13 @@
 package org.paginalibre.dao.impl;
 
-import org.paginalibre.util.Conexion;
-import org.paginalibre.model.Usuario;
 import org.paginalibre.dao.UsuarioDAO;
+import org.paginalibre.model.Usuario;
+import org.paginalibre.util.Conexion;
+import org.paginalibre.util.SecurityUtil;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -15,32 +15,14 @@ import java.util.List;
 
 public class UsuarioDAOImpl implements UsuarioDAO {
 
-    // Convierte la contraseña en hash SHA-256 para coincidir con la BD y el Login
-    private String encriptarSHA256(String password) {
-        if (password == null || password.trim().isEmpty()) {
-            return null;
-        }
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hash = md.digest(password.getBytes());
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hash) {
-                sb.append(String.format("%02x", b));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            System.err.println("Error [SHA-256]: " + e.getMessage());
-            return password;
-        }
-    }
-
     @Override
     public boolean insertar(Usuario objeto) {
         String sql = "{call sp_registrar_usuario(?, ?, ?, ?, ?, ?)}";
         try (Connection con = Conexion.getInstancia().conectar();
              CallableStatement cs = con.prepareCall(sql)) {
+
             cs.setString(1, objeto.getUsername());
-            cs.setString(2, encriptarSHA256(objeto.getPasswordHash()));
+            cs.setString(2, SecurityUtil.hashSHA256(objeto.getPasswordHash()));
             cs.setString(3, objeto.getRol());
             cs.setString(4, objeto.getNombre());
             cs.setString(5, objeto.getApellido());
@@ -59,6 +41,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
         try (Connection con = Conexion.getInstancia().conectar();
              CallableStatement cs = con.prepareCall(sql);
              ResultSet rs = cs.executeQuery()) {
+
             while (rs.next()) {
                 Usuario u = new Usuario();
                 u.setId(rs.getInt("id"));
@@ -77,33 +60,12 @@ public class UsuarioDAOImpl implements UsuarioDAO {
         return lista;
     }
 
-    public Usuario buscarPorUsername(String username) {
-        String sql = "{call sp_iniciar_sesion(?)}";
-        try (Connection con = Conexion.getInstancia().conectar();
-             CallableStatement cs = con.prepareCall(sql)) {
-            cs.setString(1, username);
-            try (ResultSet rs = cs.executeQuery()) {
-                if (rs.next()) {
-                    Usuario u = new Usuario();
-                    u.setId(rs.getInt("id"));
-                    u.setUsername(rs.getString("username"));
-                    u.setPasswordHash(rs.getString("password_hash"));
-                    u.setRol(rs.getString("rol"));
-                    u.setActivo(rs.getBoolean("activo"));
-                    return u;
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error [Buscar Usuario por Username]: " + e.getMessage());
-        }
-        return null;
-    }
-
     @Override
     public Usuario buscar(Integer id) {
-        String sql = "SELECT id, username, password_hash, rol, nombre, apellido, correo, activo FROM usuarios WHERE id = ?";
+        String sql = "SELECT * FROM usuarios WHERE id = ?";
         try (Connection con = Conexion.getInstancia().conectar();
-             var ps = con.prepareStatement(sql)) {
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -120,20 +82,27 @@ public class UsuarioDAOImpl implements UsuarioDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error [Buscar Usuario por ID]: " + e.getMessage());
+            System.err.println("Error [Buscar Usuario]: " + e.getMessage());
         }
         return null;
     }
 
     @Override
     public boolean actualizar(Usuario objeto) {
-        // Si el usuario ingresó una nueva contraseña en la vista
         if (objeto.getPasswordHash() != null && !objeto.getPasswordHash().trim().isEmpty()) {
+            String pass = objeto.getPasswordHash().trim();
+            
+            // Si la contraseña ya es un hash SHA-256 (64 hex), se conserva; de lo contrario, se genera
+            String finalHash = (pass.length() == 64 && pass.matches("[0-9a-fA-F]+")) 
+                               ? pass 
+                               : SecurityUtil.hashSHA256(pass);
+
             String sql = "UPDATE usuarios SET username = ?, password_hash = ?, rol = ?, nombre = ?, apellido = ?, correo = ?, activo = ? WHERE id = ?";
             try (Connection con = Conexion.getInstancia().conectar();
-                 var ps = con.prepareStatement(sql)) {
+                 PreparedStatement ps = con.prepareStatement(sql)) {
+
                 ps.setString(1, objeto.getUsername());
-                ps.setString(2, encriptarSHA256(objeto.getPasswordHash()));
+                ps.setString(2, finalHash);
                 ps.setString(3, objeto.getRol());
                 ps.setString(4, objeto.getNombre());
                 ps.setString(5, objeto.getApellido());
@@ -146,10 +115,10 @@ public class UsuarioDAOImpl implements UsuarioDAO {
                 return false;
             }
         } else {
-            // Si el campo de contraseña quedó vacío, se mantienen el password_hash actual sin sobreescribirlo
             String sql = "UPDATE usuarios SET username = ?, rol = ?, nombre = ?, apellido = ?, correo = ?, activo = ? WHERE id = ?";
             try (Connection con = Conexion.getInstancia().conectar();
-                 var ps = con.prepareStatement(sql)) {
+                 PreparedStatement ps = con.prepareStatement(sql)) {
+
                 ps.setString(1, objeto.getUsername());
                 ps.setString(2, objeto.getRol());
                 ps.setString(3, objeto.getNombre());
@@ -167,13 +136,14 @@ public class UsuarioDAOImpl implements UsuarioDAO {
 
     @Override
     public boolean eliminar(Integer id) {
-        String sql = "UPDATE usuarios SET activo = false WHERE id = ?";
+        String sql = "{call sp_desactivarusuario(?)}";
         try (Connection con = Conexion.getInstancia().conectar();
-             var ps = con.prepareStatement(sql)) {
-            ps.setInt(1, id);
-            return ps.executeUpdate() > 0;
+             CallableStatement cs = con.prepareCall(sql)) {
+
+            cs.setInt(1, id);
+            return cs.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error [Eliminar Usuario]: " + e.getMessage());
+            System.err.println("Error [Desactivar Usuario]: " + e.getMessage());
             return false;
         }
     }
