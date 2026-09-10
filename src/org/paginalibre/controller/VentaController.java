@@ -141,7 +141,7 @@ public class VentaController implements Initializable {
 
         if (listaLibrosBD != null && !listaLibrosBD.isEmpty()) {
             for (Libro libro : listaLibrosBD) {
-                if (libro.isActivo() && libro.getStockActual() > 0) {
+                if (libro.isActivo() && libro.getStockActual() >0) {
                     DetalleVenta detalle = new DetalleVenta();
                     // Se elimina la línea detalle.setIdLibro(...) que causaba el error
                     detalle.setIsbn(libro.getIsbn());

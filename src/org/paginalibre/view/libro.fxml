@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/21.0.1" fx:controller="org.paginalibre.controller.LibroController">
+   <children>
+      <TableView fx:id="tablaLibros" layoutX="200.0" layoutY="51.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <columns>
+          <TableColumn fx:id="colIsbn" prefWidth="122.0" text="ISBN" />
+          <TableColumn fx:id="colTitulo" prefWidth="172.0" text="TITULO" />
+            <TableColumn fx:id="colPrecio" prefWidth="129.0" text="PRECIO" />
+            <TableColumn fx:id="colStock" prefWidth="176.0" text="STOCK" />
+        </columns>
+      </TableView>
+   </children>
+</AnchorPane>

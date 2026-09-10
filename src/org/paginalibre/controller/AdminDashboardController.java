@@ -56,6 +56,15 @@ private void mostrarGestionUsuarios(ActionEvent event) {
 }
 
     @FXML
+    private void mostrarGestionLibros(ActionEvent event) {
+        try {
+            Main.cambiarVista("/org/paginalibre/view/Libro.fxml");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     private void cerrarSesion(ActionEvent event) {
         try {
             Main.cambiarVista("/org/paginalibre/view/login.fxml");

@@ -30,6 +30,7 @@
                   <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#handleMenuAction" onMousePressed="#handleMousePressed" onMouseReleased="#handleMouseReleased" style="-fx-background-color: white; -fx-border-color: #333;" text="CLIENTES" />
                   <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#handleMenuAction" onMousePressed="#handleMousePressed" onMouseReleased="#handleMouseReleased" style="-fx-background-color: white; -fx-border-color: #333;" text="AUTORES" />
                   <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#handleMenuAction" onMousePressed="#handleMousePressed" onMouseReleased="#handleMouseReleased" style="-fx-background-color: white; -fx-border-color: #333;" text="CATEGORIAS" />
+                  <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#mostrarGestionLibros" onMousePressed="#handleMousePressed" onMouseReleased="#handleMouseReleased" style="-fx-background-color: white; -fx-border-color: #333;" text="LIBROS" />
                   <Button maxWidth="Infinity" mnemonicParsing="false" onAction="#handleMenuAction" onMousePressed="#handleMousePressed" onMouseReleased="#handleMouseReleased" style="-fx-background-color: white; -fx-border-color: #333;" text="CONFIGURACION" />
                   <VBox alignment="BOTTOM_CENTER" VBox.vgrow="ALWAYS">
                      <children>
