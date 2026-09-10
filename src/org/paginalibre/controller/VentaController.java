@@ -37,7 +37,6 @@ public class VentaController implements Initializable {
     @FXML private TableColumn<DetalleVenta, Integer> colCantidad;
     @FXML private TableColumn<DetalleVenta, Double> colPrecioUnit;
     @FXML private TableColumn<DetalleVenta, Double> colSubtotal;
-    @FXML private TableColumn<DetalleVenta, Void> colAccion;
 
     @FXML private ComboBox<String> cbCliente;
     @FXML private Spinner<Double> spinnerDescuento;
@@ -66,8 +65,6 @@ public class VentaController implements Initializable {
         colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
         colPrecioUnit.setCellValueFactory(new PropertyValueFactory<>("precioUnitario"));
         colSubtotal.setCellValueFactory(new PropertyValueFactory<>("subtotal"));
-
-        configurarColumnaAccion();
 
         tablaDetalleVenta.setItems(listaTabla);
 
@@ -221,6 +218,13 @@ public class VentaController implements Initializable {
         Label lblCant = new Label("Cantidad:");
         Spinner<Integer> spCantModal = new Spinner<>(1, 100, 1);
         spCantModal.setPrefWidth(70);
+
+        // Actualizar el Spinner con la cantidad del producto seleccionado
+        tablaCarritoModal.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null && newSelection.getCantidad() > 0) {
+                spCantModal.getValueFactory().setValue(newSelection.getCantidad());
+            }
+        });
 
         Button btnEliminar = new Button("Quitar del Carrito");
         Button btnActualizar = new Button("Actualizar Cantidad");
@@ -396,39 +400,23 @@ public class VentaController implements Initializable {
         }
     }
 
-    private void configurarColumnaAccion() {
-        if (colAccion == null) return;
+    @FXML private Button btnQuitar;
 
-        colAccion.setCellFactory(param -> new TableCell<>() {
-            private final Button btnEliminar = new Button("Quitar");
-
-            {
-                btnEliminar.setStyle("-fx-background-color: #e53935; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;");
-                btnEliminar.setOnAction(event -> {
-                    DetalleVenta item = getTableView().getItems().get(getIndex());
-                    item.setCantidad(0);
-                    item.setSubtotal(0.0);
-                    tablaDetalleVenta.refresh();
-                    calcularTotales();
-                });
+    @FXML
+    void quitarProducto(ActionEvent event) {
+        DetalleVenta seleccionado = tablaDetalleVenta.getSelectionModel().getSelectedItem();
+        if (seleccionado != null) {
+            if (seleccionado.getCantidad() > 0) {
+                seleccionado.setCantidad(0);
+                seleccionado.setSubtotal(0.0);
+                tablaDetalleVenta.refresh();
+                calcularTotales();
+            } else {
+                mostrarAlerta("Atención", "El producto seleccionado ya está en 0.", Alert.AlertType.INFORMATION);
             }
-
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || getIndex() >= getTableView().getItems().size()) {
-                    setGraphic(null);
-                } else {
-                    DetalleVenta detalle = getTableView().getItems().get(getIndex());
-                    // Únicamente renderizar el botón rojj si la cantidad agregada es mayor a cero
-                    if (detalle != null && detalle.getCantidad() > 0) {
-                        setGraphic(btnEliminar);
-                    } else {
-                        setGraphic(null);
-                    }
-                }
-            }
-        });
+        } else {
+            mostrarAlerta("Atención", "Seleccione un producto de la tabla para quitarlo.", Alert.AlertType.WARNING);
+        }
     }
 
     private void calcularTotales() {
