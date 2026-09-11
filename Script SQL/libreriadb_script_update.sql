@@ -102,14 +102,16 @@ create table detalle_venta(
 -- =============================================================================
 -- 3. MOVIMIENTOS_INVENTARIO
 -- =============================================================================
-create table movimientos_inventario(
-    id_movimiento int primary key auto_increment,
-    isbn varchar(20) not null,
-    tipo_movimiento enum('INGRESO', 'VENTA', 'MERMA', 'TRASLADO', 'DEVOLUCION', 'AJUSTE') not null,
-    cantidad int not null,
-    fecha_movimiento timestamp default current_timestamp,
-    id_usuario int not null,
-    observacion varchar(255)
+CREATE TABLE movimientos_inventario (
+    id_movimiento INT PRIMARY KEY AUTO_INCREMENT,
+    isbn VARCHAR(20) NOT NULL,
+    tipo_movimiento ENUM('INGRESO', 'VENTA', 'MERMA', 'TRASLADO', 'DEVOLUCION', 'AJUSTE') NOT NULL,
+    cantidad INT NOT NULL,
+    fecha_movimiento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id_usuario INT NOT NULL,
+    observacion VARCHAR(255),
+    CONSTRAINT fk_mi_libro FOREIGN KEY (isbn) REFERENCES libros(isbn) ON DELETE CASCADE,
+    CONSTRAINT fk_mi_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
 );
 
 -- =============================================================================
@@ -132,10 +134,6 @@ add constraint fk_v_usuario_anulacion foreign key (usuario_anulacion) references
 alter table detalle_venta
 add constraint fk_dv_venta foreign key (id_venta) references ventas(id_venta) on delete cascade,
 add constraint fk_dv_libro foreign key (isbn) references libros(isbn) on delete cascade;
-
-alter table movimientos_inventario
-add constraint fk_mi_libro foreign key (isbn) references libros(isbn) on delete cascade,
-add constraint fk_mi_usuario foreign key (id_usuario) references usuarios(id);
 
 -- =============================================================================
 -- 5. CRUD: CATEGORIAS
@@ -426,7 +424,6 @@ begin
     where username = _username;
 end $$
 
--- SE AÑADIÓ 'password_hash' EN EL SELECT PARA CORREGIR EL ERROR EN JAVA
 create procedure sp_listarusuarios()
 begin
     select id, username, password_hash, rol, nombre, apellido, correo, activo, fecha_creacion 
