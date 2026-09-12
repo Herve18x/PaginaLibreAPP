@@ -72,6 +72,12 @@ create table autores_libro(
     isbn varchar(20)
 );
 
+create table tipos_movimiento (
+    id_tipo_movimiento int primary key auto_increment,
+    nombre_tipo varchar(50) not null unique,
+    operacion enum('SUMAR', 'RESTAR') not null
+);
+
 -- =============================================================================
 -- 2. VENTAS 
 -- =============================================================================
@@ -105,17 +111,18 @@ create table detalle_venta(
 CREATE TABLE movimientos_inventario (
     id_movimiento INT PRIMARY KEY AUTO_INCREMENT,
     isbn VARCHAR(20) NOT NULL,
-    tipo_movimiento ENUM('INGRESO', 'VENTA', 'MERMA', 'TRASLADO', 'DEVOLUCION', 'AJUSTE') NOT NULL,
+    id_tipo_movimiento INT NOT NULL,
     cantidad INT NOT NULL,
     fecha_movimiento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     id_usuario INT NOT NULL,
     observacion VARCHAR(255),
     CONSTRAINT fk_mi_libro FOREIGN KEY (isbn) REFERENCES libros(isbn) ON DELETE CASCADE,
-    CONSTRAINT fk_mi_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+    CONSTRAINT fk_mi_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id),
+    CONSTRAINT fk_mi_tipo FOREIGN KEY (id_tipo_movimiento) REFERENCES tipos_movimiento(id_tipo_movimiento)
 );
 
 -- =============================================================================
--- 4. LLAVES FORÁNEAS
+-- 4. LLAVES FORÁNEAS (RESTANTES)
 -- =============================================================================
 alter table autores_libro
 add constraint fk_a_autor foreign key (id_autor) references autores(id_autor) on delete cascade,
@@ -398,7 +405,7 @@ end $$
 delimiter ;
 
 -- =============================================================================
--- 10. CRUD: USUARIOS (CORREGIDO)
+-- 10. CRUD: USUARIOS 
 -- =============================================================================
 delimiter $$
 
@@ -570,28 +577,32 @@ end $$
 delimiter ;
 
 -- =============================================================================
--- 13. MOVIMIENTOS_INVENTARIO 
+-- 13. MOVIMIENTOS_INVENTARIO (TABLA DE TIPOS INTEGRADA)
 -- =============================================================================
 delimiter $$
 
 create procedure sp_registrar_movimiento_inventario(
     in _isbn varchar(20),
-    in _tipo_movimiento enum('INGRESO', 'VENTA', 'MERMA', 'TRASLADO', 'DEVOLUCION', 'AJUSTE'),
+    in _id_tipo_movimiento int,
     in _cantidad int,
     in _id_usuario int,
     in _observacion varchar(255)
 )
 begin
     declare _delta int;
+    declare _operacion varchar(10);
 
-    if _tipo_movimiento in ('INGRESO', 'DEVOLUCION') then
+    -- Obtener si el tipo de movimiento suma o resta al inventario
+    select operacion into _operacion from tipos_movimiento where id_tipo_movimiento = _id_tipo_movimiento;
+
+    if _operacion = 'SUMAR' then
         set _delta = _cantidad;
     else
         set _delta = -_cantidad;
     end if;
 
-    insert into movimientos_inventario(isbn, tipo_movimiento, cantidad, id_usuario, observacion)
-    values (_isbn, _tipo_movimiento, _cantidad, _id_usuario, _observacion);
+    insert into movimientos_inventario(isbn, id_tipo_movimiento, cantidad, id_usuario, observacion)
+    values (_isbn, _id_tipo_movimiento, _cantidad, _id_usuario, _observacion);
 
     update libros
     set stock_actual = stock_actual + _delta
@@ -600,19 +611,34 @@ end $$
 
 create procedure sp_listarmovimientosinventario()
 begin
-    select id_movimiento, isbn, tipo_movimiento, cantidad, fecha_movimiento, id_usuario, observacion
-    from movimientos_inventario
-    order by fecha_movimiento desc;
+    select 
+        mi.id_movimiento, 
+        mi.isbn, 
+        tm.nombre_tipo as tipo_movimiento, 
+        mi.cantidad, 
+        mi.fecha_movimiento, 
+        mi.id_usuario, 
+        mi.observacion
+    from movimientos_inventario mi
+    inner join tipos_movimiento tm on mi.id_tipo_movimiento = tm.id_tipo_movimiento
+    order by mi.fecha_movimiento desc;
 end $$
 
 create procedure sp_movimientos_por_libro(
     in _isbn varchar(20)
 )
 begin
-    select id_movimiento, tipo_movimiento, cantidad, fecha_movimiento, id_usuario, observacion
-    from movimientos_inventario
-    where isbn = _isbn
-    order by fecha_movimiento desc;
+    select 
+        mi.id_movimiento, 
+        tm.nombre_tipo as tipo_movimiento, 
+        mi.cantidad, 
+        mi.fecha_movimiento, 
+        mi.id_usuario, 
+        mi.observacion
+    from movimientos_inventario mi
+    inner join tipos_movimiento tm on mi.id_tipo_movimiento = tm.id_tipo_movimiento
+    where mi.isbn = _isbn
+    order by mi.fecha_movimiento desc;
 end $$
 
 delimiter ;
@@ -650,7 +676,8 @@ begin
     insert into detalle_venta(id_venta, isbn, cantidad, precio_unitario, subtotal)
     values (_id_venta, _isbn, _cantidad, _precio, _subtotal_linea);
 
-    call sp_registrar_movimiento_inventario(_isbn, 'VENTA', _cantidad, _id_usuario, concat('Venta #', _id_venta));
+    -- Se registra como tipo 2 (VENTA)
+    call sp_registrar_movimiento_inventario(_isbn, 2, _cantidad, _id_usuario, concat('Venta #', _id_venta));
 
     update ventas v
     join (select sum(subtotal) as total_sub from detalle_venta where id_venta = _id_venta) d
@@ -727,7 +754,8 @@ begin
         if done = 1 then
             leave read_loop;
         end if;
-        call sp_registrar_movimiento_inventario(v_isbn, 'DEVOLUCION', v_cantidad, _usuario_anulacion, concat('Anulación venta #', _id_venta));
+        -- Se registra como tipo 5 (DEVOLUCION)
+        call sp_registrar_movimiento_inventario(v_isbn, 5, v_cantidad, _usuario_anulacion, concat('Anulación venta #', _id_venta));
     end loop;
     close cur;
 
@@ -880,18 +908,28 @@ select
     mi.id_movimiento as 'id movimiento',
     l.titulo as 'libro',
     mi.isbn as 'isbn',
-    mi.tipo_movimiento as 'tipo',
+    tm.nombre_tipo as 'tipo',
     mi.cantidad as 'cantidad',
     mi.fecha_movimiento as 'fecha',
     u.username as 'usuario',
     mi.observacion as 'observación'
 from movimientos_inventario mi
 inner join libros l on mi.isbn = l.isbn
+inner join tipos_movimiento tm on mi.id_tipo_movimiento = tm.id_tipo_movimiento
 inner join usuarios u on mi.id_usuario = u.id;
 
 -- =============================================================================
 -- 16. INSERCIÓN DE DATOS INICIALES
 -- =============================================================================
+
+-- TIPOS DE MOVIMIENTO
+INSERT INTO tipos_movimiento (nombre_tipo, operacion) VALUES
+('INGRESO', 'SUMAR'),       -- id: 1
+('VENTA', 'RESTAR'),        -- id: 2
+('MERMA', 'RESTAR'),        -- id: 3
+('TRASLADO', 'RESTAR'),     -- id: 4
+('DEVOLUCION', 'SUMAR'),    -- id: 5
+('AJUSTE', 'RESTAR');       -- id: 6
 
 -- CATEGORIAS
 CALL sp_insertarcategoria('Ficción Cósmica');
@@ -1073,27 +1111,27 @@ CALL sp_insertarautorlibro(19, '978-0-140');
 CALL sp_insertarautorlibro(7, '978-0-141');   
 CALL sp_insertarautorlibro(16, '978-0-142');  
 
--- MOVIMIENTOS_INVENTARIO 
-CALL sp_registrar_movimiento_inventario('978-0-123', 'INGRESO', 40, 4,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-124', 'INGRESO', 25, 5,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-125', 'INGRESO', 30, 6,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-126', 'INGRESO', 50, 7,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-127', 'INGRESO', 20, 8,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-128', 'INGRESO', 35, 9,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-129', 'INGRESO', 45, 10, 'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-130', 'INGRESO', 22, 4,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-131', 'INGRESO', 28, 5,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-132', 'INGRESO', 33, 6,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-133', 'INGRESO', 26, 7,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-134', 'INGRESO', 18, 8,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-135', 'INGRESO', 20, 9,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-136', 'INGRESO', 24, 10, 'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-137', 'INGRESO', 20, 4,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-138', 'INGRESO', 18, 5,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-139', 'INGRESO', 15, 6,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-140', 'INGRESO', 22, 7,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-141', 'INGRESO', 35, 8,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-142', 'INGRESO', 15, 9,  'Carga inicial de stock');
+-- MOVIMIENTOS_INVENTARIO (AHORA USANDO ID 1 PARA 'INGRESO')
+CALL sp_registrar_movimiento_inventario('978-0-123', 1, 40, 4,  'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-124', 1, 25, 5,  'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-125', 1, 30, 6,  'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-126', 1, 50, 7,  'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-127', 1, 20, 8,  'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-128', 1, 35, 9,  'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-129', 1, 45, 10, 'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-130', 1, 22, 4,  'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-131', 1, 28, 5,  'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-132', 1, 33, 6,  'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-133', 1, 26, 7,  'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-134', 1, 18, 8,  'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-135', 1, 20, 9,  'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-136', 1, 24, 10, 'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-137', 1, 20, 4,  'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-138', 1, 18, 5,  'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-139', 1, 15, 6,  'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-140', 1, 22, 7,  'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-141', 1, 35, 8,  'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-142', 1, 15, 9,  'Carga inicial de stock');
 
 -- VENTAS Y DETALLE_VENTA 
 CALL sp_insertarventa(2000100010101, 11, @v1);  CALL sp_agregardetalleventa(@v1, '978-0-123', 2, 11);
