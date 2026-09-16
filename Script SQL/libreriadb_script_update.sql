@@ -5,8 +5,8 @@ use libreriadb_in4cm;
 -- =============================================================================
 -- 1. TABLAS BASE
 -- =============================================================================
-create table categorias(
-    id_categoria int primary key auto_increment,
+create table categoria(
+    categoria_id int primary key auto_increment,
     nombre_categoria varchar(100)
 );
 
@@ -58,11 +58,11 @@ create table libros(
     titulo varchar(100) not null,
     fecha_publicacion date,
     precio decimal(8,2) not null,
-    id_categoria int,
+    categoria_id int,
     nit_editorial varchar(20),
     stock_actual int not null default 0,
     stock_minimo int not null default 0,
-    activo boolean not null default true,
+    estado tinyint(1) not null default 1,
     fecha_actualizacion timestamp default current_timestamp on update current_timestamp
 );
 
@@ -129,7 +129,7 @@ add constraint fk_a_autor foreign key (id_autor) references autores(id_autor) on
 add constraint fk_a_libro foreign key (isbn) references libros(isbn) on delete cascade;
 
 alter table libros
-add constraint fk_a_categorias foreign key (id_categoria) references categorias(id_categoria) on delete cascade,
+add constraint fk_a_categoria foreign key (categoria_id) references categoria(categoria_id) on delete cascade,
 add constraint fk_a_editoriales foreign key (nit_editorial) references editoriales(nit) on delete cascade;
 
 alter table ventas
@@ -151,39 +151,39 @@ create procedure sp_insertarcategoria(
     in _nombre_categoria varchar(100)
 )
 begin
-    insert into categorias(nombre_categoria)
+    insert into categoria(nombre_categoria)
     values (_nombre_categoria);
 end $$
 
 create procedure sp_listarcategorias()
 begin
-    select id_categoria, nombre_categoria from categorias;
+    select categoria_id, nombre_categoria from categoria;
 end $$
 
 create procedure sp_buscarcategoria(
-    in _id_categoria int
+    in _categoria_id int
 )
 begin
-    select id_categoria, nombre_categoria
-    from categorias
-    where id_categoria = _id_categoria;
+    select categoria_id, nombre_categoria
+    from categoria
+    where categoria_id = _categoria_id;
 end $$
 
 create procedure sp_actualizarcategoria(
-    in _id_categoria int,
+    in _categoria_id int,
     in _nombre_categoria varchar(100)
 )
 begin
-    update categorias
+    update categoria
     set nombre_categoria = _nombre_categoria
-    where id_categoria = _id_categoria;
+    where categoria_id = _categoria_id;
 end $$
 
 create procedure sp_eliminarcategoria(
-    in _id_categoria int
+    in _categoria_id int
 )
 begin
-    delete from categorias where id_categoria = _id_categoria;
+    delete from categoria where categoria_id = _categoria_id;
 end $$
 
 delimiter ;
@@ -468,19 +468,19 @@ create procedure sp_insertarlibro(
     in _titulo varchar(100),
     in _fecha_publicacion date,
     in _precio decimal(8,2),
-    in _id_categoria int,
+    in _categoria_id int,
     in _nit_editorial varchar(20),
     in _stock_actual int,
     in _stock_minimo int
 )
 begin
-    insert into libros(isbn, titulo, fecha_publicacion, precio, id_categoria, nit_editorial, stock_actual, stock_minimo)
-    values (_isbn, _titulo, _fecha_publicacion, _precio, _id_categoria, _nit_editorial, _stock_actual, _stock_minimo);
+    insert into libros(isbn, titulo, fecha_publicacion, precio, categoria_id, nit_editorial, stock_actual, stock_minimo)
+    values (_isbn, _titulo, _fecha_publicacion, _precio, _categoria_id, _nit_editorial, _stock_actual, _stock_minimo);
 end $$
 
 create procedure sp_listarlibros()
 begin
-    select isbn, titulo, fecha_publicacion, precio, id_categoria, nit_editorial, stock_actual, stock_minimo, activo
+    select isbn, titulo, fecha_publicacion, precio, categoria_id, nit_editorial, stock_actual, stock_minimo, estado
     from libros;
 end $$
 
@@ -488,7 +488,7 @@ create procedure sp_buscarlibro(
     in _isbn varchar(20)
 )
 begin
-    select isbn, titulo, fecha_publicacion, precio, id_categoria, nit_editorial, stock_actual, stock_minimo, activo
+    select isbn, titulo, fecha_publicacion, precio, categoria_id, nit_editorial, stock_actual, stock_minimo, estado
     from libros
     where isbn = _isbn;
 end $$
@@ -498,7 +498,7 @@ create procedure sp_actualizarlibro(
     in _titulo varchar(100),
     in _fecha_publicacion date,
     in _precio decimal(8,2),
-    in _id_categoria int,
+    in _categoria_id int,
     in _nit_editorial varchar(20)
 )
 begin
@@ -506,7 +506,7 @@ begin
     set titulo = _titulo,
         fecha_publicacion = _fecha_publicacion,
         precio = _precio,
-        id_categoria = _id_categoria,
+        categoria_id = _categoria_id,
         nit_editorial = _nit_editorial
     where isbn = _isbn;
 end $$
@@ -515,14 +515,14 @@ create procedure sp_libros_bajo_stock_minimo()
 begin
     select isbn, titulo, stock_actual, stock_minimo
     from libros
-    where stock_actual <= stock_minimo and activo = true;
+    where stock_actual <= stock_minimo and estado = 1;
 end $$
 
 create procedure sp_eliminarlibro(
     in _isbn varchar(20)
 )
 begin
-    update libros set activo = false where isbn = _isbn;
+    update libros set estado = 0 where isbn = _isbn;
 end $$
 
 delimiter ;
@@ -577,7 +577,7 @@ end $$
 delimiter ;
 
 -- =============================================================================
--- 13. MOVIMIENTOS_INVENTARIO (TABLA DE TIPOS INTEGRADA)
+-- 13. MOVIMIENTOS_INVENTARIO
 -- =============================================================================
 delimiter $$
 
@@ -592,7 +592,6 @@ begin
     declare _delta int;
     declare _operacion varchar(10);
 
-    -- Obtener si el tipo de movimiento suma o resta al inventario
     select operacion into _operacion from tipos_movimiento where id_tipo_movimiento = _id_tipo_movimiento;
 
     if _operacion = 'SUMAR' then
@@ -676,7 +675,6 @@ begin
     insert into detalle_venta(id_venta, isbn, cantidad, precio_unitario, subtotal)
     values (_id_venta, _isbn, _cantidad, _precio, _subtotal_linea);
 
-    -- Se registra como tipo 2 (VENTA)
     call sp_registrar_movimiento_inventario(_isbn, 2, _cantidad, _id_usuario, concat('Venta #', _id_venta));
 
     update ventas v
@@ -754,7 +752,6 @@ begin
         if done = 1 then
             leave read_loop;
         end if;
-        -- Se registra como tipo 5 (DEVOLUCION)
         call sp_registrar_movimiento_inventario(v_isbn, 5, v_cantidad, _usuario_anulacion, concat('Anulación venta #', _id_venta));
     end loop;
     close cur;
@@ -774,9 +771,9 @@ delimiter ;
 -- =============================================================================
 create or replace view vw_lista_categorias as
 select
-    id_categoria as 'id categoría',
+    categoria_id as 'id categoría',
     nombre_categoria as 'categoría'
-from categorias;
+from categoria;
 
 create or replace view vw_lista_editoriales as
 select
@@ -831,9 +828,9 @@ select
     e.nombre_editorial as 'editorial',
     l.stock_actual as 'stock actual',
     l.stock_minimo as 'stock mínimo',
-    l.activo as 'activo'
+    l.estado as 'activo'
 from libros l
-inner join categorias c on l.id_categoria = c.id_categoria
+inner join categoria c on l.categoria_id = c.categoria_id
 inner join editoriales e on l.nit_editorial = e.nit;
 
 create or replace view vw_libros_bajo_stock as
@@ -843,7 +840,7 @@ select
     stock_actual as 'stock actual',
     stock_minimo as 'stock mínimo'
 from libros
-where stock_actual <= stock_minimo and activo = true;
+where stock_actual <= stock_minimo and estado = 1;
 
 create or replace view vw_lista_autores_libro as
 select
@@ -1111,7 +1108,7 @@ CALL sp_insertarautorlibro(19, '978-0-140');
 CALL sp_insertarautorlibro(7, '978-0-141');   
 CALL sp_insertarautorlibro(16, '978-0-142');  
 
--- MOVIMIENTOS_INVENTARIO (AHORA USANDO ID 1 PARA 'INGRESO')
+-- MOVIMIENTOS_INVENTARIO
 CALL sp_registrar_movimiento_inventario('978-0-123', 1, 40, 4,  'Carga inicial de stock');
 CALL sp_registrar_movimiento_inventario('978-0-124', 1, 25, 5,  'Carga inicial de stock');
 CALL sp_registrar_movimiento_inventario('978-0-125', 1, 30, 6,  'Carga inicial de stock');
