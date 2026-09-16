@@ -27,6 +27,24 @@ public class BodegaDashboardController implements BaseDashboardController {
     }
 
     @FXML
+    private void abrirInventario(ActionEvent event) {
+        try {
+            Main.cambiarVista("/org/paginalibre/view/InventarioBodegaView.fxml");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void abrirMovimientos(ActionEvent event) {
+        try {
+            Main.cambiarVista("/org/paginalibre/view/IngresoInventario.fxml");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
     private void cerrarSesion(ActionEvent event) {
         try {
             Main.cambiarVista("/org/paginalibre/view/login.fxml");

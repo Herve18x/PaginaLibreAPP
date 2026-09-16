@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="580.0" prefWidth="750.0" spacing="10.0" style="-fx-background-color: #F8F9FA;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.paginalibre.controller.IngresoInventarioController">
+   <padding>
+      <Insets bottom="12.0" left="15.0" right="15.0" top="12.0" />
+   </padding>
+   <children>
+      <!-- Encabezado con Botón Regresar -->
+      <HBox alignment="CENTER_LEFT" spacing="12.0">
+         <children>
+            <Button fx:id="btnRegresar" onAction="#handleRegresar" style="-fx-background-color: #34495E; -fx-text-fill: white; -fx-font-weight: bold;" text="← Regresar" />
+            <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2C3E50;" text="Ingreso de Inventario (Entradas)" />
+         </children>
+      </HBox>
+      
+      <!-- Formulario Reducido -->
+      <GridPane hgap="10.0" style="-fx-background-color: #FFFFFF; -fx-padding: 10; -fx-background-radius: 6; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 4, 0, 0, 0);" vgap="8.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="NEVER" minWidth="110.0" />
+          <ColumnConstraints hgrow="ALWAYS" minWidth="180.0" />
+            <ColumnConstraints hgrow="NEVER" minWidth="90.0" />
+            <ColumnConstraints hgrow="ALWAYS" minWidth="180.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="28.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="28.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="45.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label style="-fx-font-weight: bold;" text="ISBN / Libro:" />
+            <HBox spacing="6.0" GridPane.columnIndex="1">
+               <children>
+                  <TextField fx:id="txtIsbn" promptText="Ingrese ISBN" HBox.hgrow="ALWAYS" />
+                  <Button fx:id="btnBuscarLibro" onAction="#handleBuscarLibro" style="-fx-background-color: #3498DB; -fx-text-fill: white;" text="Buscar" />
+               </children>
+            </HBox>
+
+            <Label style="-fx-font-weight: bold;" text="Título del Libro:" GridPane.columnIndex="2" />
+            <TextField fx:id="txtTituloLibro" editable="false" promptText="Seleccione libro..." style="-fx-background-color: #ECF0F1;" GridPane.columnIndex="3" />
+
+            <Label style="-fx-font-weight: bold;" text="Cantidad:" GridPane.rowIndex="1" />
+            <TextField fx:id="txtCantidad" promptText="Ej. 25" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+            <Label style="-fx-font-weight: bold;" text="Usuario:" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <TextField fx:id="txtUsuario" editable="false" promptText="Sesión activa" style="-fx-background-color: #ECF0F1;" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+
+            <Label style="-fx-font-weight: bold;" text="Observaciones:" GridPane.rowIndex="2" />
+            <TextArea fx:id="txtMotivo" prefHeight="40.0" promptText="Motivo o razón de ingreso" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2" />
+         </children>
+      </GridPane>
+
+      <!-- Botones de Acción -->
+      <HBox alignment="CENTER_RIGHT" spacing="8.0">
+         <children>
+            <Button fx:id="btnLimpiar" onAction="#handleLimpiar" style="-fx-background-color: #7F8C8D; -fx-text-fill: white; -fx-padding: 6 15;" text="Limpiar" />
+            <Button fx:id="btnGuardar" onAction="#handleGuardarIngreso" style="-fx-background-color: #2ECC71; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 6 15;" text="Registrar Ingreso" />
+         </children>
+      </HBox>
+
+      <!-- Tabla de Historial -->
+      <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #34495E;" text="Historial Reciente de Entradas" />
+      <TableView fx:id="tblMovimientos" prefHeight="220.0" VBox.vgrow="ALWAYS">
+        <columns>
+          <TableColumn fx:id="colId" prefWidth="50.0" text="ID" />
+          <TableColumn fx:id="colIsbn" prefWidth="110.0" text="ISBN" />
+            <TableColumn fx:id="colCantidad" prefWidth="70.0" text="Cantidad" />
+            <TableColumn fx:id="colUsuario" prefWidth="80.0" text="ID Usuario" />
+            <TableColumn fx:id="colFecha" prefWidth="140.0" text="Fecha / Hora" />
+            <TableColumn fx:id="colMotivo" prefWidth="220.0" text="Observación" />
+        </columns>
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
+      </TableView>
+   </children>
+</VBox>
