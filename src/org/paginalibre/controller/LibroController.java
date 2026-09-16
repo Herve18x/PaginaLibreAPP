@@ -143,6 +143,21 @@ public class LibroController implements Initializable {
             alerta.showAndWait();
         }
     }
+    
+    @FXML
+private void mostrarFormularioAgregar(ActionEvent event) {
+    try {
+        Main.cambiarVista(
+                "/org/paginalibre/view/FormularioLibro.fxml"
+        );
+    } catch (Exception e) {
+        System.err.println(
+                "Error al abrir formulario de libro: "
+                + e.getMessage()
+        );
+        e.printStackTrace();
+    }
+}
 
     @FXML
     private void mostrarTodos(ActionEvent event) {

@@ -52,6 +52,10 @@
 
                 <Button text="MOSTRAR TODOS"
                         onAction="#mostrarTodos" />
+                
+                <Button text="AGREGAR LIBRO"
+                        onAction="#mostrarFormularioAgregar" />
+
 
             </HBox>
 
