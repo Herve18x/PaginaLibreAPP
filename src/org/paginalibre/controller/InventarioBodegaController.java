@@ -77,8 +77,8 @@ public class InventarioBodegaController implements Initializable {
                     return true;
                 }
                 String filtro = newValue.toLowerCase().trim();
-                return libro.getIsbn().toLowerCase().contains(filtro)
-                        || libro.getTitulo().toLowerCase().contains(filtro);
+                return (libro.getIsbn() != null && libro.getIsbn().toLowerCase().contains(filtro))
+                        || (libro.getTitulo() != null && libro.getTitulo().toLowerCase().contains(filtro));
             });
         });
     }
