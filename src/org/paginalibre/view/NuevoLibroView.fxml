@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="650.0" prefWidth="950.0" style="-fx-background-color: #f4f6f9;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.paginalibre.controller.NuevoLibroController">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="15.0" style="-fx-background-color: #3B82A6;">
+            <padding>
+                <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+            </padding>
+            <children>
+                <Button onAction="#regresar" style="-fx-background-color: white; -fx-text-fill: #333; -fx-font-weight: bold;" text="← REGRESAR" />
+                <Label text="REGISTRAR NUEVO LIBRO" textFill="WHITE">
+                    <font>
+                        <Font name="System Bold" size="20.0" />
+                    </font>
+                </Label>
+            </children>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox alignment="TOP_CENTER" maxWidth="850.0" spacing="20.0">
+            <padding>
+                <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+            </padding>
+
+            <children>
+                <Label text="Información del libro" textFill="#2c3e50">
+                    <font>
+                        <Font name="System Bold" size="22.0" />
+                    </font>
+                </Label>
+
+                <GridPane hgap="20.0" vgap="15.0">
+                    <children>
+                        <Label text="ISBN *" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                        <TextField fx:id="txtIsbn" promptText="Ej. 9781234567890" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                        <Label text="Título *" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                        <TextField fx:id="txtTitulo" promptText="Título del libro" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+
+                        <Label text="Fecha de publicación" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                        <DatePicker fx:id="dpFechaPublicacion" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                        <Label text="Precio (Q) *" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                        <TextField fx:id="txtPrecio" promptText="0.00" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+
+                        <Label text="Categoría ID *" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                        <TextField fx:id="txtCategoria" promptText="ID de categoría" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                        <Label text="NIT Editorial" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                        <TextField fx:id="txtEditorial" promptText="NIT de editorial" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+
+                        <Label text="Stock actual *" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                        <TextField fx:id="txtStockActual" promptText="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                        <Label text="Stock mínimo *" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+                        <TextField fx:id="txtStockMinimo" promptText="0" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+
+                        <Label text="Estado" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                        <CheckBox fx:id="chkEstado" text="Libro activo" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                    </children>
+
+                    <columnConstraints>
+                        <javafx.scene.layout.ColumnConstraints halignment="RIGHT" minWidth="120.0" />
+                        <javafx.scene.layout.ColumnConstraints hgrow="ALWAYS" />
+                        <javafx.scene.layout.ColumnConstraints halignment="RIGHT" minWidth="120.0" />
+                        <javafx.scene.layout.ColumnConstraints hgrow="ALWAYS" />
+                    </columnConstraints>
+                </GridPane>
+
+                <HBox alignment="CENTER" spacing="15.0">
+                    <children>
+                        <Button onAction="#guardarLibro" prefWidth="180.0" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;" text="GUARDAR LIBRO" />
+                        <Button onAction="#limpiarFormulario" prefWidth="180.0" style="-fx-background-color: #7f8c8d; -fx-text-fill: white;" text="LIMPIAR" />
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </center>
+</BorderPane>

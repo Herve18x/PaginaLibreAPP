@@ -40,40 +40,38 @@ public class BodegaDashboardController implements Initializable, BaseDashboardCo
     public void initialize(URL url, ResourceBundle rb) {
         libroDAO = new LibroDAOImpl();
 
-        // 1. Configurar Fábricas de Celda PRIMERO
         if (colIsbn != null) colIsbn.setCellValueFactory(new PropertyValueFactory<>("isbn"));
         if (colTitulo != null) colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
         if (colCategoria != null) colCategoria.setCellValueFactory(new PropertyValueFactory<>("nombreCategoria"));
         if (colStockActual != null) colStockActual.setCellValueFactory(new PropertyValueFactory<>("stockActual"));
         if (colStockMin != null) colStockMin.setCellValueFactory(new PropertyValueFactory<>("stockMinimo"));
 
-        // 2. Cargar Datos
         cargarDashboard();
     }
 
     private void cargarDashboard() {
         if (libroDAO == null) return;
 
-        // Obtener lista de libros bajo stock
         List<Libro> listaBajoStock = libroDAO.listarLibrosBajoStock();
-        
+
         if (listaBajoStock != null) {
             ObservableList<Libro> itemsBajoStock = FXCollections.observableArrayList(listaBajoStock);
-            
+
             if (tblBodega != null) {
                 tblBodega.setItems(itemsBajoStock);
             }
-            
-            // Asignar el conteo directo a la tarjeta de Alertas
+
             if (lblAlertasStock != null) {
                 lblAlertasStock.setText(String.valueOf(listaBajoStock.size()));
             }
         } else {
-            if (lblAlertasStock != null) lblAlertasStock.setText("0");
+            if (lblAlertasStock != null) {
+                lblAlertasStock.setText("0");
+            }
         }
 
-        // Obtener total de catálogo
         List<Libro> todosLosLibros = libroDAO.listar();
+
         if (lblTitulosCatalogo != null && todosLosLibros != null) {
             lblTitulosCatalogo.setText(String.valueOf(todosLosLibros.size()));
         }
@@ -86,9 +84,24 @@ public class BodegaDashboardController implements Initializable, BaseDashboardCo
     @Override
     public void iniciarUsuario(Usuario usuario) {
         this.usuarioSesion = usuario;
+
         if (usuario != null) {
-            if (lblUsuario != null) lblUsuario.setText(usuario.getNombre() + " " + usuario.getApellido());
-            if (lblRol != null) lblRol.setText(usuario.getRol());
+            if (lblUsuario != null) {
+                lblUsuario.setText(usuario.getNombre() + " " + usuario.getApellido());
+            }
+
+            if (lblRol != null) {
+                lblRol.setText(usuario.getRol());
+            }
+        }
+    }
+
+    @FXML
+    private void abrirNuevoLibro(ActionEvent event) {
+        try {
+            Main.cambiarVista("/org/paginalibre/view/NuevoLibroView.fxml");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -117,11 +130,6 @@ public class BodegaDashboardController implements Initializable, BaseDashboardCo
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @FXML
-    private void cerrarSesion(ActionEvent event) {
-        handleCerrarSesion(event);
     }
 
     @FXML

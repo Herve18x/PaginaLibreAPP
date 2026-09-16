@@ -28,6 +28,7 @@ import org.paginalibre.dao.impl.VentaDAOImpl;
 import org.paginalibre.model.Cliente;
 import org.paginalibre.model.DetalleVenta;
 import org.paginalibre.model.Libro;
+import org.paginalibre.model.Usuario;
 import org.paginalibre.model.Venta;
 import org.paginalibre.system.Main;
 
@@ -500,5 +501,9 @@ public class VentaController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(contenido);
         alert.showAndWait();
+    }
+
+    void iniciarUsuario(Usuario usuarioSesion) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }
