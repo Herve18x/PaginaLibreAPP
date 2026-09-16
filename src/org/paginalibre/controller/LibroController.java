@@ -32,7 +32,7 @@ public class LibroController implements Initializable {
     @FXML
     private TableColumn<Libro, Double> colPrecio;
     @FXML
-    private TableColumn<Libro, Integer> colIdCategoria;
+    private TableColumn<Libro, Integer> colCategoriaId;
     @FXML
     private TableColumn<Libro, String> colNitEditorial;
     @FXML
@@ -63,7 +63,7 @@ public class LibroController implements Initializable {
         
         colPrecio.setCellValueFactory(new PropertyValueFactory<>("Precio")); 
         
-        colIdCategoria.setCellValueFactory(new PropertyValueFactory<>("idCategoria"));
+        colCategoriaId.setCellValueFactory(new PropertyValueFactory<>("categoriaId"));
         
         colNitEditorial.setCellValueFactory(new PropertyValueFactory<>("nitEditorial"));
         
@@ -75,16 +75,7 @@ public class LibroController implements Initializable {
         
         
     }
-        @FXML 
-        private void agregarLibro(ActionEvent event) {
-    
-        try {
-            Main.cambiarVista("/org/paginalibre/view/FormularioLibro.fxml");
-        } catch (Exception e) {
-        }
-    
-    }
-    
+
     
         private void cargarLibros(){
             

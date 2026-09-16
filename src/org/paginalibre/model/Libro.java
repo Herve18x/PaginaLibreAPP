@@ -15,30 +15,12 @@ public class Libro {
     String titulo;
     LocalDate fechaPublicacion;
     double precio;
-    int idCategoria;
+    int categoriaId;
     String nitEditorial;
     int stockActual;
     int stockMinimo;
-    boolean activo; 
+    boolean estado; 
     Timestamp fechaActualizacion;
-
-    public Libro() {
-    }
-    
-    
-
-    public Libro(String isbn, String titulo, LocalDate fechaPublicacion, double precio, int idCategoria, String nitEditorial, int stockActual, int stockMinimo, boolean activo, Timestamp fechaActualizacion) {
-        this.isbn = isbn;
-        this.titulo = titulo;
-        this.fechaPublicacion = fechaPublicacion;
-        this.precio = precio;
-        this.idCategoria = idCategoria;
-        this.nitEditorial = nitEditorial;
-        this.stockActual = stockActual;
-        this.stockMinimo = stockMinimo;
-        this.activo = activo;
-        this.fechaActualizacion = fechaActualizacion;
-    }
 
     public String getIsbn() {
         return isbn;
@@ -72,12 +54,12 @@ public class Libro {
         this.precio = precio;
     }
 
-    public int getIdCategoria() {
-        return idCategoria;
+    public int getCategoriaId() {
+        return categoriaId;
     }
 
-    public void setIdCategoria(int idCategoria) {
-        this.idCategoria = idCategoria;
+    public void setCategoriaId(int categoriaId) {
+        this.categoriaId = categoriaId;
     }
 
     public String getNitEditorial() {
@@ -104,12 +86,12 @@ public class Libro {
         this.stockMinimo = stockMinimo;
     }
 
-    public boolean isActivo() {
-        return activo;
+    public boolean isEstado() {
+        return estado;
     }
 
-    public void setActivo(boolean activo) {
-        this.activo = activo;
+    public void setEstado(boolean estado) {
+        this.estado = estado;
     }
 
     public Timestamp getFechaActualizacion() {
@@ -119,5 +101,21 @@ public class Libro {
     public void setFechaActualizacion(Timestamp fechaActualizacion) {
         this.fechaActualizacion = fechaActualizacion;
     }
-    
+
+    public Libro() {
+    }
+
+    public Libro(String isbn, String titulo, LocalDate fechaPublicacion, double precio, int categoriaId, String nitEditorial, int stockActual, int stockMinimo, boolean estado, Timestamp fechaActualizacion) {
+        this.isbn = isbn;
+        this.titulo = titulo;
+        this.fechaPublicacion = fechaPublicacion;
+        this.precio = precio;
+        this.categoriaId = categoriaId;
+        this.nitEditorial = nitEditorial;
+        this.stockActual = stockActual;
+        this.stockMinimo = stockMinimo;
+        this.estado = estado;
+        this.fechaActualizacion = fechaActualizacion;
+    }
+
 }

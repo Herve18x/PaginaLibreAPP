@@ -24,7 +24,7 @@ public class LibroDAOImpl implements LibroDAO {
             consultaCall.setString(2, libros.getTitulo());
             consultaCall.setDate(3, java.sql.Date.valueOf(libros.getFechaPublicacion()));
             consultaCall.setDouble(4, libros.getPrecio());
-            consultaCall.setInt(5, libros.getIdCategoria());
+            consultaCall.setInt(5, libros.getCategoriaId());
             consultaCall.setString(6, libros.getNitEditorial());
             consultaCall.setInt(7, libros.getStockActual());
             consultaCall.setInt(8, libros.getStockMinimo());
@@ -39,7 +39,7 @@ public class LibroDAOImpl implements LibroDAO {
     @Override
     public List<Libro> listar() {
         List<Libro> lista = new ArrayList<>();
-        String consultaSQL = "SELECT isbn, titulo, fecha_publicacion, precio, id_categoria, nit_editorial, stock_actual, stock_minimo, activo, fecha_actualizacion FROM libros WHERE activo = 1";
+        String consultaSQL = "SELECT isbn, titulo, fecha_publicacion, precio, categoria_id, nit_editorial, stock_actual, stock_minimo, estado, fecha_actualizacion FROM libros WHERE estado = 1";
 
         try (Connection conexion = Conexion.getInstancia().conectar(); 
              PreparedStatement ps = conexion.prepareStatement(consultaSQL); 
@@ -54,11 +54,11 @@ public class LibroDAOImpl implements LibroDAO {
                         tablaResultado.getString("titulo"),
                         fechaPublicacion,
                         tablaResultado.getDouble("precio"),
-                        tablaResultado.getInt("id_categoria"),
+                        tablaResultado.getInt("categoria_id"),
                         tablaResultado.getString("nit_editorial"),
                         tablaResultado.getInt("stock_actual"),
                         tablaResultado.getInt("stock_minimo"),
-                        tablaResultado.getBoolean("activo"),
+                        tablaResultado.getBoolean("estado"),
                         tablaResultado.getTimestamp("fecha_actualizacion")
                 );
                 lista.add(libro);
@@ -73,7 +73,7 @@ public class LibroDAOImpl implements LibroDAO {
     @Override
     public Libro buscar(String isbn) {
         Libro libro = null;
-        String consultaSQL = "SELECT isbn, titulo, fecha_publicacion, precio, id_categoria, nit_editorial, stock_actual, stock_minimo, activo, fecha_actualizacion FROM libros WHERE isbn = ?";
+        String consultaSQL = "SELECT isbn, titulo, fecha_publicacion, precio, categoria_id, nit_editorial, stock_actual, stock_minimo, activo, fecha_actualizacion FROM libros WHERE isbn = ?";
         
         try (Connection conexion = Conexion.getInstancia().conectar(); 
              PreparedStatement ps = conexion.prepareStatement(consultaSQL)) {
@@ -89,11 +89,11 @@ public class LibroDAOImpl implements LibroDAO {
                             tablaResultado.getString("titulo"),
                             fechaPublicacion,
                             tablaResultado.getDouble("precio"),
-                            tablaResultado.getInt("id_categoria"),
+                            tablaResultado.getInt("categoria_id"),
                             tablaResultado.getString("nit_editorial"),
                             tablaResultado.getInt("stock_actual"),
                             tablaResultado.getInt("stock_minimo"),
-                            tablaResultado.getBoolean("activo"),
+                            tablaResultado.getBoolean("estadp"),
                             tablaResultado.getTimestamp("fecha_actualizacion")
                     );
                 }
@@ -107,18 +107,18 @@ public class LibroDAOImpl implements LibroDAO {
 
     @Override
     public boolean actualizar(Libro libro) {
-        String consultaSQL = "UPDATE libros SET titulo = ?, fecha_publicacion = ?, precio = ?, id_categoria = ?, nit_editorial = ?, stock_actual = ?, stock_minimo = ?, activo = ? WHERE isbn = ?";
+        String consultaSQL = "UPDATE libros SET titulo = ?, fecha_publicacion = ?, precio = ?, categoria_id = ?, nit_editorial = ?, stock_actual = ?, stock_minimo = ?, activo = ? WHERE isbn = ?";
         try (Connection conexion = Conexion.getInstancia().conectar();
              PreparedStatement ps = conexion.prepareStatement(consultaSQL)) {
 
             ps.setString(1, libro.getTitulo());
             ps.setDate(2, libro.getFechaPublicacion() != null ? java.sql.Date.valueOf(libro.getFechaPublicacion()) : null);
             ps.setDouble(3, libro.getPrecio());
-            ps.setInt(4, libro.getIdCategoria());
+            ps.setInt(4, libro.getCategoriaId());
             ps.setString(5, libro.getNitEditorial());
             ps.setInt(6, libro.getStockActual());
             ps.setInt(7, libro.getStockMinimo());
-            ps.setBoolean(8, libro.isActivo());
+            ps.setBoolean(8, libro.isEstado());
             ps.setString(9, libro.getIsbn());
 
             return ps.executeUpdate() > 0;
