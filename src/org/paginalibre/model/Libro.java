@@ -1,38 +1,38 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package org.paginalibre.model;
 
 import java.time.LocalDate;
 import java.sql.Timestamp;
+
 /**
- *
- * @author informatica
+ * Modelo para representar la entidad Libro
  */
 public class Libro {
-    String isbn;
-    String titulo;
-    LocalDate fechaPublicacion;
-    double precio;
-    int idCategoria;
-    String nitEditorial;
-    int stockActual;
-    int stockMinimo;
-    boolean activo; 
-    Timestamp fechaActualizacion;
+    private String isbn;
+    private String titulo;
+    private LocalDate fechaPublicacion;
+    private double precio;
+    private int idCategoria;
+    private String nombreCategoria; // Atributo para mostrar la categoría en el TableView
+    private String nitEditorial;
+    private int stockActual;
+    private int stockMinimo;
+    private boolean activo; 
+    private Timestamp fechaActualizacion;
 
+    // Constructor vacío
     public Libro() {
     }
-    
-    
 
-    public Libro(String isbn, String titulo, LocalDate fechaPublicacion, double precio, int idCategoria, String nitEditorial, int stockActual, int stockMinimo, boolean activo, Timestamp fechaActualizacion) {
+    // Constructor completo
+    public Libro(String isbn, String titulo, LocalDate fechaPublicacion, double precio, int idCategoria, 
+                 String nombreCategoria, String nitEditorial, int stockActual, int stockMinimo, 
+                 boolean activo, Timestamp fechaActualizacion) {
         this.isbn = isbn;
         this.titulo = titulo;
         this.fechaPublicacion = fechaPublicacion;
         this.precio = precio;
         this.idCategoria = idCategoria;
+        this.nombreCategoria = nombreCategoria;
         this.nitEditorial = nitEditorial;
         this.stockActual = stockActual;
         this.stockMinimo = stockMinimo;
@@ -40,6 +40,7 @@ public class Libro {
         this.fechaActualizacion = fechaActualizacion;
     }
 
+    // Getters y Setters
     public String getIsbn() {
         return isbn;
     }
@@ -78,6 +79,14 @@ public class Libro {
 
     public void setIdCategoria(int idCategoria) {
         this.idCategoria = idCategoria;
+    }
+
+    public String getNombreCategoria() {
+        return nombreCategoria;
+    }
+
+    public void setNombreCategoria(String nombreCategoria) {
+        this.nombreCategoria = nombreCategoria;
     }
 
     public String getNitEditorial() {
@@ -119,5 +128,4 @@ public class Libro {
     public void setFechaActualizacion(Timestamp fechaActualizacion) {
         this.fechaActualizacion = fechaActualizacion;
     }
-    
 }
