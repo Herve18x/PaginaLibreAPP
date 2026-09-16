@@ -73,7 +73,7 @@ public class LibroDAOImpl implements LibroDAO {
     @Override
     public Libro buscar(String isbn) {
         Libro libro = null;
-        String consultaSQL = "SELECT isbn, titulo, fecha_publicacion, precio, categoria_id, nit_editorial, stock_actual, stock_minimo, activo, fecha_actualizacion FROM libros WHERE isbn = ?";
+        String consultaSQL = "SELECT isbn, titulo, fecha_publicacion, precio, categoria_id, nit_editorial, stock_actual, stock_minimo, estado, fecha_actualizacion FROM libros WHERE isbn = ?";
         
         try (Connection conexion = Conexion.getInstancia().conectar(); 
              PreparedStatement ps = conexion.prepareStatement(consultaSQL)) {
@@ -93,7 +93,7 @@ public class LibroDAOImpl implements LibroDAO {
                             tablaResultado.getString("nit_editorial"),
                             tablaResultado.getInt("stock_actual"),
                             tablaResultado.getInt("stock_minimo"),
-                            tablaResultado.getBoolean("estadp"),
+                            tablaResultado.getBoolean("estado"),
                             tablaResultado.getTimestamp("fecha_actualizacion")
                     );
                 }
@@ -107,7 +107,7 @@ public class LibroDAOImpl implements LibroDAO {
 
     @Override
     public boolean actualizar(Libro libro) {
-        String consultaSQL = "UPDATE libros SET titulo = ?, fecha_publicacion = ?, precio = ?, categoria_id = ?, nit_editorial = ?, stock_actual = ?, stock_minimo = ?, activo = ? WHERE isbn = ?";
+       String consultaSQL = "SELECT isbn, titulo, fecha_publicacion, precio, categoria_id, nit_editorial, stock_actual, stock_minimo, estado, fecha_actualizacion FROM libros WHERE isbn = ?";
         try (Connection conexion = Conexion.getInstancia().conectar();
              PreparedStatement ps = conexion.prepareStatement(consultaSQL)) {
 
@@ -130,7 +130,7 @@ public class LibroDAOImpl implements LibroDAO {
 
     @Override
     public boolean eliminar(String isbn) {
-        String consultaSQL = "UPDATE libros SET activo = 0 WHERE isbn = ?";
+        String consultaSQL = "UPDATE libros SET estado = 0 WHERE isbn = ?";
         try (Connection conexion = Conexion.getInstancia().conectar();
              PreparedStatement ps = conexion.prepareStatement(consultaSQL)) {
 
