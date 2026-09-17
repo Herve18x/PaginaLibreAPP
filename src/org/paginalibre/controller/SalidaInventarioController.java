@@ -99,7 +99,10 @@ public class SalidaInventarioController implements Initializable {
 
     public void cargarComboTiposMovimiento() {
         listaTipos = FXCollections.observableArrayList();
-        String sql = "SELECT id_tipo_movimiento, nombre_tipo FROM tipos_movimiento";
+        
+        // Filtramos para dejar únicamente: VENTA, TRASLADO, MERMA y DEVOLUCION
+        String sql = "SELECT id_tipo_movimiento, nombre_tipo FROM tipos_movimiento "
+                   + "WHERE nombre_tipo NOT IN ('AJUSTE', 'INGRESO')";
         
         try (Connection conn = Conexion.getInstancia().conectar();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -121,7 +124,9 @@ public class SalidaInventarioController implements Initializable {
 
     public void cargarMovimientos() {
         listaMovimientos = FXCollections.observableArrayList();
-        String sql = "SELECT * FROM vw_movimientos_inventario";
+        
+        // Se excluyen INGRESO y VENTA para mostrar únicamente las salidas registradas en Bodega
+        String sql = "SELECT * FROM vw_movimientos_inventario WHERE tipo NOT IN ('INGRESO', 'VENTA')";
         
         try (Connection conn = Conexion.getInstancia().conectar();
              PreparedStatement ps = conn.prepareStatement(sql);
