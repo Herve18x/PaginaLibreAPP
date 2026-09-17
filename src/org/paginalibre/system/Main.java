@@ -8,10 +8,12 @@ import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import java.net.URL;
+import org.paginalibre.model.Usuario;
 
 public class Main extends Application {
 
     private static Stage escenarioPrincipal;
+    private static Usuario usuarioSesion;
 
     public static void main(String[] args) {
         launch(args);
@@ -31,7 +33,6 @@ public class Main extends Application {
     }
 
     public static Object cambiarVista(String fxmlPath) throws Exception {
-        // Ajusta la ruta si solo se envía el nombre del archivo
         if (!fxmlPath.startsWith("/")) {
             fxmlPath = "/org/paginalibre/view/" + fxmlPath;
         }
@@ -53,7 +54,6 @@ public class Main extends Application {
     }
 
     public static Object cargarVistaEnContenedor(String fxmlPath, Pane contenedor) throws Exception {
-        // Ajusta la ruta si solo se envía el nombre del archivo
         if (!fxmlPath.startsWith("/")) {
             fxmlPath = "/org/paginalibre/view/" + fxmlPath;
         }
@@ -81,5 +81,17 @@ public class Main extends Application {
 
     public static Stage getEscenarioPrincipal() {
         return escenarioPrincipal;
+    }
+
+    public static void establecerUsuarioSesion(Usuario usuario) {
+        usuarioSesion = usuario;
+    }
+
+    public static Usuario getUsuarioSesion() {
+        return usuarioSesion;
+    }
+
+    public static void cerrarSesion() {
+        usuarioSesion = null;
     }
 }
