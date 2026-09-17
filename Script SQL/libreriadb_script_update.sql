@@ -1034,26 +1034,8 @@ ON DUPLICATE KEY UPDATE nombre_cliente = 'Consumidor';
 
 -- USUARIOS
 CALL sp_registrar_usuario('admin1', SHA2('Admin#2026',256), 'admin', 'Sofía', 'Reyes', 'sofia.reyes@libreria.com');
-CALL sp_registrar_usuario('admin2', SHA2('Admin#2026',256), 'admin', 'Diego', 'Morales', 'diego.morales@libreria.com');
-CALL sp_registrar_usuario('admin3', SHA2('Admin#2026',256), 'admin', 'Carmen', 'López', 'carmen.lopez@libreria.com');
 CALL sp_registrar_usuario('bodega1', SHA2('Bodega#2026',256), 'bodega', 'Luis', 'Ramírez', 'luis.ramirez@libreria.com');
-CALL sp_registrar_usuario('bodega2', SHA2('Bodega#2026',256), 'bodega', 'Marta', 'González', 'marta.gonzalez@libreria.com');
-CALL sp_registrar_usuario('bodega3', SHA2('Bodega#2026',256), 'bodega', 'Pedro', 'Sánchez', 'pedro.sanchez@libreria.com');
-CALL sp_registrar_usuario('bodega4', SHA2('Bodega#2026',256), 'bodega', 'Ana', 'Torres', 'ana.torres@libreria.com');
-CALL sp_registrar_usuario('bodega5', SHA2('Bodega#2026',256), 'bodega', 'Jorge', 'Castillo', 'jorge.castillo@libreria.com');
-CALL sp_registrar_usuario('bodega6', SHA2('Bodega#2026',256), 'bodega', 'Elena', 'Vargas', 'elena.vargas@libreria.com');
-CALL sp_registrar_usuario('bodega7', SHA2('Bodega#2026',256), 'bodega', 'Ricardo', 'Méndez', 'ricardo.mendez@libreria.com');
 CALL sp_registrar_usuario('cajero1', SHA2('Cajero#2026',256), 'cajero', 'Paola', 'Cruz', 'paola.cruz@libreria.com');
-CALL sp_registrar_usuario('cajero2', SHA2('Cajero#2026',256), 'cajero', 'Fernando', 'Ortiz', 'fernando.ortiz@libreria.com');
-CALL sp_registrar_usuario('cajero3', SHA2('Cajero#2026',256), 'cajero', 'Karla', 'Díaz', 'karla.diaz@libreria.com');
-CALL sp_registrar_usuario('cajero4', SHA2('Cajero#2026',256), 'cajero', 'Hugo', 'Palacios', 'hugo.palacios@libreria.com');
-CALL sp_registrar_usuario('cajero5', SHA2('Cajero#2026',256), 'cajero', 'Silvia', 'Guerra', 'silvia.guerra@libreria.com');
-CALL sp_registrar_usuario('cajero6', SHA2('Cajero#2026',256), 'cajero', 'Mauricio', 'Cardona', 'mauricio.cardona@libreria.com');
-CALL sp_registrar_usuario('cajero7', SHA2('Cajero#2026',256), 'cajero', 'Vivian', 'Solares', 'vivian.solares@libreria.com');
-CALL sp_registrar_usuario('cajero8', SHA2('Cajero#2026',256), 'cajero', 'Christian', 'Orellana', 'christian.orellana@libreria.com');
-CALL sp_registrar_usuario('cajero9', SHA2('Cajero#2026',256), 'cajero', 'Natalia', 'Sandoval', 'natalia.sandoval@libreria.com');
-CALL sp_registrar_usuario('cajero10', SHA2('Cajero#2026',256), 'cajero', 'Pablo', 'Archila', 'pablo.archila@libreria.com');
-
 -- LIBROS
 CALL sp_insertarlibro('978-0-123', 'Cien Años de Soledad', '1967-05-30', 150.00, 1, '1001-A', 0, 10);
 CALL sp_insertarlibro('978-0-124', 'Rayuela', '1963-06-28', 135.50, 1, '1002-B', 0, 8);

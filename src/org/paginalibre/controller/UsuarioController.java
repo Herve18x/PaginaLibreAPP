@@ -18,7 +18,6 @@ import org.paginalibre.model.Usuario;
 
 public class UsuarioController {
 
-    // Componentes de la Tabla
     @FXML private TableView<Usuario> tblUsuarios;
     @FXML private TableColumn<Usuario, Integer> colId;
     @FXML private TableColumn<Usuario, String> colUsername;
@@ -28,9 +27,9 @@ public class UsuarioController {
     @FXML private TableColumn<Usuario, String> colRol;
     @FXML private TableColumn<Usuario, Boolean> colActivo;
 
-    // Componentes del Formulario
     @FXML private Label lblTituloFormulario;
     @FXML private TextField txtUsername;
+    @FXML private PasswordField txtPassword;
     @FXML private TextField txtNombre;
     @FXML private TextField txtApellido;
     @FXML private TextField txtCorreo;
@@ -54,7 +53,6 @@ public class UsuarioController {
 
         cmbRol.setItems(FXCollections.observableArrayList("admin", "bodega", "cajero"));
 
-        // Listener para cargar automáticamente el usuario seleccionado en el formulario
         tblUsuarios.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
                 cargarParaEditar(newSelection);
@@ -74,6 +72,7 @@ public class UsuarioController {
         this.usuarioEdicion = usuario;
         lblTituloFormulario.setText("EDITAR USUARIO (ID: " + usuario.getId() + ")");
         txtUsername.setText(usuario.getUsername());
+        txtPassword.clear();
         txtNombre.setText(usuario.getNombre());
         txtApellido.setText(usuario.getApellido());
         txtCorreo.setText(usuario.getCorreo());
@@ -83,19 +82,21 @@ public class UsuarioController {
     @FXML
     private void guardarUsuario() {
         String username = txtUsername.getText().trim();
+        String password = txtPassword.getText().trim();
         String nombre = txtNombre.getText().trim();
         String apellido = txtApellido.getText().trim();
         String correo = txtCorreo.getText().trim();
         String rol = cmbRol.getValue();
 
-        if (username.isEmpty() || nombre.isEmpty() || apellido.isEmpty() || rol == null) {
-            mostrarAlerta("Campos Requeridos", "Por favor complete usuario, nombre, apellido y rol.", Alert.AlertType.WARNING);
+        if (username.isEmpty() || nombre.isEmpty() || apellido.isEmpty() || rol == null || (usuarioEdicion == null && password.isEmpty())) {
+            mostrarAlerta("Campos Requeridos", "Por favor complete usuario, contraseña, nombre, apellido y rol.", Alert.AlertType.WARNING);
             return;
         }
 
         if (usuarioEdicion == null) {
             Usuario nuevo = new Usuario();
             nuevo.setUsername(username);
+            nuevo.setPasswordHash(password);
             nuevo.setRol(rol);
             nuevo.setNombre(nombre);
             nuevo.setApellido(apellido);
@@ -128,6 +129,7 @@ public class UsuarioController {
     @FXML
     private void abrirCambiarPassword() {
         Usuario seleccionado = tblUsuarios.getSelectionModel().getSelectedItem();
+
         if (seleccionado == null) {
             mostrarAlerta("Selección Requerida", "Seleccione un usuario de la tabla para cambiar su contraseña.", Alert.AlertType.INFORMATION);
             return;
@@ -160,6 +162,7 @@ public class UsuarioController {
         this.usuarioEdicion = null;
         lblTituloFormulario.setText("REGISTRAR NUEVO USUARIO");
         txtUsername.clear();
+        txtPassword.clear();
         txtNombre.clear();
         txtApellido.clear();
         txtCorreo.clear();
@@ -169,8 +172,10 @@ public class UsuarioController {
     @FXML
     private void toggleEstado() {
         Usuario seleccionado = tblUsuarios.getSelectionModel().getSelectedItem();
+
         if (seleccionado != null) {
             seleccionado.setActivo(!seleccionado.isActivo());
+
             if (usuarioDAO.actualizar(seleccionado)) {
                 tblUsuarios.refresh();
             } else {
@@ -184,6 +189,7 @@ public class UsuarioController {
     @FXML
     private void cerrarVentana() {
         Stage stage = (Stage) tblUsuarios.getScene().getWindow();
+
         if (stage != null) {
             stage.close();
         }

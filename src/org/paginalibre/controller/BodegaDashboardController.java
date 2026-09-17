@@ -53,31 +53,39 @@ public class BodegaDashboardController implements Initializable, BaseDashboardCo
         if (libroDAO == null) return;
 
         List<Libro> listaBajoStock = libroDAO.listarLibrosBajoStock();
+        ObservableList<Libro> itemsBajoStock = FXCollections.observableArrayList(listaBajoStock);
 
-        if (listaBajoStock != null) {
-            ObservableList<Libro> itemsBajoStock = FXCollections.observableArrayList(listaBajoStock);
+        if (tblBodega != null) {
+            tblBodega.setItems(itemsBajoStock);
+            tblBodega.refresh();
+        }
 
-            if (tblBodega != null) {
-                tblBodega.setItems(itemsBajoStock);
-            }
-
-            if (lblAlertasStock != null) {
-                lblAlertasStock.setText(String.valueOf(listaBajoStock.size()));
-            }
-        } else {
-            if (lblAlertasStock != null) {
-                lblAlertasStock.setText("0");
-            }
+        if (lblAlertasStock != null) {
+            lblAlertasStock.setText(String.valueOf(listaBajoStock.size()));
         }
 
         List<Libro> todosLosLibros = libroDAO.listar();
 
-        if (lblTitulosCatalogo != null && todosLosLibros != null) {
+        if (lblTitulosCatalogo != null) {
             lblTitulosCatalogo.setText(String.valueOf(todosLosLibros.size()));
         }
 
-        if (lblEntradasHoy != null) {
-            lblEntradasHoy.setText("0");
+        String sqlEntradas = "SELECT COUNT(*) FROM movimientos_inventario mi "
+                           + "INNER JOIN tipos_movimiento tm ON mi.id_tipo_movimiento = tm.id_tipo_movimiento "
+                           + "WHERE tm.nombre_tipo = 'INGRESO' AND DATE(mi.fecha_movimiento) = CURDATE()";
+
+        try (java.sql.Connection conn = org.paginalibre.util.Conexion.getInstancia().conectar();
+             java.sql.PreparedStatement ps = conn.prepareStatement(sqlEntradas);
+             java.sql.ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next() && lblEntradasHoy != null) {
+                lblEntradasHoy.setText(String.valueOf(rs.getInt(1)));
+            }
+
+        } catch (java.sql.SQLException e) {
+            if (lblEntradasHoy != null) {
+                lblEntradasHoy.setText("0");
+            }
         }
     }
 
@@ -95,8 +103,6 @@ public class BodegaDashboardController implements Initializable, BaseDashboardCo
             }
         }
     }
-
-    // --- Métodos del Menú Lateral y Acciones ---
 
     @FXML
     private void irIngresoInventario(ActionEvent event) {
