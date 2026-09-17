@@ -766,6 +766,18 @@ end $$
 
 delimiter ;
 
+CREATE OR REPLACE VIEW vw_movimientos_inventario AS
+SELECT 
+    m.id_movimiento AS id,
+    COALESCE(l.titulo, m.isbn) AS libro,
+    COALESCE(tm.nombre_tipo, 'DESCONOCIDO') AS tipo,
+    m.cantidad AS cantidad,
+    DATE_FORMAT(m.fecha_movimiento, '%d/%m/%Y %H:%i') AS fecha
+FROM movimientos_inventario m
+LEFT JOIN libros l ON m.isbn = l.isbn
+LEFT JOIN tipos_movimiento tm ON m.id_tipo_movimiento = tm.id_tipo_movimiento
+ORDER BY m.fecha_movimiento DESC;
+
 -- =============================================================================
 -- 15. VISTAS
 -- =============================================================================
