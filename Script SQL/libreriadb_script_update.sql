@@ -1,113 +1,119 @@
-drop database if exists libreriadb_in4cm;
-create database if not exists libreriadb_in4cm;
-use libreriadb_in4cm;
+DROP DATABASE IF EXISTS libreriadb_in4cm;
+CREATE DATABASE libreriadb_in4cm;
+USE libreriadb_in4cm;
 
 -- =============================================================================
 -- 1. TABLAS BASE
 -- =============================================================================
-create table categoria(
-    categoria_id int primary key auto_increment,
-    nombre_categoria varchar(100)
+
+CREATE TABLE categoria (
+    categoria_id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_categoria VARCHAR(100) NOT NULL
 );
 
-create table editoriales (
-    nit varchar(20) primary key,
-    nombre_editorial varchar(100) not null,
-    telefono_editorial varchar(15),
-    direccion_editorial varchar(100)
+CREATE TABLE editoriales (
+    nit VARCHAR(20) PRIMARY KEY,
+    nombre_editorial VARCHAR(100) NOT NULL,
+    telefono_editorial VARCHAR(15),
+    direccion_editorial VARCHAR(100)
 );
 
-create table proveedores (
-    id_proveedor int primary key auto_increment,
-    nombre_proveedor varchar(100) not null,
-    telefono_proveedor varchar(15),
-    direccion_proveedor varchar(100),
-    correo_proveedor varchar(100)
+CREATE TABLE proveedores (
+    id_proveedor INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_proveedor VARCHAR(100) NOT NULL,
+    telefono_proveedor VARCHAR(15),
+    direccion_proveedor VARCHAR(100),
+    correo_proveedor VARCHAR(100)
 );
 
-create table autores(
-    id_autor int primary key auto_increment,
-    nombre_autor varchar(100) not null,
-    apellido_autor varchar(100) not null,
-    nacionalidad varchar(100),
-    biografia text
+CREATE TABLE autores (
+    id_autor INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_autor VARCHAR(100) NOT NULL,
+    apellido_autor VARCHAR(100) NOT NULL,
+    nacionalidad VARCHAR(100),
+    biografia TEXT
 );
 
-create table clientes(
-    cui bigint primary key,
-    nombre_cliente varchar(100),
-    apellido_cliente varchar(100),
-    correo_electronico varchar(100)
+CREATE TABLE clientes (
+    cui BIGINT PRIMARY KEY,
+    nombre_cliente VARCHAR(100),
+    apellido_cliente VARCHAR(100),
+    correo_electronico VARCHAR(100)
 );
 
-create table usuarios (
-    id int primary key auto_increment,
-    username varchar(50) not null unique,
-    password_hash varchar(255) not null,
-    rol enum('admin', 'bodega', 'cajero') not null,
-    nombre varchar(100),
-    apellido varchar(100),
-    correo varchar(100),
-    activo boolean not null default true,
-    fecha_creacion timestamp default current_timestamp,
-    fecha_actualizacion timestamp default current_timestamp on update current_timestamp
+CREATE TABLE usuarios (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    rol ENUM('admin','bodega','cajero') NOT NULL,
+    nombre VARCHAR(100),
+    apellido VARCHAR(100),
+    correo VARCHAR(100),
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP
 );
 
-create table libros(
-    isbn varchar(20) primary key,
-    titulo varchar(100) not null,
-    fecha_publicacion date,
-    precio decimal(8,2) not null,
-    categoria_id int,
-    nit_editorial varchar(20),
-    stock_actual int not null default 0,
-    stock_minimo int not null default 0,
-    estado tinyint(1) not null default 1,
-    fecha_actualizacion timestamp default current_timestamp on update current_timestamp
+CREATE TABLE libros (
+    isbn VARCHAR(20) PRIMARY KEY,
+    titulo VARCHAR(100) NOT NULL,
+    fecha_publicacion DATE,
+    precio DECIMAL(8,2) NOT NULL,
+    categoria_id INT,
+    nit_editorial VARCHAR(20),
+    stock_actual INT NOT NULL DEFAULT 0,
+    stock_minimo INT NOT NULL DEFAULT 0,
+    estado TINYINT(1) NOT NULL DEFAULT 1,
+    fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP
 );
 
-create table autores_libro(
-    id_autor_libro int auto_increment primary key,
-    id_autor int,
-    isbn varchar(20)
+CREATE TABLE autores_libro (
+    id_autor_libro INT AUTO_INCREMENT PRIMARY KEY,
+    id_autor INT,
+    isbn VARCHAR(20)
 );
 
-create table tipos_movimiento (
-    id_tipo_movimiento int primary key auto_increment,
-    nombre_tipo varchar(50) not null unique,
-    operacion enum('SUMAR', 'RESTAR') not null
-);
-
--- =============================================================================
--- 2. VENTAS 
--- =============================================================================
-create table ventas(
-    id_venta int primary key auto_increment,
-    fecha_venta timestamp default current_timestamp,
-    subtotal decimal(10,2) not null default 0,
-    descuento decimal(10,2) not null default 0,
-    total decimal(10,2) not null default 0,
-    estado enum('COMPLETADA', 'ANULADA', 'DEVUELTA') not null default 'COMPLETADA',
-    cui_cliente bigint,
-    id_usuario int not null,
-    usuario_autoriza_descuento int,
-    fecha_anulacion timestamp null,
-    usuario_anulacion int,
-    motivo_anulacion varchar(255)
-);
-
-create table detalle_venta(
-    id_detalle int primary key auto_increment,
-    id_venta int,
-    isbn varchar(20),
-    cantidad int not null,
-    precio_unitario decimal(10,2) not null,
-    subtotal decimal(10,2) not null
+CREATE TABLE tipos_movimiento (
+    id_tipo_movimiento INT PRIMARY KEY AUTO_INCREMENT,
+    nombre_tipo VARCHAR(50) NOT NULL UNIQUE,
+    operacion ENUM('SUMAR','RESTAR') NOT NULL
 );
 
 -- =============================================================================
--- 3. MOVIMIENTOS_INVENTARIO
+-- 2. VENTAS
 -- =============================================================================
+
+CREATE TABLE ventas (
+    id_venta INT PRIMARY KEY AUTO_INCREMENT,
+    fecha_venta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    subtotal DECIMAL(10,2) NOT NULL DEFAULT 0,
+    descuento DECIMAL(10,2) NOT NULL DEFAULT 0,
+    total DECIMAL(10,2) NOT NULL DEFAULT 0,
+    estado ENUM('COMPLETADA','ANULADA','DEVUELTA')
+        NOT NULL DEFAULT 'COMPLETADA',
+    cui_cliente BIGINT,
+    id_usuario INT NOT NULL,
+    usuario_autoriza_descuento INT,
+    fecha_anulacion TIMESTAMP NULL,
+    usuario_anulacion INT,
+    motivo_anulacion VARCHAR(255)
+);
+
+CREATE TABLE detalle_venta (
+    id_detalle INT PRIMARY KEY AUTO_INCREMENT,
+    id_venta INT,
+    isbn VARCHAR(20),
+    cantidad INT NOT NULL,
+    precio_unitario DECIMAL(10,2) NOT NULL,
+    subtotal DECIMAL(10,2) NOT NULL
+);
+
+-- =============================================================================
+-- 3. MOVIMIENTOS DE INVENTARIO
+-- =============================================================================
+
 CREATE TABLE movimientos_inventario (
     id_movimiento INT PRIMARY KEY AUTO_INCREMENT,
     isbn VARCHAR(20) NOT NULL,
@@ -116,473 +122,640 @@ CREATE TABLE movimientos_inventario (
     fecha_movimiento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     id_usuario INT NOT NULL,
     observacion VARCHAR(255),
-    CONSTRAINT fk_mi_libro FOREIGN KEY (isbn) REFERENCES libros(isbn) ON DELETE CASCADE,
-    CONSTRAINT fk_mi_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id),
-    CONSTRAINT fk_mi_tipo FOREIGN KEY (id_tipo_movimiento) REFERENCES tipos_movimiento(id_tipo_movimiento)
+
+    CONSTRAINT fk_mi_libro
+        FOREIGN KEY (isbn)
+        REFERENCES libros(isbn)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_mi_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuarios(id),
+
+    CONSTRAINT fk_mi_tipo
+        FOREIGN KEY (id_tipo_movimiento)
+        REFERENCES tipos_movimiento(id_tipo_movimiento)
 );
 
 -- =============================================================================
--- 4. LLAVES FORÁNEAS (RESTANTES)
+-- 4. LLAVES FORÁNEAS
 -- =============================================================================
-alter table autores_libro
-add constraint fk_a_autor foreign key (id_autor) references autores(id_autor) on delete cascade,
-add constraint fk_a_libro foreign key (isbn) references libros(isbn) on delete cascade;
 
-alter table libros
-add constraint fk_a_categoria foreign key (categoria_id) references categoria(categoria_id) on delete cascade,
-add constraint fk_a_editoriales foreign key (nit_editorial) references editoriales(nit) on delete cascade;
+ALTER TABLE autores_libro
+ADD CONSTRAINT fk_a_autor
+    FOREIGN KEY (id_autor)
+    REFERENCES autores(id_autor)
+    ON DELETE CASCADE,
+ADD CONSTRAINT fk_a_libro
+    FOREIGN KEY (isbn)
+    REFERENCES libros(isbn)
+    ON DELETE CASCADE;
 
-alter table ventas
-add constraint fk_v_cliente foreign key (cui_cliente) references clientes(cui) on delete set null,
-add constraint fk_v_usuario foreign key (id_usuario) references usuarios(id),
-add constraint fk_v_autoriza_descuento foreign key (usuario_autoriza_descuento) references usuarios(id),
-add constraint fk_v_usuario_anulacion foreign key (usuario_anulacion) references usuarios(id);
+ALTER TABLE libros
+ADD CONSTRAINT fk_a_categoria
+    FOREIGN KEY (categoria_id)
+    REFERENCES categoria(categoria_id)
+    ON DELETE CASCADE,
+ADD CONSTRAINT fk_a_editoriales
+    FOREIGN KEY (nit_editorial)
+    REFERENCES editoriales(nit)
+    ON DELETE CASCADE;
 
-alter table detalle_venta
-add constraint fk_dv_venta foreign key (id_venta) references ventas(id_venta) on delete cascade,
-add constraint fk_dv_libro foreign key (isbn) references libros(isbn) on delete cascade;
+ALTER TABLE ventas
+ADD CONSTRAINT fk_v_cliente
+    FOREIGN KEY (cui_cliente)
+    REFERENCES clientes(cui)
+    ON DELETE SET NULL,
+ADD CONSTRAINT fk_v_usuario
+    FOREIGN KEY (id_usuario)
+    REFERENCES usuarios(id),
+ADD CONSTRAINT fk_v_autoriza_descuento
+    FOREIGN KEY (usuario_autoriza_descuento)
+    REFERENCES usuarios(id),
+ADD CONSTRAINT fk_v_usuario_anulacion
+    FOREIGN KEY (usuario_anulacion)
+    REFERENCES usuarios(id);
 
--- =============================================================================
--- 5. CRUD: CATEGORIAS
--- =============================================================================
-delimiter $$
-
-create procedure sp_insertarcategoria(
-    in _nombre_categoria varchar(100)
-)
-begin
-    insert into categoria(nombre_categoria)
-    values (_nombre_categoria);
-end $$
-
-create procedure sp_listarcategorias()
-begin
-    select categoria_id, nombre_categoria from categoria;
-end $$
-
-create procedure sp_buscarcategoria(
-    in _categoria_id int
-)
-begin
-    select categoria_id, nombre_categoria
-    from categoria
-    where categoria_id = _categoria_id;
-end $$
-
-create procedure sp_actualizarcategoria(
-    in _categoria_id int,
-    in _nombre_categoria varchar(100)
-)
-begin
-    update categoria
-    set nombre_categoria = _nombre_categoria
-    where categoria_id = _categoria_id;
-end $$
-
-create procedure sp_eliminarcategoria(
-    in _categoria_id int
-)
-begin
-    delete from categoria where categoria_id = _categoria_id;
-end $$
-
-delimiter ;
+ALTER TABLE detalle_venta
+ADD CONSTRAINT fk_dv_venta
+    FOREIGN KEY (id_venta)
+    REFERENCES ventas(id_venta)
+    ON DELETE CASCADE,
+ADD CONSTRAINT fk_dv_libro
+    FOREIGN KEY (isbn)
+    REFERENCES libros(isbn)
+    ON DELETE CASCADE;
 
 -- =============================================================================
--- 6. CRUD: EDITORIALES
+-- 5. CRUD CATEGORIAS
 -- =============================================================================
-delimiter $$
 
-create procedure sp_insertareditorial(
-    in _nit varchar(20),
-    in _nombre_editorial varchar(100),
-    in _telefono_editorial varchar(15),
-    in _direccion_editorial varchar(100)
+DELIMITER $$
+
+CREATE PROCEDURE sp_insertarcategoria(
+    IN _nombre_categoria VARCHAR(100)
 )
-begin
-    insert into editoriales(nit, nombre_editorial, telefono_editorial, direccion_editorial)
-    values (_nit, _nombre_editorial, _telefono_editorial, _direccion_editorial);
-end $$
+BEGIN
+    INSERT INTO categoria(nombre_categoria)
+    VALUES (_nombre_categoria);
+END $$
 
-create procedure sp_listareditoriales()
-begin
-    select nit, nombre_editorial, telefono_editorial, direccion_editorial from editoriales;
-end $$
+CREATE PROCEDURE sp_listarcategorias()
+BEGIN
+    SELECT categoria_id, nombre_categoria
+    FROM categoria;
+END $$
 
-create procedure sp_buscareditorial(
-    in _nit varchar(20)
+CREATE PROCEDURE sp_buscarcategoria(
+    IN _categoria_id INT
 )
-begin
-    select nit, nombre_editorial, telefono_editorial, direccion_editorial
-    from editoriales
-    where nit = _nit;
-end $$
+BEGIN
+    SELECT categoria_id, nombre_categoria
+    FROM categoria
+    WHERE categoria_id = _categoria_id;
+END $$
 
-create procedure sp_actualizareditorial(
-    in _nit varchar(20),
-    in _nombre_editorial varchar(100),
-    in _telefono_editorial varchar(15),
-    in _direccion_editorial varchar(100)
+CREATE PROCEDURE sp_actualizarcategoria(
+    IN _categoria_id INT,
+    IN _nombre_categoria VARCHAR(100)
 )
-begin
-    update editoriales
-    set nombre_editorial = _nombre_editorial,
+BEGIN
+    UPDATE categoria
+    SET nombre_categoria = _nombre_categoria
+    WHERE categoria_id = _categoria_id;
+END $$
+
+CREATE PROCEDURE sp_eliminarcategoria(
+    IN _categoria_id INT
+)
+BEGIN
+    DELETE FROM categoria
+    WHERE categoria_id = _categoria_id;
+END $$
+
+-- =============================================================================
+-- 6. CRUD EDITORIALES
+-- =============================================================================
+
+CREATE PROCEDURE sp_insertareditorial(
+    IN _nit VARCHAR(20),
+    IN _nombre_editorial VARCHAR(100),
+    IN _telefono_editorial VARCHAR(15),
+    IN _direccion_editorial VARCHAR(100)
+)
+BEGIN
+    INSERT INTO editoriales(
+        nit,
+        nombre_editorial,
+        telefono_editorial,
+        direccion_editorial
+    )
+    VALUES (
+        _nit,
+        _nombre_editorial,
+        _telefono_editorial,
+        _direccion_editorial
+    );
+END $$
+
+CREATE PROCEDURE sp_listareditoriales()
+BEGIN
+    SELECT nit,
+           nombre_editorial,
+           telefono_editorial,
+           direccion_editorial
+    FROM editoriales;
+END $$
+
+CREATE PROCEDURE sp_buscareditorial(
+    IN _nit VARCHAR(20)
+)
+BEGIN
+    SELECT nit,
+           nombre_editorial,
+           telefono_editorial,
+           direccion_editorial
+    FROM editoriales
+    WHERE nit = _nit;
+END $$
+
+CREATE PROCEDURE sp_actualizareditorial(
+    IN _nit VARCHAR(20),
+    IN _nombre_editorial VARCHAR(100),
+    IN _telefono_editorial VARCHAR(15),
+    IN _direccion_editorial VARCHAR(100)
+)
+BEGIN
+    UPDATE editoriales
+    SET nombre_editorial = _nombre_editorial,
         telefono_editorial = _telefono_editorial,
         direccion_editorial = _direccion_editorial
-    where nit = _nit;
-end $$
+    WHERE nit = _nit;
+END $$
 
-create procedure sp_eliminareditorial(
-    in _nit varchar(20)
+CREATE PROCEDURE sp_eliminareditorial(
+    IN _nit VARCHAR(20)
 )
-begin
-    delete from editoriales where nit = _nit;
-end $$
-
-delimiter ;
+BEGIN
+    DELETE FROM editoriales
+    WHERE nit = _nit;
+END $$
 
 -- =============================================================================
--- 7. CRUD: PROVEEDORES
+-- 7. CRUD PROVEEDORES
 -- =============================================================================
-delimiter $$
 
-create procedure sp_insertarproveedor(
-    in _nombre_proveedor varchar(100),
-    in _telefono_proveedor varchar(15),
-    in _direccion_proveedor varchar(100),
-    in _correo_proveedor varchar(100)
+CREATE PROCEDURE sp_insertarproveedor(
+    IN _nombre_proveedor VARCHAR(100),
+    IN _telefono_proveedor VARCHAR(15),
+    IN _direccion_proveedor VARCHAR(100),
+    IN _correo_proveedor VARCHAR(100)
 )
-begin
-    insert into proveedores(nombre_proveedor, telefono_proveedor, direccion_proveedor, correo_proveedor)
-    values (_nombre_proveedor, _telefono_proveedor, _direccion_proveedor, _correo_proveedor);
-end $$
+BEGIN
+    INSERT INTO proveedores(
+        nombre_proveedor,
+        telefono_proveedor,
+        direccion_proveedor,
+        correo_proveedor
+    )
+    VALUES (
+        _nombre_proveedor,
+        _telefono_proveedor,
+        _direccion_proveedor,
+        _correo_proveedor
+    );
+END $$
 
-create procedure sp_listarproveedores()
-begin
-    select id_proveedor, nombre_proveedor, telefono_proveedor, direccion_proveedor, correo_proveedor from proveedores;
-end $$
+CREATE PROCEDURE sp_listarproveedores()
+BEGIN
+    SELECT id_proveedor,
+           nombre_proveedor,
+           telefono_proveedor,
+           direccion_proveedor,
+           correo_proveedor
+    FROM proveedores;
+END $$
 
-create procedure sp_buscarproveedor(
-    in _id_proveedor int
+CREATE PROCEDURE sp_buscarproveedor(
+    IN _id_proveedor INT
 )
-begin
-    select id_proveedor, nombre_proveedor, telefono_proveedor, direccion_proveedor, correo_proveedor
-    from proveedores
-    where id_proveedor = _id_proveedor;
-end $$
+BEGIN
+    SELECT id_proveedor,
+           nombre_proveedor,
+           telefono_proveedor,
+           direccion_proveedor,
+           correo_proveedor
+    FROM proveedores
+    WHERE id_proveedor = _id_proveedor;
+END $$
 
-create procedure sp_actualizarproveedor(
-    in _id_proveedor int,
-    in _nombre_proveedor varchar(100),
-    in _telefono_proveedor varchar(15),
-    in _direccion_proveedor varchar(100),
-    in _correo_proveedor varchar(100)
+CREATE PROCEDURE sp_actualizarproveedor(
+    IN _id_proveedor INT,
+    IN _nombre_proveedor VARCHAR(100),
+    IN _telefono_proveedor VARCHAR(15),
+    IN _direccion_proveedor VARCHAR(100),
+    IN _correo_proveedor VARCHAR(100)
 )
-begin
-    update proveedores
-    set nombre_proveedor = _nombre_proveedor,
+BEGIN
+    UPDATE proveedores
+    SET nombre_proveedor = _nombre_proveedor,
         telefono_proveedor = _telefono_proveedor,
         direccion_proveedor = _direccion_proveedor,
         correo_proveedor = _correo_proveedor
-    where id_proveedor = _id_proveedor;
-end $$
+    WHERE id_proveedor = _id_proveedor;
+END $$
 
-create procedure sp_eliminarproveedor(
-    in _id_proveedor int
+CREATE PROCEDURE sp_eliminarproveedor(
+    IN _id_proveedor INT
 )
-begin
-    delete from proveedores where id_proveedor = _id_proveedor;
-end $$
-
-delimiter ;
+BEGIN
+    DELETE FROM proveedores
+    WHERE id_proveedor = _id_proveedor;
+END $$
 
 -- =============================================================================
--- 8. CRUD: AUTORES
+-- 8. CRUD AUTORES
 -- =============================================================================
-delimiter $$
 
-create procedure sp_insertarautor(
-    in _nombre_autor varchar(100),
-    in _apellido_autor varchar(100),
-    in _nacionalidad varchar(100),
-    in _biografia text
+CREATE PROCEDURE sp_insertarautor(
+    IN _nombre_autor VARCHAR(100),
+    IN _apellido_autor VARCHAR(100),
+    IN _nacionalidad VARCHAR(100),
+    IN _biografia TEXT
 )
-begin
-    insert into autores(nombre_autor, apellido_autor, nacionalidad, biografia)
-    values (_nombre_autor, _apellido_autor, _nacionalidad, _biografia);
-end $$
+BEGIN
+    INSERT INTO autores(
+        nombre_autor,
+        apellido_autor,
+        nacionalidad,
+        biografia
+    )
+    VALUES (
+        _nombre_autor,
+        _apellido_autor,
+        _nacionalidad,
+        _biografia
+    );
+END $$
 
-create procedure sp_listarautores()
-begin
-    select id_autor, nombre_autor, apellido_autor, nacionalidad, biografia from autores;
-end $$
+CREATE PROCEDURE sp_listarautores()
+BEGIN
+    SELECT id_autor,
+           nombre_autor,
+           apellido_autor,
+           nacionalidad,
+           biografia
+    FROM autores;
+END $$
 
-create procedure sp_buscarautor(
-    in _id_autor int
+CREATE PROCEDURE sp_buscarautor(
+    IN _id_autor INT
 )
-begin
-    select id_autor, nombre_autor, apellido_autor, nacionalidad, biografia
-    from autores
-    where id_autor = _id_autor;
-end $$
+BEGIN
+    SELECT id_autor,
+           nombre_autor,
+           apellido_autor,
+           nacionalidad,
+           biografia
+    FROM autores
+    WHERE id_autor = _id_autor;
+END $$
 
-create procedure sp_actualizarautor(
-    in _id_autor int,
-    in _nombre_autor varchar(100),
-    in _apellido_autor varchar(100),
-    in _nacionalidad varchar(100),
-    in _biografia text
+CREATE PROCEDURE sp_actualizarautor(
+    IN _id_autor INT,
+    IN _nombre_autor VARCHAR(100),
+    IN _apellido_autor VARCHAR(100),
+    IN _nacionalidad VARCHAR(100),
+    IN _biografia TEXT
 )
-begin
-    update autores
-    set nombre_autor = _nombre_autor,
+BEGIN
+    UPDATE autores
+    SET nombre_autor = _nombre_autor,
         apellido_autor = _apellido_autor,
         nacionalidad = _nacionalidad,
         biografia = _biografia
-    where id_autor = _id_autor;
-end $$
+    WHERE id_autor = _id_autor;
+END $$
 
-create procedure sp_eliminarautor(
-    in _id_autor int
+CREATE PROCEDURE sp_eliminarautor(
+    IN _id_autor INT
 )
-begin
-    delete from autores where id_autor = _id_autor;
-end $$
-
-delimiter ;
+BEGIN
+    DELETE FROM autores
+    WHERE id_autor = _id_autor;
+END $$
 
 -- =============================================================================
--- 9. CRUD: CLIENTES
+-- 9. CRUD CLIENTES
 -- =============================================================================
-delimiter $$
 
-create procedure sp_insertarcliente(
-    in _cui bigint,
-    in _nombre_cliente varchar(100),
-    in _apellido_cliente varchar(100),
-    in _correo_electronico varchar(100)
+CREATE PROCEDURE sp_insertarcliente(
+    IN _cui BIGINT,
+    IN _nombre_cliente VARCHAR(100),
+    IN _apellido_cliente VARCHAR(100),
+    IN _correo_electronico VARCHAR(100)
 )
-begin
-    insert into clientes(cui, nombre_cliente, apellido_cliente, correo_electronico)
-    values (_cui, _nombre_cliente, _apellido_cliente, _correo_electronico);
-end $$
+BEGIN
+    INSERT INTO clientes(
+        cui,
+        nombre_cliente,
+        apellido_cliente,
+        correo_electronico
+    )
+    VALUES (
+        _cui,
+        _nombre_cliente,
+        _apellido_cliente,
+        _correo_electronico
+    );
+END $$
 
-create procedure sp_listarclientes()
-begin
-    select cui, nombre_cliente, apellido_cliente, correo_electronico from clientes;
-end $$
+CREATE PROCEDURE sp_listarclientes()
+BEGIN
+    SELECT cui,
+           nombre_cliente,
+           apellido_cliente,
+           correo_electronico
+    FROM clientes;
+END $$
 
-create procedure sp_buscarcliente(
-    in _cui bigint
+CREATE PROCEDURE sp_buscarcliente(
+    IN _cui BIGINT
 )
-begin
-    select cui, nombre_cliente, apellido_cliente, correo_electronico
-    from clientes
-    where cui = _cui;
-end $$
+BEGIN
+    SELECT cui,
+           nombre_cliente,
+           apellido_cliente,
+           correo_electronico
+    FROM clientes
+    WHERE cui = _cui;
+END $$
 
-create procedure sp_actualizarcliente(
-    in _cui bigint,
-    in _nombre_cliente varchar(100),
-    in _apellido_cliente varchar(100),
-    in _correo_electronico varchar(100)
+CREATE PROCEDURE sp_actualizarcliente(
+    IN _cui BIGINT,
+    IN _nombre_cliente VARCHAR(100),
+    IN _apellido_cliente VARCHAR(100),
+    IN _correo_electronico VARCHAR(100)
 )
-begin
-    update clientes
-    set nombre_cliente = _nombre_cliente,
+BEGIN
+    UPDATE clientes
+    SET nombre_cliente = _nombre_cliente,
         apellido_cliente = _apellido_cliente,
         correo_electronico = _correo_electronico
-    where cui = _cui;
-end $$
+    WHERE cui = _cui;
+END $$
 
-create procedure sp_eliminarcliente(
-    in _cui bigint
+CREATE PROCEDURE sp_eliminarcliente(
+    IN _cui BIGINT
 )
-begin
-    delete from clientes where cui = _cui;
-end $$
-
-delimiter ;
+BEGIN
+    DELETE FROM clientes
+    WHERE cui = _cui;
+END $$
 
 -- =============================================================================
--- 10. CRUD: USUARIOS 
+-- 10. CRUD USUARIOS
 -- =============================================================================
-delimiter $$
 
-create procedure sp_registrar_usuario(
-    in _username varchar(50),
-    in _password_hash varchar(255),
-    in _rol enum('admin', 'bodega', 'cajero'),
-    in _nombre varchar(100),
-    in _apellido varchar(100),
-    in _correo varchar(100)
+CREATE PROCEDURE sp_registrar_usuario(
+    IN _username VARCHAR(50),
+    IN _password_hash VARCHAR(255),
+    IN _rol ENUM('admin','bodega','cajero'),
+    IN _nombre VARCHAR(100),
+    IN _apellido VARCHAR(100),
+    IN _correo VARCHAR(100)
 )
-begin
-    insert into usuarios(username, password_hash, rol, nombre, apellido, correo)
-    values (_username, _password_hash, _rol, _nombre, _apellido, _correo);
-end $$
+BEGIN
+    INSERT INTO usuarios(
+        username,
+        password_hash,
+        rol,
+        nombre,
+        apellido,
+        correo
+    )
+    VALUES (
+        _username,
+        _password_hash,
+        _rol,
+        _nombre,
+        _apellido,
+        _correo
+    );
+END $$
 
-create procedure sp_iniciar_sesion(
-    in _username varchar(50)
+CREATE PROCEDURE sp_iniciar_sesion(
+    IN _username VARCHAR(50)
 )
-begin
-    select id, username, password_hash, rol, activo
-    from usuarios
-    where username = _username;
-end $$
+BEGIN
+    SELECT id,
+           username,
+           password_hash,
+           rol,
+           activo
+    FROM usuarios
+    WHERE username = _username
+      AND activo = TRUE;
+END $$
 
-create procedure sp_listarusuarios()
-begin
-    select id, username, password_hash, rol, nombre, apellido, correo, activo, fecha_creacion 
-    from usuarios;
-end $$
+CREATE PROCEDURE sp_listarusuarios()
+BEGIN
+    SELECT id,
+           username,
+           password_hash,
+           rol,
+           nombre,
+           apellido,
+           correo,
+           activo,
+           fecha_creacion
+    FROM usuarios;
+END $$
 
-create procedure sp_cambiar_password(
-    in _id int,
-    in _password_actual_hash varchar(255),
-    in _password_nuevo_hash varchar(255)
+CREATE PROCEDURE sp_cambiar_password(
+    IN _id INT,
+    IN _password_actual_hash VARCHAR(255),
+    IN _password_nuevo_hash VARCHAR(255)
 )
-begin
-    update usuarios
-    set password_hash = _password_nuevo_hash,
-        fecha_actualizacion = current_timestamp
-    where id = _id and password_hash = _password_actual_hash;
-end $$
+BEGIN
+    UPDATE usuarios
+    SET password_hash = _password_nuevo_hash,
+        fecha_actualizacion = CURRENT_TIMESTAMP
+    WHERE id = _id
+      AND password_hash = _password_actual_hash;
+END $$
 
-create procedure sp_desactivarusuario(
-    in _id int
+CREATE PROCEDURE sp_desactivarusuario(
+    IN _id INT
 )
-begin
-    update usuarios set activo = false where id = _id;
-end $$
-
-delimiter ;
+BEGIN
+    UPDATE usuarios
+    SET activo = FALSE
+    WHERE id = _id;
+END $$
 
 -- =============================================================================
--- 11. CRUD: LIBROS
+-- 11. CRUD LIBROS
 -- =============================================================================
-delimiter $$
 
-create procedure sp_insertarlibro(
-    in _isbn varchar(20),
-    in _titulo varchar(100),
-    in _fecha_publicacion date,
-    in _precio decimal(8,2),
-    in _categoria_id int,
-    in _nit_editorial varchar(20),
-    in _stock_actual int,
-    in _stock_minimo int
+CREATE PROCEDURE sp_insertarlibro(
+    IN _isbn VARCHAR(20),
+    IN _titulo VARCHAR(100),
+    IN _fecha_publicacion DATE,
+    IN _precio DECIMAL(8,2),
+    IN _categoria_id INT,
+    IN _nit_editorial VARCHAR(20),
+    IN _stock_actual INT,
+    IN _stock_minimo INT
 )
-begin
-    insert into libros(isbn, titulo, fecha_publicacion, precio, categoria_id, nit_editorial, stock_actual, stock_minimo)
-    values (_isbn, _titulo, _fecha_publicacion, _precio, _categoria_id, _nit_editorial, _stock_actual, _stock_minimo);
-end $$
+BEGIN
+    INSERT INTO libros(
+        isbn,
+        titulo,
+        fecha_publicacion,
+        precio,
+        categoria_id,
+        nit_editorial,
+        stock_actual,
+        stock_minimo
+    )
+    VALUES (
+        _isbn,
+        _titulo,
+        _fecha_publicacion,
+        _precio,
+        _categoria_id,
+        _nit_editorial,
+        _stock_actual,
+        _stock_minimo
+    );
+END $$
 
-create procedure sp_listarlibros()
-begin
-    select isbn, titulo, fecha_publicacion, precio, categoria_id, nit_editorial, stock_actual, stock_minimo, estado
-    from libros;
-end $$
+CREATE PROCEDURE sp_listarlibros()
+BEGIN
+    SELECT isbn,
+           titulo,
+           fecha_publicacion,
+           precio,
+           categoria_id,
+           nit_editorial,
+           stock_actual,
+           stock_minimo,
+           estado
+    FROM libros;
+END $$
 
-create procedure sp_buscarlibro(
-    in _isbn varchar(20)
+CREATE PROCEDURE sp_buscarlibro(
+    IN _isbn VARCHAR(20)
 )
-begin
-    select isbn, titulo, fecha_publicacion, precio, categoria_id, nit_editorial, stock_actual, stock_minimo, estado
-    from libros
-    where isbn = _isbn;
-end $$
+BEGIN
+    SELECT isbn,
+           titulo,
+           fecha_publicacion,
+           precio,
+           categoria_id,
+           nit_editorial,
+           stock_actual,
+           stock_minimo,
+           estado
+    FROM libros
+    WHERE isbn = _isbn;
+END $$
 
-create procedure sp_actualizarlibro(
-    in _isbn varchar(20),
-    in _titulo varchar(100),
-    in _fecha_publicacion date,
-    in _precio decimal(8,2),
-    in _categoria_id int,
-    in _nit_editorial varchar(20)
+CREATE PROCEDURE sp_actualizarlibro(
+    IN _isbn VARCHAR(20),
+    IN _titulo VARCHAR(100),
+    IN _fecha_publicacion DATE,
+    IN _precio DECIMAL(8,2),
+    IN _categoria_id INT,
+    IN _nit_editorial VARCHAR(20)
 )
-begin
-    update libros
-    set titulo = _titulo,
+BEGIN
+    UPDATE libros
+    SET titulo = _titulo,
         fecha_publicacion = _fecha_publicacion,
         precio = _precio,
         categoria_id = _categoria_id,
         nit_editorial = _nit_editorial
-    where isbn = _isbn;
-end $$
+    WHERE isbn = _isbn;
+END $$
 
-create procedure sp_libros_bajo_stock_minimo()
-begin
-    select isbn, titulo, stock_actual, stock_minimo
-    from libros
-    where stock_actual <= stock_minimo and estado = 1;
-end $$
+CREATE PROCEDURE sp_libros_bajo_stock_minimo()
+BEGIN
+    SELECT isbn,
+           titulo,
+           stock_actual,
+           stock_minimo
+    FROM libros
+    WHERE stock_actual <= stock_minimo
+      AND estado = 1;
+END $$
 
-create procedure sp_eliminarlibro(
-    in _isbn varchar(20)
+CREATE PROCEDURE sp_eliminarlibro(
+    IN _isbn VARCHAR(20)
 )
-begin
-    update libros set estado = 0 where isbn = _isbn;
-end $$
-
-delimiter ;
+BEGIN
+    UPDATE libros
+    SET estado = 0
+    WHERE isbn = _isbn;
+END $$
 
 -- =============================================================================
--- 12. CRUD: AUTORES_LIBRO
+-- 12. AUTORES_LIBRO
 -- =============================================================================
-delimiter $$
 
-create procedure sp_insertarautorlibro(
-    in _id_autor int,
-    in _isbn varchar(20)
+CREATE PROCEDURE sp_insertarautorlibro(
+    IN _id_autor INT,
+    IN _isbn VARCHAR(20)
 )
-begin
-    insert into autores_libro(id_autor, isbn)
-    values (_id_autor, _isbn);
-end $$
+BEGIN
+    INSERT INTO autores_libro(id_autor, isbn)
+    VALUES (_id_autor, _isbn);
+END $$
 
-create procedure sp_listarautoreslibro()
-begin
-    select id_autor_libro, id_autor, isbn from autores_libro;
-end $$
+CREATE PROCEDURE sp_listarautoreslibro()
+BEGIN
+    SELECT id_autor_libro,
+           id_autor,
+           isbn
+    FROM autores_libro;
+END $$
 
-create procedure sp_buscarautorlibro(
-    in _id_autor_libro int
+CREATE PROCEDURE sp_buscarautorlibro(
+    IN _id_autor_libro INT
 )
-begin
-    select id_autor_libro, id_autor, isbn
-    from autores_libro
-    where id_autor_libro = _id_autor_libro;
-end $$
+BEGIN
+    SELECT id_autor_libro,
+           id_autor,
+           isbn
+    FROM autores_libro
+    WHERE id_autor_libro = _id_autor_libro;
+END $$
 
-create procedure sp_actualizarautorlibro(
-    in _id_autor_libro int,
-    in _id_autor int,
-    in _isbn varchar(20)
+CREATE PROCEDURE sp_actualizarautorlibro(
+    IN _id_autor_libro INT,
+    IN _id_autor INT,
+    IN _isbn VARCHAR(20)
 )
-begin
-    update autores_libro
-    set id_autor = _id_autor,
+BEGIN
+    UPDATE autores_libro
+    SET id_autor = _id_autor,
         isbn = _isbn
-    where id_autor_libro = _id_autor_libro;
-end $$
+    WHERE id_autor_libro = _id_autor_libro;
+END $$
 
-create procedure sp_eliminarautorlibro(
-    in _id_autor_libro int
+CREATE PROCEDURE sp_eliminarautorlibro(
+    IN _id_autor_libro INT
 )
-begin
-    delete from autores_libro where id_autor_libro = _id_autor_libro;
-end $$
-
-delimiter ;
+BEGIN
+    DELETE FROM autores_libro
+    WHERE id_autor_libro = _id_autor_libro;
+END $$
 
 -- =============================================================================
--- 13. MOVIMIENTOS_INVENTARIO
+-- 13. MOVIMIENTOS DE INVENTARIO
 -- =============================================================================
-DELIMITER $$
 
--- 1. Registrar Movimiento
-DROP PROCEDURE IF EXISTS sp_registrar_movimiento_inventario$$
 CREATE PROCEDURE sp_registrar_movimiento_inventario(
     IN _isbn VARCHAR(20),
     IN _id_tipo_movimiento INT,
@@ -591,11 +764,12 @@ CREATE PROCEDURE sp_registrar_movimiento_inventario(
     IN _observacion VARCHAR(255)
 )
 BEGIN
-    DECLARE _delta INT;
+    DECLARE _delta INT DEFAULT 0;
     DECLARE _operacion VARCHAR(10);
 
-    SELECT operacion INTO _operacion 
-    FROM tipos_movimiento 
+    SELECT operacion
+    INTO _operacion
+    FROM tipos_movimiento
     WHERE id_tipo_movimiento = _id_tipo_movimiento;
 
     IF _operacion = 'SUMAR' THEN
@@ -604,17 +778,26 @@ BEGIN
         SET _delta = -_cantidad;
     END IF;
 
-    INSERT INTO movimientos_inventario(isbn, id_tipo_movimiento, cantidad, id_usuario, observacion)
-    VALUES (_isbn, _id_tipo_movimiento, _cantidad, _id_usuario, _observacion);
+    INSERT INTO movimientos_inventario(
+        isbn,
+        id_tipo_movimiento,
+        cantidad,
+        id_usuario,
+        observacion
+    )
+    VALUES (
+        _isbn,
+        _id_tipo_movimiento,
+        _cantidad,
+        _id_usuario,
+        _observacion
+    );
 
     UPDATE libros
     SET stock_actual = stock_actual + _delta
     WHERE isbn = _isbn;
-END$$
+END $$
 
-
--- 3. Agregar Detalle Venta
-DROP PROCEDURE IF EXISTS sp_agregardetalleventa$$
 CREATE PROCEDURE sp_agregardetalleventa(
     IN _id_venta INT,
     IN _isbn VARCHAR(20),
@@ -622,303 +805,390 @@ CREATE PROCEDURE sp_agregardetalleventa(
     IN _id_usuario INT
 )
 BEGIN
-    -- Declaraciones SIEMPRE al inicio
     DECLARE _precio DECIMAL(8,2);
     DECLARE _subtotal_linea DECIMAL(10,2);
+    DECLARE _stock INT;
 
-    -- Lógica de negocio
-    SELECT precio INTO _precio FROM libros WHERE isbn = _isbn;
+    SELECT precio, stock_actual
+    INTO _precio, _stock
+    FROM libros
+    WHERE isbn = _isbn;
+
+    IF _stock < _cantidad THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Stock insuficiente para realizar la venta';
+    END IF;
+
     SET _subtotal_linea = _precio * _cantidad;
 
-    INSERT INTO detalle_venta(id_venta, isbn, cantidad, precio_unitario, subtotal)
-    VALUES (_id_venta, _isbn, _cantidad, _precio, _subtotal_linea);
+    INSERT INTO detalle_venta(
+        id_venta,
+        isbn,
+        cantidad,
+        precio_unitario,
+        subtotal
+    )
+    VALUES (
+        _id_venta,
+        _isbn,
+        _cantidad,
+        _precio,
+        _subtotal_linea
+    );
 
-    CALL sp_registrar_movimiento_inventario(_isbn, 2, _cantidad, _id_usuario, CONCAT('Venta #', _id_venta));
+    CALL sp_registrar_movimiento_inventario(
+        _isbn,
+        2,
+        _cantidad,
+        _id_usuario,
+        CONCAT('Venta #', _id_venta)
+    );
 
     UPDATE ventas v
-    JOIN (SELECT SUM(subtotal) AS total_sub FROM detalle_venta WHERE id_venta = _id_venta) d
-    SET v.subtotal = d.total_sub,
-        v.total = d.total_sub - v.descuento
+    SET v.subtotal = (
+        SELECT COALESCE(SUM(subtotal),0)
+        FROM detalle_venta
+        WHERE id_venta = _id_venta
+    ),
+    v.total = v.subtotal - v.descuento
     WHERE v.id_venta = _id_venta;
-END$$
+END $$
+
+-- =============================================================================
+-- 14. VENTAS
+-- =============================================================================
+
+CREATE PROCEDURE sp_insertarventa(
+    IN _cui_cliente BIGINT,
+    IN _id_usuario INT,
+    OUT _id_venta INT
+)
+BEGIN
+    INSERT INTO ventas(
+        subtotal,
+        descuento,
+        total,
+        estado,
+        cui_cliente,
+        id_usuario
+    )
+    VALUES (
+        0,
+        0,
+        0,
+        'COMPLETADA',
+        _cui_cliente,
+        _id_usuario
+    );
+
+    SET _id_venta = LAST_INSERT_ID();
+END $$
+
+CREATE PROCEDURE sp_aplicardescuentoventa(
+    IN _id_venta INT,
+    IN _descuento DECIMAL(10,2),
+    IN _usuario_autoriza INT
+)
+BEGIN
+    UPDATE ventas
+    SET descuento = _descuento,
+        total = subtotal - _descuento,
+        usuario_autoriza_descuento = _usuario_autoriza
+    WHERE id_venta = _id_venta;
+END $$
+
+CREATE PROCEDURE sp_listarventas()
+BEGIN
+    SELECT id_venta,
+           fecha_venta,
+           subtotal,
+           descuento,
+           total,
+           estado,
+           cui_cliente,
+           id_usuario
+    FROM ventas;
+END $$
+
+CREATE PROCEDURE sp_buscarventa(
+    IN _id_venta INT
+)
+BEGIN
+    SELECT id_venta,
+           fecha_venta,
+           subtotal,
+           descuento,
+           total,
+           estado,
+           cui_cliente,
+           id_usuario
+    FROM ventas
+    WHERE id_venta = _id_venta;
+END $$
+
+CREATE PROCEDURE sp_resumenventasdelcajero(
+    IN _id_usuario INT,
+    IN _fecha DATE
+)
+BEGIN
+    SELECT id_venta,
+           fecha_venta,
+           subtotal,
+           descuento,
+           total,
+           estado
+    FROM ventas
+    WHERE id_usuario = _id_usuario
+      AND DATE(fecha_venta) = _fecha
+      AND estado = 'COMPLETADA';
+END $$
+
+CREATE PROCEDURE sp_listardetalleventa(
+    IN _id_venta INT
+)
+BEGIN
+    SELECT id_detalle,
+           id_venta,
+           isbn,
+           cantidad,
+           precio_unitario,
+           subtotal
+    FROM detalle_venta
+    WHERE id_venta = _id_venta;
+END $$
+
+CREATE PROCEDURE sp_anularventa(
+    IN _id_venta INT,
+    IN _usuario_anulacion INT,
+    IN _motivo VARCHAR(255)
+)
+BEGIN
+    DECLARE done INT DEFAULT 0;
+    DECLARE v_isbn VARCHAR(20);
+    DECLARE v_cantidad INT;
+
+    DECLARE cur CURSOR FOR
+        SELECT isbn, cantidad
+        FROM detalle_venta
+        WHERE id_venta = _id_venta;
+
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    OPEN cur;
+
+    read_loop: LOOP
+
+        FETCH cur INTO v_isbn, v_cantidad;
+
+        IF done = 1 THEN
+            LEAVE read_loop;
+        END IF;
+
+        CALL sp_registrar_movimiento_inventario(
+            v_isbn,
+            5,
+            v_cantidad,
+            _usuario_anulacion,
+            CONCAT('Anulación venta #', _id_venta)
+        );
+
+    END LOOP;
+
+    CLOSE cur;
+
+    UPDATE ventas
+    SET estado = 'ANULADA',
+        fecha_anulacion = CURRENT_TIMESTAMP,
+        usuario_anulacion = _usuario_anulacion,
+        motivo_anulacion = _motivo
+    WHERE id_venta = _id_venta;
+END $$
 
 DELIMITER ;
 
 -- =============================================================================
--- 14. VENTAS Y DETALLE_VENTA 
--- =============================================================================
-delimiter $$
-
-create procedure sp_insertarventa(
-    in _cui_cliente bigint,
-    in _id_usuario int,
-    out _id_venta int
-)
-begin
-    insert into ventas(subtotal, descuento, total, estado, cui_cliente, id_usuario)
-    values (0, 0, 0, 'COMPLETADA', _cui_cliente, _id_usuario);
-
-    set _id_venta = last_insert_id();
-end $$
-
-
-create procedure sp_aplicardescuentoventa(
-    in _id_venta int,
-    in _descuento decimal(10,2),
-    in _usuario_autoriza int
-)
-begin
-    update ventas
-    set descuento = _descuento,
-        total = subtotal - _descuento,
-        usuario_autoriza_descuento = _usuario_autoriza
-    where id_venta = _id_venta;
-end $$
-
-create procedure sp_listarventas()
-begin
-    select id_venta, fecha_venta, subtotal, descuento, total, estado, cui_cliente, id_usuario
-    from ventas;
-end $$
-
-create procedure sp_buscarventa(
-    in _id_venta int
-)
-begin
-    select id_venta, fecha_venta, subtotal, descuento, total, estado, cui_cliente, id_usuario
-    from ventas
-    where id_venta = _id_venta;
-end $$
-
-create procedure sp_resumenventasdelcajero(
-    in _id_usuario int,
-    in _fecha date
-)
-begin
-    select id_venta, fecha_venta, subtotal, descuento, total, estado
-    from ventas
-    where id_usuario = _id_usuario
-      and date(fecha_venta) = _fecha
-      and estado = 'COMPLETADA';
-end $$
-
-create procedure sp_listardetalleventa(
-    in _id_venta int
-)
-begin
-    select id_detalle, id_venta, isbn, cantidad, precio_unitario, subtotal
-    from detalle_venta
-    where id_venta = _id_venta;
-end $$
-
-create procedure sp_anularventa(
-    in _id_venta int,
-    in _usuario_anulacion int,
-    in _motivo varchar(255)
-)
-begin
-    declare done int default 0;
-    declare v_isbn varchar(20);
-    declare v_cantidad int;
-    declare cur cursor for
-        select isbn, cantidad from detalle_venta where id_venta = _id_venta;
-    declare continue handler for not found set done = 1;
-
-    open cur;
-    read_loop: loop
-        fetch cur into v_isbn, v_cantidad;
-        if done = 1 then
-            leave read_loop;
-        end if;
-        call sp_registrar_movimiento_inventario(v_isbn, 5, v_cantidad, _usuario_anulacion, concat('Anulación venta #', _id_venta));
-    end loop;
-    close cur;
-
-    update ventas
-    set estado = 'ANULADA',
-        fecha_anulacion = current_timestamp,
-        usuario_anulacion = _usuario_anulacion,
-        motivo_anulacion = _motivo
-    where id_venta = _id_venta;
-end $$
-
-delimiter ;
-
-CREATE OR REPLACE VIEW vw_movimientos_inventario AS
-SELECT 
-    m.id_movimiento AS id,
-    COALESCE(l.titulo, m.isbn) AS libro,
-    COALESCE(tm.nombre_tipo, 'DESCONOCIDO') AS tipo,
-    m.cantidad AS cantidad,
-    DATE_FORMAT(m.fecha_movimiento, '%d/%m/%Y %H:%i') AS fecha
-FROM movimientos_inventario m
-LEFT JOIN libros l ON m.isbn = l.isbn
-LEFT JOIN tipos_movimiento tm ON m.id_tipo_movimiento = tm.id_tipo_movimiento
-ORDER BY m.fecha_movimiento DESC;
-
--- =============================================================================
 -- 15. VISTAS
 -- =============================================================================
-create or replace view vw_lista_categorias as
-select
-    categoria_id as 'id categoría',
-    nombre_categoria as 'categoría'
-from categoria;
 
-create or replace view vw_lista_editoriales as
-select
-    nit as 'nit editorial',
-    nombre_editorial as 'editorial',
-    telefono_editorial as 'teléfono',
-    direccion_editorial as 'dirección'
-from editoriales;
+CREATE OR REPLACE VIEW vw_lista_categorias AS
+SELECT
+    categoria_id AS 'id categoría',
+    nombre_categoria AS 'categoría'
+FROM categoria;
 
-create or replace view vw_lista_proveedores as
-select
-    id_proveedor as 'id proveedor',
-    nombre_proveedor as 'proveedor',
-    telefono_proveedor as 'teléfono',
-    direccion_proveedor as 'dirección',
-    correo_proveedor as 'correo'
-from proveedores;
+CREATE OR REPLACE VIEW vw_lista_editoriales AS
+SELECT
+    nit AS 'nit editorial',
+    nombre_editorial AS 'editorial',
+    telefono_editorial AS 'teléfono',
+    direccion_editorial AS 'dirección'
+FROM editoriales;
 
-create or replace view vw_lista_autores as
-select
-    id_autor as 'id autor',
-    concat(nombre_autor, ' ', apellido_autor) as 'autor',
-    nacionalidad as 'nacionalidad',
-    biografia as 'biografía'
-from autores;
+CREATE OR REPLACE VIEW vw_lista_proveedores AS
+SELECT
+    id_proveedor AS 'id proveedor',
+    nombre_proveedor AS 'proveedor',
+    telefono_proveedor AS 'teléfono',
+    direccion_proveedor AS 'dirección',
+    correo_proveedor AS 'correo'
+FROM proveedores;
 
-create or replace view vw_lista_clientes as
-select
-    cui as 'cui cliente',
-    concat(nombre_cliente, ' ', apellido_cliente) as 'cliente',
-    correo_electronico as 'correo electrónico'
-from clientes;
+CREATE OR REPLACE VIEW vw_lista_autores AS
+SELECT
+    id_autor AS 'id autor',
+    CONCAT(nombre_autor,' ',apellido_autor) AS 'autor',
+    nacionalidad AS 'nacionalidad',
+    biografia AS 'biografía'
+FROM autores;
 
-create or replace view vw_lista_usuarios as
-select
-    id as 'id usuario',
-    username as 'usuario',
-    password_hash as 'password_hash',
-    rol as 'rol',
-    concat(nombre, ' ', apellido) as 'nombre completo',
-    correo as 'correo',
-    activo as 'activo'
-from usuarios;
+CREATE OR REPLACE VIEW vw_lista_clientes AS
+SELECT
+    cui AS 'cui cliente',
+    CONCAT(nombre_cliente,' ',apellido_cliente) AS 'cliente',
+    correo_electronico AS 'correo electrónico'
+FROM clientes;
 
-create or replace view vw_lista_libros as
-select
-    l.isbn as 'isbn',
-    l.titulo as 'título',
-    l.fecha_publicacion as 'fecha de publicación',
-    l.precio as 'precio',
-    c.nombre_categoria as 'categoría',
-    e.nombre_editorial as 'editorial',
-    l.stock_actual as 'stock actual',
-    l.stock_minimo as 'stock mínimo',
-    l.estado as 'activo'
-from libros l
-inner join categoria c on l.categoria_id = c.categoria_id
-inner join editoriales e on l.nit_editorial = e.nit;
+CREATE OR REPLACE VIEW vw_lista_usuarios AS
+SELECT
+    id AS 'id usuario',
+    username AS 'usuario',
+    password_hash AS 'password_hash',
+    rol AS 'rol',
+    CONCAT(nombre,' ',apellido) AS 'nombre completo',
+    correo AS 'correo',
+    activo AS 'activo'
+FROM usuarios;
 
-create or replace view vw_libros_bajo_stock as
-select
-    isbn as 'isbn',
-    titulo as 'título',
-    stock_actual as 'stock actual',
-    stock_minimo as 'stock mínimo'
-from libros
-where stock_actual <= stock_minimo and estado = 1;
+CREATE OR REPLACE VIEW vw_lista_libros AS
+SELECT
+    l.isbn AS 'isbn',
+    l.titulo AS 'título',
+    l.fecha_publicacion AS 'fecha de publicación',
+    l.precio AS 'precio',
+    c.nombre_categoria AS 'categoría',
+    e.nombre_editorial AS 'editorial',
+    l.stock_actual AS 'stock actual',
+    l.stock_minimo AS 'stock mínimo',
+    l.estado AS 'activo'
+FROM libros l
+INNER JOIN categoria c
+    ON l.categoria_id = c.categoria_id
+INNER JOIN editoriales e
+    ON l.nit_editorial = e.nit;
 
-create or replace view vw_lista_autores_libro as
-select
-    al.id_autor_libro as 'id relación',
-    concat(a.nombre_autor, ' ', a.apellido_autor) as 'autor',
-    l.titulo as 'título del libro',
-    l.isbn as 'isbn'
-from autores_libro al
-inner join autores a on al.id_autor = a.id_autor
-inner join libros l on al.isbn = l.isbn;
+CREATE OR REPLACE VIEW vw_libros_bajo_stock AS
+SELECT
+    isbn AS 'isbn',
+    titulo AS 'título',
+    stock_actual AS 'stock actual',
+    stock_minimo AS 'stock mínimo'
+FROM libros
+WHERE stock_actual <= stock_minimo
+  AND estado = 1;
 
-create or replace view vw_lista_ventas as
-select
-    v.id_venta as 'no. venta',
-    v.fecha_venta as 'fecha/hora',
-    v.subtotal as 'subtotal',
-    v.descuento as 'descuento',
-    v.total as 'total',
-    v.estado as 'estado',
-    v.cui_cliente as 'cui cliente',
-    concat(cl.nombre_cliente, ' ', cl.apellido_cliente) as 'cliente',
-    u.username as 'cajero'
-from ventas v
-left join clientes cl on v.cui_cliente = cl.cui
-inner join usuarios u on v.id_usuario = u.id;
+CREATE OR REPLACE VIEW vw_lista_autores_libro AS
+SELECT
+    al.id_autor_libro AS 'id relación',
+    CONCAT(a.nombre_autor,' ',a.apellido_autor) AS 'autor',
+    l.titulo AS 'título del libro',
+    l.isbn AS 'isbn'
+FROM autores_libro al
+INNER JOIN autores a
+    ON al.id_autor = a.id_autor
+INNER JOIN libros l
+    ON al.isbn = l.isbn;
 
-create or replace view vw_lista_detalle_venta as
-select
-    dv.id_detalle as 'id detalle',
-    dv.id_venta as 'no. venta',
-    l.titulo as 'libro',
-    l.isbn as 'isbn',
-    dv.cantidad as 'cantidad',
-    dv.precio_unitario as 'precio unitario',
-    dv.subtotal as 'subtotal'
-from detalle_venta dv
-inner join libros l on dv.isbn = l.isbn;
+CREATE OR REPLACE VIEW vw_lista_ventas AS
+SELECT
+    v.id_venta AS 'no. venta',
+    v.fecha_venta AS 'fecha/hora',
+    v.subtotal AS 'subtotal',
+    v.descuento AS 'descuento',
+    v.total AS 'total',
+    v.estado AS 'estado',
+    v.cui_cliente AS 'cui cliente',
+    CONCAT(cl.nombre_cliente,' ',cl.apellido_cliente) AS 'cliente',
+    u.username AS 'cajero'
+FROM ventas v
+LEFT JOIN clientes cl
+    ON v.cui_cliente = cl.cui
+INNER JOIN usuarios u
+    ON v.id_usuario = u.id;
 
-create or replace view vw_factura_ventas as
-select
-    v.id_venta as 'numero_factura',
-    v.fecha_venta as 'fecha_emision',
-    cl.cui as 'cui_cliente',
-    concat(cl.nombre_cliente, ' ', cl.apellido_cliente) as 'nombre_cliente',
-    cl.correo_electronico as 'correo_cliente',
-    l.isbn as 'isbn_libro',
-    l.titulo as 'descripcion_libro',
-    dv.cantidad as 'cantidad',
-    dv.precio_unitario as 'precio_unitario',
-    dv.subtotal as 'subtotal_linea',
-    v.descuento as 'descuento',
-    v.total as 'gran_total',
-    u.username as 'atendido_por'
-from ventas v
-left join clientes cl on v.cui_cliente = cl.cui
-inner join detalle_venta dv on v.id_venta = dv.id_venta
-inner join libros l on dv.isbn = l.isbn
-inner join usuarios u on v.id_usuario = u.id;
+CREATE OR REPLACE VIEW vw_lista_detalle_venta AS
+SELECT
+    dv.id_detalle AS 'id detalle',
+    dv.id_venta AS 'no. venta',
+    l.titulo AS 'libro',
+    l.isbn AS 'isbn',
+    dv.cantidad AS 'cantidad',
+    dv.precio_unitario AS 'precio unitario',
+    dv.subtotal AS 'subtotal'
+FROM detalle_venta dv
+INNER JOIN libros l
+    ON dv.isbn = l.isbn;
 
-create or replace view vw_movimientos_inventario as
-select
-    mi.id_movimiento as 'id movimiento',
-    l.titulo as 'libro',
-    mi.isbn as 'isbn',
-    tm.nombre_tipo as 'tipo',
-    mi.cantidad as 'cantidad',
-    mi.fecha_movimiento as 'fecha',
-    u.username as 'usuario',
-    mi.observacion as 'observación'
-from movimientos_inventario mi
-inner join libros l on mi.isbn = l.isbn
-inner join tipos_movimiento tm on mi.id_tipo_movimiento = tm.id_tipo_movimiento
-inner join usuarios u on mi.id_usuario = u.id;
+CREATE OR REPLACE VIEW vw_factura_ventas AS
+SELECT
+    v.id_venta AS 'numero_factura',
+    v.fecha_venta AS 'fecha_emision',
+    cl.cui AS 'cui_cliente',
+    CONCAT(cl.nombre_cliente,' ',cl.apellido_cliente) AS 'nombre_cliente',
+    cl.correo_electronico AS 'correo_cliente',
+    l.isbn AS 'isbn_libro',
+    l.titulo AS 'descripcion_libro',
+    dv.cantidad AS 'cantidad',
+    dv.precio_unitario AS 'precio_unitario',
+    dv.subtotal AS 'subtotal_linea',
+    v.descuento AS 'descuento',
+    v.total AS 'gran_total',
+    u.username AS 'atendido_por'
+FROM ventas v
+LEFT JOIN clientes cl
+    ON v.cui_cliente = cl.cui
+INNER JOIN detalle_venta dv
+    ON v.id_venta = dv.id_venta
+INNER JOIN libros l
+    ON dv.isbn = l.isbn
+INNER JOIN usuarios u
+    ON v.id_usuario = u.id;
+
+CREATE OR REPLACE VIEW vw_movimientos_inventario AS
+SELECT
+    mi.id_movimiento AS 'id movimiento',
+    l.titulo AS 'libro',
+    mi.isbn AS 'isbn',
+    tm.nombre_tipo AS 'tipo',
+    mi.cantidad AS 'cantidad',
+    mi.fecha_movimiento AS 'fecha',
+    u.username AS 'usuario',
+    mi.observacion AS 'observación'
+FROM movimientos_inventario mi
+INNER JOIN libros l
+    ON mi.isbn = l.isbn
+INNER JOIN tipos_movimiento tm
+    ON mi.id_tipo_movimiento = tm.id_tipo_movimiento
+INNER JOIN usuarios u
+    ON mi.id_usuario = u.id;
 
 -- =============================================================================
--- 16. INSERCIÓN DE DATOS INICIALES
+-- 16. DATOS INICIALES
 -- =============================================================================
 
 -- TIPOS DE MOVIMIENTO
-INSERT INTO tipos_movimiento (nombre_tipo, operacion) VALUES
-('INGRESO', 'SUMAR'),       -- id: 1
-('VENTA', 'RESTAR'),        -- id: 2
-('MERMA', 'RESTAR'),        -- id: 3
-('TRASLADO', 'RESTAR'),     -- id: 4
-('DEVOLUCION', 'SUMAR'),    -- id: 5
-('AJUSTE', 'RESTAR');       -- id: 6
+INSERT INTO tipos_movimiento(nombre_tipo, operacion)
+VALUES
+('INGRESO','SUMAR'),
+('VENTA','RESTAR'),
+('MERMA','RESTAR'),
+('TRASLADO','RESTAR'),
+('DEVOLUCION','SUMAR'),
+('AJUSTE','RESTAR');
 
+-- =============================================================================
 -- CATEGORIAS
+-- =============================================================================
+
 CALL sp_insertarcategoria('Ficción Cósmica');
 CALL sp_insertarcategoria('Fantasía Épica');
 CALL sp_insertarcategoria('Ciencia Ficción');
@@ -940,189 +1210,287 @@ CALL sp_insertarcategoria('Cómics y Manga');
 CALL sp_insertarcategoria('Gastronomía');
 CALL sp_insertarcategoria('Crónicas de Viajes');
 
+-- =============================================================================
 -- EDITORIALES
-CALL sp_insertareditorial('1001-A', 'Editorial Planeta', '22334455', 'Zona 1, Ciudad');
-CALL sp_insertareditorial('1002-B', 'Penguin Random House', '22334456', 'Zona 10, Ciudad');
-CALL sp_insertareditorial('1003-C', 'Editorial Santillana', '22334457', 'Zona 9, Ciudad');
-CALL sp_insertareditorial('1004-D', 'Ediciones Salamandra', '22334458', 'Zona 14, Ciudad');
-CALL sp_insertareditorial('1005-E', 'Anagrama', '22334459', 'Zona 4, Ciudad');
-CALL sp_insertareditorial('1006-F', 'Alfaguara', '22334460', 'Zona 15, Ciudad');
-CALL sp_insertareditorial('1007-G', 'Seix Barral', '22334461', 'Zona 1, Ciudad');
-CALL sp_insertareditorial('1008-H', 'Tusquets Editores', '22334462', 'Zona 2, Ciudad');
-CALL sp_insertareditorial('1009-I', 'Lumen', '22334463', 'Zona 11, Ciudad');
-CALL sp_insertareditorial('1010-J', 'Debolsillo', '22334464', 'Zona 12, Ciudad');
-CALL sp_insertareditorial('1011-K', 'Ediciones B', '22334465', 'Zona 13, Ciudad');
-CALL sp_insertareditorial('1012-L', 'Roca Editorial', '22334466', 'Zona 16, Ciudad');
-CALL sp_insertareditorial('1013-M', 'Ediciones Minotauro', '22334467', 'Zona 5, Ciudad');
-CALL sp_insertareditorial('1014-N', 'Suma de Letras', '22334468', 'Zona 6, Ciudad');
-CALL sp_insertareditorial('1015-O', 'Plaza & Janés', '22334469', 'Zona 7, Ciudad');
-CALL sp_insertareditorial('1016-P', 'Editorial Siruela', '22334470', 'Zona 8, Ciudad');
-CALL sp_insertareditorial('1017-Q', 'Ediciones Destino', '22334471', 'Zona 18, Ciudad');
-CALL sp_insertareditorial('1018-R', 'Acantilado', '22334472', 'Zona 21, Ciudad');
-CALL sp_insertareditorial('1019-S', 'Editorial Piedra Santa', '22334473', 'Zona 1, Ciudad');
-CALL sp_insertareditorial('1020-T', 'Fondo de Cultura Económica', '22334474', 'Zona 9, Ciudad');
+-- =============================================================================
 
+CALL sp_insertareditorial('1001-A','Editorial Planeta','22334455','Zona 1, Ciudad');
+CALL sp_insertareditorial('1002-B','Penguin Random House','22334456','Zona 10, Ciudad');
+CALL sp_insertareditorial('1003-C','Editorial Santillana','22334457','Zona 9, Ciudad');
+CALL sp_insertareditorial('1004-D','Ediciones Salamandra','22334458','Zona 14, Ciudad');
+CALL sp_insertareditorial('1005-E','Anagrama','22334459','Zona 4, Ciudad');
+CALL sp_insertareditorial('1006-F','Alfaguara','22334460','Zona 15, Ciudad');
+CALL sp_insertareditorial('1007-G','Seix Barral','22334461','Zona 1, Ciudad');
+CALL sp_insertareditorial('1008-H','Tusquets Editores','22334462','Zona 2, Ciudad');
+CALL sp_insertareditorial('1009-I','Lumen','22334463','Zona 11, Ciudad');
+CALL sp_insertareditorial('1010-J','Debolsillo','22334464','Zona 12, Ciudad');
+CALL sp_insertareditorial('1011-K','Ediciones B','22334465','Zona 13, Ciudad');
+CALL sp_insertareditorial('1012-L','Roca Editorial','22334466','Zona 16, Ciudad');
+CALL sp_insertareditorial('1013-M','Ediciones Minotauro','22334467','Zona 5, Ciudad');
+CALL sp_insertareditorial('1014-N','Suma de Letras','22334468','Zona 6, Ciudad');
+CALL sp_insertareditorial('1015-O','Plaza & Janés','22334469','Zona 7, Ciudad');
+CALL sp_insertareditorial('1016-P','Editorial Siruela','22334470','Zona 8, Ciudad');
+CALL sp_insertareditorial('1017-Q','Ediciones Destino','22334471','Zona 18, Ciudad');
+CALL sp_insertareditorial('1018-R','Acantilado','22334472','Zona 21, Ciudad');
+CALL sp_insertareditorial('1019-S','Editorial Piedra Santa','22334473','Zona 1, Ciudad');
+CALL sp_insertareditorial('1020-T','Fondo de Cultura Económica','22334474','Zona 9, Ciudad');
+
+-- =============================================================================
 -- PROVEEDORES
-CALL sp_insertarproveedor('Distribuidora Nacional de Libros', '23001001', 'Zona 1, Ciudad', 'contacto@dnl.com');
-CALL sp_insertarproveedor('Importadora Cultural S.A.', '23001002', 'Zona 4, Ciudad', 'ventas@importcultural.com');
-CALL sp_insertarproveedor('Papelera San Miguel', '23001003', 'Zona 11, Ciudad', 'info@papelerasanmiguel.com');
-CALL sp_insertarproveedor('Suministros Editoriales GT', '23001004', 'Zona 7, Ciudad', 'contacto@sumeditorialesgt.com');
-CALL sp_insertarproveedor('Distribuciones Quetzal', '23001005', 'Zona 9, Ciudad', 'ventas@distquetzal.com');
-CALL sp_insertarproveedor('Importaciones Libro Mundo', '23001006', 'Zona 2, Ciudad', 'info@libromundo.com');
-CALL sp_insertarproveedor('Grupo Distribuidor Maya', '23001007', 'Zona 15, Ciudad', 'contacto@grupomaya.com');
-CALL sp_insertarproveedor('Comercializadora Andina', '23001008', 'Zona 13, Ciudad', 'ventas@comercialandina.com');
-CALL sp_insertarproveedor('Distribuidora Continental de Libros', '23001009', 'Zona 6, Ciudad', 'info@dcl.com');
-CALL sp_insertarproveedor('Suministros y Papel S.A.', '23001010', 'Zona 16, Ciudad', 'contacto@sumypapel.com');
-CALL sp_insertarproveedor('Importadora del Atlántico', '23001011', 'Zona 21, Ciudad', 'ventas@importatlantico.com');
-CALL sp_insertarproveedor('Distribuidora Pacífico Libros', '23001012', 'Zona 8, Ciudad', 'info@pacificolibros.com');
-CALL sp_insertarproveedor('Grupo Editorial Insumos', '23001013', 'Zona 12, Ciudad', 'contacto@geinsumos.com');
-CALL sp_insertarproveedor('Papel y Tinta S.A.', '23001014', 'Zona 5, Ciudad', 'ventas@papelytinta.com');
-CALL sp_insertarproveedor('Distribuidora Metropolitana', '23001015', 'Zona 10, Ciudad', 'info@distmetropolitana.com');
-CALL sp_insertarproveedor('Importaciones Culturales Unidas', '23001016', 'Zona 14, Ciudad', 'contacto@icunidas.com');
-CALL sp_insertarproveedor('Suministros Gráficos GT', '23001017', 'Zona 18, Ciudad', 'ventas@sumgraficosgt.com');
-CALL sp_insertarproveedor('Distribuidora Central de Libros', '23001018', 'Zona 3, Ciudad', 'info@dcentrallibros.com');
-CALL sp_insertarproveedor('Comercial Andina de Papel', '23001019', 'Zona 17, Ciudad', 'contacto@candinapapel.com');
-CALL sp_insertarproveedor('Grupo Logístico Editorial', '23001020', 'Zona 19, Ciudad', 'ventas@glogisticoeditorial.com');
+-- =============================================================================
 
+CALL sp_insertarproveedor('Distribuidora Nacional de Libros','23001001','Zona 1, Ciudad','contacto@dnl.com');
+CALL sp_insertarproveedor('Importadora Cultural S.A.','23001002','Zona 4, Ciudad','ventas@importcultural.com');
+CALL sp_insertarproveedor('Papelera San Miguel','23001003','Zona 11, Ciudad','info@papelerasanmiguel.com');
+CALL sp_insertarproveedor('Suministros Editoriales GT','23001004','Zona 7, Ciudad','contacto@sumeditorialesgt.com');
+CALL sp_insertarproveedor('Distribuciones Quetzal','23001005','Zona 9, Ciudad','ventas@distquetzal.com');
+CALL sp_insertarproveedor('Importaciones Libro Mundo','23001006','Zona 2, Ciudad','info@libromundo.com');
+CALL sp_insertarproveedor('Grupo Distribuidor Maya','23001007','Zona 15, Ciudad','contacto@grupomaya.com');
+CALL sp_insertarproveedor('Comercializadora Andina','23001008','Zona 13, Ciudad','ventas@comercialandina.com');
+CALL sp_insertarproveedor('Distribuidora Continental de Libros','23001009','Zona 6, Ciudad','info@dcl.com');
+CALL sp_insertarproveedor('Suministros y Papel S.A.','23001010','Zona 16, Ciudad','contacto@sumypapel.com');
+CALL sp_insertarproveedor('Importadora del Atlántico','23001011','Zona 21, Ciudad','ventas@importatlantico.com');
+CALL sp_insertarproveedor('Distribuidora Pacífico Libros','23001012','Zona 8, Ciudad','info@pacificolibros.com');
+CALL sp_insertarproveedor('Grupo Editorial Insumos','23001013','Zona 12, Ciudad','contacto@geinsumos.com');
+CALL sp_insertarproveedor('Papel y Tinta S.A.','23001014','Zona 5, Ciudad','ventas@papelytinta.com');
+CALL sp_insertarproveedor('Distribuidora Metropolitana','23001015','Zona 10, Ciudad','info@distmetropolitana.com');
+CALL sp_insertarproveedor('Importaciones Culturales Unidas','23001016','Zona 14, Ciudad','contacto@icunidas.com');
+CALL sp_insertarproveedor('Suministros Gráficos GT','23001017','Zona 18, Ciudad','ventas@sumgraficosgt.com');
+CALL sp_insertarproveedor('Distribuidora Central de Libros','23001018','Zona 3, Ciudad','info@dcentrallibros.com');
+CALL sp_insertarproveedor('Comercial Andina de Papel','23001019','Zona 17, Ciudad','contacto@candinapapel.com');
+CALL sp_insertarproveedor('Grupo Logístico Editorial','23001020','Zona 19, Ciudad','ventas@glogisticoeditorial.com');
+
+-- =============================================================================
 -- AUTORES
-CALL sp_insertarautor('Gabriel', 'García Márquez', 'Colombiana', 'Premio Nobel de Literatura 1982. Exponente del realismo mágico.');
-CALL sp_insertarautor('Julio', 'Cortázar', 'Argentina', 'Maestro del relato corto y creador de Rayuela.');
-CALL sp_insertarautor('Isabel', 'Allende', 'Chilena', 'Autora de La Casa de los Espíritus. Gran exponente latinoamericana.');
-CALL sp_insertarautor('Jorge Luis', 'Borges', 'Argentina', 'Escritor de ficciones, poemas y ensayos aclamado mundialmente.');
-CALL sp_insertarautor('Miguel', 'Ángel Asturias', 'Guatemalteca', 'Premio Nobel de Literatura 1967. Autor de El Señor Presidente.');
-CALL sp_insertarautor('J.K.', 'Rowling', 'Británica', 'Creadora del famoso mundo mágico de Harry Potter.');
-CALL sp_insertarautor('George R.R.', 'Martin', 'Estadounidense', 'Autor de la saga Canción de Hielo y Fuego.');
-CALL sp_insertarautor('Stephen', 'King', 'Estadounidense', 'El maestro contemporáneo del terror y el suspenso.');
-CALL sp_insertarautor('Haruki', 'Murakami', 'Japonesa', 'Autor de Tokio Blues, conocido por su surrealismo melancólico.');
-CALL sp_insertarautor('Jane', 'Austen', 'Británica', 'Autora clásica conocida por Orgullo y Prejuicio.');
-CALL sp_insertarautor('Edgar Allan', 'Poe', 'Estadounidense', 'Padre del cuento de terror y precursor de la novela policíaca.');
-CALL sp_insertarautor('Agatha', 'Christie', 'Británica', 'Reina del misterio y creadora de Hércules Poirot.');
-CALL sp_insertarautor('Isaac', 'Asimov', 'Rusa/Estadounidense', 'Uno de los grandes maestros de la ciencia ficción.');
-CALL sp_insertarautor('J.R.R.', 'Tolkien', 'Británica', 'Creador de la Tierra Media, El Hobbit y El Señor de los Anillos.');
-CALL sp_insertarautor('Virginia', 'Woolf', 'Británica', 'Figura destacada del modernismo literario del siglo XX.');
-CALL sp_insertarautor('Fiódor', 'Dostoievski', 'Rusa', 'Autor de Crimen y Castigo, maestro en psicología humana.');
-CALL sp_insertarautor('Franz', 'Kafka', 'Checa', 'Conocido por obras existencialistas como La Metamorfosis.');
-CALL sp_insertarautor('Oscar', 'Wilde', 'Irlandesa', 'Dramaturgo y autor de El Retrato de Dorian Gray.');
-CALL sp_insertarautor('Mario', 'Vargas Llosa', 'Peruana', 'Premio Nobel de Literatura 2010.');
-CALL sp_insertarautor('Margaret', 'Atwood', 'Canadiense', 'Autora de El cuento de la criada, fuerte exponente distópica.');
+-- =============================================================================
 
+CALL sp_insertarautor('Gabriel','García Márquez','Colombiana','Premio Nobel de Literatura 1982. Exponente del realismo mágico.');
+CALL sp_insertarautor('Julio','Cortázar','Argentina','Maestro del relato corto y creador de Rayuela.');
+CALL sp_insertarautor('Isabel','Allende','Chilena','Autora de La Casa de los Espíritus.');
+CALL sp_insertarautor('Jorge Luis','Borges','Argentina','Escritor de ficciones, poemas y ensayos.');
+CALL sp_insertarautor('Miguel','Ángel Asturias','Guatemalteca','Premio Nobel de Literatura 1967.');
+CALL sp_insertarautor('J.K.','Rowling','Británica','Creadora del mundo mágico de Harry Potter.');
+CALL sp_insertarautor('George R.R.','Martin','Estadounidense','Autor de Canción de Hielo y Fuego.');
+CALL sp_insertarautor('Stephen','King','Estadounidense','Autor contemporáneo de terror y suspenso.');
+CALL sp_insertarautor('Haruki','Murakami','Japonesa','Autor de Tokio Blues.');
+CALL sp_insertarautor('Jane','Austen','Británica','Autora clásica de Orgullo y Prejuicio.');
+CALL sp_insertarautor('Edgar Allan','Poe','Estadounidense','Padre del cuento de terror.');
+CALL sp_insertarautor('Agatha','Christie','Británica','Autora de novelas de misterio.');
+CALL sp_insertarautor('Isaac','Asimov','Rusa/Estadounidense','Maestro de la ciencia ficción.');
+CALL sp_insertarautor('J.R.R.','Tolkien','Británica','Creador de la Tierra Media.');
+CALL sp_insertarautor('Virginia','Woolf','Británica','Figura del modernismo literario.');
+CALL sp_insertarautor('Fiódor','Dostoievski','Rusa','Autor de Crimen y Castigo.');
+CALL sp_insertarautor('Franz','Kafka','Checa','Autor de La Metamorfosis.');
+CALL sp_insertarautor('Oscar','Wilde','Irlandesa','Autor de El Retrato de Dorian Gray.');
+CALL sp_insertarautor('Mario','Vargas Llosa','Peruana','Premio Nobel de Literatura 2010.');
+CALL sp_insertarautor('Margaret','Atwood','Canadiense','Autora de El cuento de la criada.');
+
+-- =============================================================================
 -- CLIENTES
-CALL sp_insertarcliente(2000100010101, 'Ana', 'López', 'ana.l@gmail.com');
-CALL sp_insertarcliente(2000100020101, 'Carlos', 'Méndez', 'cmendez@yahoo.com');
-CALL sp_insertarcliente(2000100030101, 'Luis', 'Pérez', 'lperez@hotmail.com');
-CALL sp_insertarcliente(2000100040101, 'María', 'García', 'mgarcia@gmail.com');
-CALL sp_insertarcliente(2000100050101, 'Jorge', 'Castillo', 'jcastillo@gmail.com');
-CALL sp_insertarcliente(2000100060101, 'Lucía', 'Fernández', 'lfernandez@yahoo.com');
-CALL sp_insertarcliente(2000100070101, 'Mario', 'Gómez', 'mgomez@gmail.com');
-CALL sp_insertarcliente(2000100080101, 'Elena', 'Morales', 'emorales@hotmail.com');
-CALL sp_insertarcliente(2000100090101, 'Pedro', 'Ramírez', 'pramirez@gmail.com');
-CALL sp_insertarcliente(2000100100101, 'Sofía', 'Vásquez', 'svasquez@gmail.com');
-CALL sp_insertarcliente(2000100110101, 'Diego', 'Hernández', 'dhernandez@yahoo.com');
-CALL sp_insertarcliente(2000100120101, 'Camila', 'Cruz', 'ccruz@hotmail.com');
-CALL sp_insertarcliente(2000100130101, 'Andrés', 'Reyes', 'areyes@gmail.com');
-CALL sp_insertarcliente(2000100140101, 'Valeria', 'Ortiz', 'vortiz@gmail.com');
-CALL sp_insertarcliente(2000100150101, 'Javier', 'Flores', 'jflores@yahoo.com');
-CALL sp_insertarcliente(2000100160101, 'Daniela', 'Díaz', 'ddiaz@gmail.com');
-CALL sp_insertarcliente(2000100170101, 'Ricardo', 'Alonso', 'ralonso@hotmail.com');
-CALL sp_insertarcliente(2000100180101, 'Gabriela', 'Rojas', 'grojas@gmail.com');
-CALL sp_insertarcliente(2000100190101, 'Héctor', 'Salazar', 'hsalazar@yahoo.com');
-CALL sp_insertarcliente(2000100200101, 'Mónica', 'Herrera', 'mherrera@gmail.com');
+-- =============================================================================
 
-INSERT INTO clientes (cui, nombre_cliente, apellido_cliente, correo_electronico) 
-VALUES (0, 'Consumidor', 'Final', 'cf@correo.com')
-ON DUPLICATE KEY UPDATE nombre_cliente = 'Consumidor';
+CALL sp_insertarcliente(2000100010101,'Ana','López','ana.l@gmail.com');
+CALL sp_insertarcliente(2000100020101,'Carlos','Méndez','cmendez@yahoo.com');
+CALL sp_insertarcliente(2000100030101,'Luis','Pérez','lperez@hotmail.com');
+CALL sp_insertarcliente(2000100040101,'María','García','mgarcia@gmail.com');
+CALL sp_insertarcliente(2000100050101,'Jorge','Castillo','jcastillo@gmail.com');
+CALL sp_insertarcliente(2000100060101,'Lucía','Fernández','lfernandez@yahoo.com');
+CALL sp_insertarcliente(2000100070101,'Mario','Gómez','mgomez@gmail.com');
+CALL sp_insertarcliente(2000100080101,'Elena','Morales','emorales@hotmail.com');
+CALL sp_insertarcliente(2000100090101,'Pedro','Ramírez','pramirez@gmail.com');
+CALL sp_insertarcliente(2000100100101,'Sofía','Vásquez','svasquez@gmail.com');
+CALL sp_insertarcliente(2000100110101,'Diego','Hernández','dhernandez@yahoo.com');
+CALL sp_insertarcliente(2000100120101,'Camila','Cruz','ccruz@hotmail.com');
+CALL sp_insertarcliente(2000100130101,'Andrés','Reyes','areyes@gmail.com');
+CALL sp_insertarcliente(2000100140101,'Valeria','Ortiz','vortiz@gmail.com');
+CALL sp_insertarcliente(2000100150101,'Javier','Flores','jflores@yahoo.com');
+CALL sp_insertarcliente(2000100160101,'Daniela','Díaz','ddiaz@gmail.com');
+CALL sp_insertarcliente(2000100170101,'Ricardo','Alonso','ralonso@hotmail.com');
+CALL sp_insertarcliente(2000100180101,'Gabriela','Rojas','grojas@gmail.com');
+CALL sp_insertarcliente(2000100190101,'Héctor','Salazar','hsalazar@yahoo.com');
+CALL sp_insertarcliente(2000100200101,'Mónica','Herrera','mherrera@gmail.com');
 
+INSERT INTO clientes(
+    cui,
+    nombre_cliente,
+    apellido_cliente,
+    correo_electronico
+)
+VALUES (
+    0,
+    'Consumidor',
+    'Final',
+    'cf@correo.com'
+);
+
+-- =============================================================================
 -- USUARIOS
-CALL sp_registrar_usuario('admin1', SHA2('Admin#2026',256), 'admin', 'Sofía', 'Reyes', 'sofia.reyes@libreria.com');
-CALL sp_registrar_usuario('bodega1', SHA2('Bodega#2026',256), 'bodega', 'Luis', 'Ramírez', 'luis.ramirez@libreria.com');
-CALL sp_registrar_usuario('cajero1', SHA2('Cajero#2026',256), 'cajero', 'Paola', 'Cruz', 'paola.cruz@libreria.com');
+-- =============================================================================
+
+CALL sp_registrar_usuario(
+    'admin1',
+    SHA2('Admin#2026',256),
+    'admin',
+    'Sofía',
+    'Reyes',
+    'sofia.reyes@libreria.com'
+);
+
+CALL sp_registrar_usuario(
+    'bodega1',
+    SHA2('Bodega#2026',256),
+    'bodega',
+    'Luis',
+    'Ramírez',
+    'luis.ramirez@libreria.com'
+);
+
+CALL sp_registrar_usuario(
+    'cajero1',
+    SHA2('Cajero#2026',256),
+    'cajero',
+    'Paola',
+    'Cruz',
+    'paola.cruz@libreria.com'
+);
+
+-- =============================================================================
 -- LIBROS
-CALL sp_insertarlibro('978-0-123', 'Cien Años de Soledad', '1967-05-30', 150.00, 1, '1001-A', 0, 10);
-CALL sp_insertarlibro('978-0-124', 'Rayuela', '1963-06-28', 135.50, 1, '1002-B', 0, 8);
-CALL sp_insertarlibro('978-0-125', 'El Señor Presidente', '1946-01-01', 120.00, 1, '1019-S', 0, 10);
-CALL sp_insertarlibro('978-0-126', 'Harry Potter y la Piedra Filosofal', '1997-06-26', 180.00, 2, '1004-D', 0, 15);
-CALL sp_insertarlibro('978-0-127', 'El Resplandor', '1977-01-28', 165.00, 10, '1005-E', 0, 5);
-CALL sp_insertarlibro('978-0-128', 'Fundación', '1951-05-01', 140.00, 3, '1013-M', 0, 10);
-CALL sp_insertarlibro('978-0-129', 'El Señor de los Anillos', '1954-07-29', 250.00, 2, '1013-M', 0, 12);
-CALL sp_insertarlibro('978-0-130', 'Crimen y Castigo', '1866-01-01', 95.00, 1, '1007-G', 0, 6);
-CALL sp_insertarlibro('978-0-131', 'Diez Negritos', '1939-11-06', 110.00, 5, '1008-H', 0, 8);
-CALL sp_insertarlibro('978-0-132', 'Orgullo y Prejuicio', '1813-01-28', 85.00, 9, '1009-I', 0, 10);
-CALL sp_insertarlibro('978-0-133', 'La Casa de los Espíritus', '1982-01-01', 145.00, 1, '1001-A', 0, 8);
-CALL sp_insertarlibro('978-0-134', 'El Cuento de la Criada', '1985-01-01', 160.00, 3, '1004-D', 0, 5);
-CALL sp_insertarlibro('978-0-135', 'La Metamorfosis', '1915-01-01', 90.00, 10, '1006-F', 0, 5);
-CALL sp_insertarlibro('978-0-136', 'Tokio Blues (Norwegian Wood)', '1987-08-04', 140.00, 9, '1009-I', 0, 6);
-CALL sp_insertarlibro('978-0-137', 'Narraciones Extraordinarias', '1845-01-01', 95.00, 10, '1016-P', 0, 5);
-CALL sp_insertarlibro('978-0-138', 'El Retrato de Dorian Gray', '1890-07-01', 100.00, 14, '1018-R', 0, 5);
-CALL sp_insertarlibro('978-0-139', 'Mrs. Dalloway', '1925-05-14', 110.00, 1, '1005-E', 0, 4);
-CALL sp_insertarlibro('978-0-140', 'La Ciudad y los Perros', '1963-01-01', 130.00, 4, '1015-O', 0, 6);
-CALL sp_insertarlibro('978-0-141', 'Juego de Tronos', '1996-08-01', 200.00, 2, '1011-K', 0, 10);
-CALL sp_insertarlibro('978-0-142', 'Los Hermanos Karamazov', '1880-11-01', 190.00, 1, '1007-G', 0, 5);
+-- =============================================================================
 
+CALL sp_insertarlibro('978-0-123','Cien Años de Soledad','1967-05-30',150.00,1,'1001-A',0,10);
+CALL sp_insertarlibro('978-0-124','Rayuela','1963-06-28',135.50,1,'1002-B',0,8);
+CALL sp_insertarlibro('978-0-125','El Señor Presidente','1946-01-01',120.00,1,'1019-S',0,10);
+CALL sp_insertarlibro('978-0-126','Harry Potter y la Piedra Filosofal','1997-06-26',180.00,2,'1004-D',0,15);
+CALL sp_insertarlibro('978-0-127','El Resplandor','1977-01-28',165.00,10,'1005-E',0,5);
+CALL sp_insertarlibro('978-0-128','Fundación','1951-05-01',140.00,3,'1013-M',0,10);
+CALL sp_insertarlibro('978-0-129','El Señor de los Anillos','1954-07-29',250.00,2,'1013-M',0,12);
+CALL sp_insertarlibro('978-0-130','Crimen y Castigo','1866-01-01',95.00,1,'1007-G',0,6);
+CALL sp_insertarlibro('978-0-131','Diez Negritos','1939-11-06',110.00,5,'1008-H',0,8);
+CALL sp_insertarlibro('978-0-132','Orgullo y Prejuicio','1813-01-28',85.00,9,'1009-I',0,10);
+CALL sp_insertarlibro('978-0-133','La Casa de los Espíritus','1982-01-01',145.00,1,'1001-A',0,8);
+CALL sp_insertarlibro('978-0-134','El Cuento de la Criada','1985-01-01',160.00,3,'1004-D',0,5);
+CALL sp_insertarlibro('978-0-135','La Metamorfosis','1915-01-01',90.00,10,'1006-F',0,5);
+CALL sp_insertarlibro('978-0-136','Tokio Blues (Norwegian Wood)','1987-08-04',140.00,9,'1009-I',0,6);
+CALL sp_insertarlibro('978-0-137','Narraciones Extraordinarias','1845-01-01',95.00,10,'1016-P',0,5);
+CALL sp_insertarlibro('978-0-138','El Retrato de Dorian Gray','1890-07-01',100.00,14,'1018-R',0,5);
+CALL sp_insertarlibro('978-0-139','Mrs. Dalloway','1925-05-14',110.00,1,'1005-E',0,4);
+CALL sp_insertarlibro('978-0-140','La Ciudad y los Perros','1963-01-01',130.00,4,'1015-O',0,6);
+CALL sp_insertarlibro('978-0-141','Juego de Tronos','1996-08-01',200.00,2,'1011-K',0,10);
+CALL sp_insertarlibro('978-0-142','Los Hermanos Karamazov','1880-11-01',190.00,1,'1007-G',0,5);
+
+-- =============================================================================
 -- AUTORES_LIBRO
-CALL sp_insertarautorlibro(1, '978-0-123');   
-CALL sp_insertarautorlibro(2, '978-0-124');   
-CALL sp_insertarautorlibro(5, '978-0-125');   
-CALL sp_insertarautorlibro(6, '978-0-126');   
-CALL sp_insertarautorlibro(8, '978-0-127');   
-CALL sp_insertarautorlibro(13, '978-0-128');  
-CALL sp_insertarautorlibro(14, '978-0-129');  
-CALL sp_insertarautorlibro(16, '978-0-130');  
-CALL sp_insertarautorlibro(12, '978-0-131');  
-CALL sp_insertarautorlibro(10, '978-0-132');  
-CALL sp_insertarautorlibro(3, '978-0-133');   
-CALL sp_insertarautorlibro(20, '978-0-134');  
-CALL sp_insertarautorlibro(17, '978-0-135');  
-CALL sp_insertarautorlibro(9, '978-0-136');   
-CALL sp_insertarautorlibro(11, '978-0-137');  
-CALL sp_insertarautorlibro(18, '978-0-138');  
-CALL sp_insertarautorlibro(15, '978-0-139');  
-CALL sp_insertarautorlibro(19, '978-0-140');  
-CALL sp_insertarautorlibro(7, '978-0-141');   
-CALL sp_insertarautorlibro(16, '978-0-142');  
+-- =============================================================================
 
--- MOVIMIENTOS_INVENTARIO
-CALL sp_registrar_movimiento_inventario('978-0-123', 1, 40, 4,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-124', 1, 25, 5,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-125', 1, 30, 6,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-126', 1, 50, 7,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-127', 1, 20, 8,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-128', 1, 35, 9,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-129', 1, 45, 10, 'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-130', 1, 22, 4,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-131', 1, 28, 5,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-132', 1, 33, 6,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-133', 1, 26, 7,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-134', 1, 18, 8,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-135', 1, 20, 9,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-136', 1, 24, 10, 'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-137', 1, 20, 4,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-138', 1, 18, 5,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-139', 1, 15, 6,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-140', 1, 22, 7,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-141', 1, 35, 8,  'Carga inicial de stock');
-CALL sp_registrar_movimiento_inventario('978-0-142', 1, 15, 9,  'Carga inicial de stock');
+CALL sp_insertarautorlibro(1,'978-0-123');
+CALL sp_insertarautorlibro(2,'978-0-124');
+CALL sp_insertarautorlibro(5,'978-0-125');
+CALL sp_insertarautorlibro(6,'978-0-126');
+CALL sp_insertarautorlibro(8,'978-0-127');
+CALL sp_insertarautorlibro(13,'978-0-128');
+CALL sp_insertarautorlibro(14,'978-0-129');
+CALL sp_insertarautorlibro(16,'978-0-130');
+CALL sp_insertarautorlibro(12,'978-0-131');
+CALL sp_insertarautorlibro(10,'978-0-132');
+CALL sp_insertarautorlibro(3,'978-0-133');
+CALL sp_insertarautorlibro(20,'978-0-134');
+CALL sp_insertarautorlibro(17,'978-0-135');
+CALL sp_insertarautorlibro(9,'978-0-136');
+CALL sp_insertarautorlibro(11,'978-0-137');
+CALL sp_insertarautorlibro(18,'978-0-138');
+CALL sp_insertarautorlibro(15,'978-0-139');
+CALL sp_insertarautorlibro(19,'978-0-140');
+CALL sp_insertarautorlibro(7,'978-0-141');
+CALL sp_insertarautorlibro(16,'978-0-142');
 
--- VENTAS Y DETALLE_VENTA 
-CALL sp_insertarventa(2000100010101, 11, @v1);  CALL sp_agregardetalleventa(@v1, '978-0-123', 2, 11);
-CALL sp_insertarventa(2000100020101, 12, @v2);  CALL sp_agregardetalleventa(@v2, '978-0-124', 3, 12);
-CALL sp_insertarventa(2000100030101, 13, @v3);  CALL sp_agregardetalleventa(@v3, '978-0-125', 1, 13);
-CALL sp_insertarventa(2000100040101, 14, @v4);  CALL sp_agregardetalleventa(@v4, '978-0-126', 2, 14);
-CALL sp_insertarventa(2000100050101, 15, @v5);  CALL sp_agregardetalleventa(@v5, '978-0-127', 3, 15);
-CALL sp_insertarventa(2000100060101, 16, @v6);  CALL sp_agregardetalleventa(@v6, '978-0-128', 1, 16);
-CALL sp_insertarventa(2000100070101, 17, @v7);  CALL sp_agregardetalleventa(@v7, '978-0-129', 2, 17);
-CALL sp_insertarventa(2000100080101, 18, @v8);  CALL sp_agregardetalleventa(@v8, '978-0-130', 3, 18);
-CALL sp_insertarventa(2000100090101, 19, @v9);  CALL sp_agregardetalleventa(@v9, '978-0-131', 1, 19);
-CALL sp_insertarventa(2000100100101, 20, @v10); CALL sp_agregardetalleventa(@v10, '978-0-132', 2, 20);
-CALL sp_insertarventa(2000100110101, 11, @v11); CALL sp_agregardetalleventa(@v11, '978-0-133', 3, 11);
-CALL sp_insertarventa(2000100120101, 12, @v12); CALL sp_agregardetalleventa(@v12, '978-0-134', 1, 12);
-CALL sp_insertarventa(2000100130101, 13, @v13); CALL sp_agregardetalleventa(@v13, '978-0-135', 2, 13);
-CALL sp_insertarventa(2000100140101, 14, @v14); CALL sp_agregardetalleventa(@v14, '978-0-136', 3, 14);
-CALL sp_insertarventa(2000100150101, 15, @v15); CALL sp_agregardetalleventa(@v15, '978-0-137', 1, 15);
-CALL sp_insertarventa(2000100160101, 16, @v16); CALL sp_agregardetalleventa(@v16, '978-0-138', 2, 16);
-CALL sp_insertarventa(2000100170101, 17, @v17); CALL sp_agregardetalleventa(@v17, '978-0-139', 3, 17);
-CALL sp_insertarventa(2000100180101, 18, @v18); CALL sp_agregardetalleventa(@v18, '978-0-140', 1, 18);
-CALL sp_insertarventa(2000100190101, 19, @v19); CALL sp_agregardetalleventa(@v19, '978-0-141', 2, 19);
-CALL sp_insertarventa(2000100200101, 20, @v20); CALL sp_agregardetalleventa(@v20, '978-0-142', 3, 20);
+
+
+CALL sp_registrar_movimiento_inventario('978-0-123',1,40,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-124',1,25,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-125',1,30,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-126',1,50,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-127',1,20,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-128',1,35,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-129',1,45,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-130',1,22,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-131',1,28,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-132',1,33,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-133',1,26,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-134',1,18,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-135',1,20,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-136',1,24,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-137',1,20,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-138',1,18,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-139',1,15,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-140',1,22,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-141',1,35,2,'Carga inicial de stock');
+CALL sp_registrar_movimiento_inventario('978-0-142',1,15,2,'Carga inicial de stock');
+
+
+CALL sp_insertarventa(2000100010101,3,@v1);
+CALL sp_agregardetalleventa(@v1,'978-0-123',2,3);
+
+CALL sp_insertarventa(2000100020101,3,@v2);
+CALL sp_agregardetalleventa(@v2,'978-0-124',3,3);
+
+CALL sp_insertarventa(2000100030101,3,@v3);
+CALL sp_agregardetalleventa(@v3,'978-0-125',1,3);
+
+CALL sp_insertarventa(2000100040101,3,@v4);
+CALL sp_agregardetalleventa(@v4,'978-0-126',2,3);
+
+CALL sp_insertarventa(2000100050101,3,@v5);
+CALL sp_agregardetalleventa(@v5,'978-0-127',3,3);
+
+CALL sp_insertarventa(2000100060101,3,@v6);
+CALL sp_agregardetalleventa(@v6,'978-0-128',1,3);
+
+CALL sp_insertarventa(2000100070101,3,@v7);
+CALL sp_agregardetalleventa(@v7,'978-0-129',2,3);
+
+CALL sp_insertarventa(2000100080101,3,@v8);
+CALL sp_agregardetalleventa(@v8,'978-0-130',3,3);
+
+CALL sp_insertarventa(2000100090101,3,@v9);
+CALL sp_agregardetalleventa(@v9,'978-0-131',1,3);
+
+CALL sp_insertarventa(2000100100101,3,@v10);
+CALL sp_agregardetalleventa(@v10,'978-0-132',2,3);
+
+CALL sp_insertarventa(2000100110101,3,@v11);
+CALL sp_agregardetalleventa(@v11,'978-0-133',3,3);
+
+CALL sp_insertarventa(2000100120101,3,@v12);
+CALL sp_agregardetalleventa(@v12,'978-0-134',1,3);
+
+CALL sp_insertarventa(2000100130101,3,@v13);
+CALL sp_agregardetalleventa(@v13,'978-0-135',2,3);
+
+CALL sp_insertarventa(2000100140101,3,@v14);
+CALL sp_agregardetalleventa(@v14,'978-0-136',3,3);
+
+CALL sp_insertarventa(2000100150101,3,@v15);
+CALL sp_agregardetalleventa(@v15,'978-0-137',1,3);
+
+CALL sp_insertarventa(2000100160101,3,@v16);
+CALL sp_agregardetalleventa(@v16,'978-0-138',2,3);
+
+CALL sp_insertarventa(2000100170101,3,@v17);
+CALL sp_agregardetalleventa(@v17,'978-0-139',3,3);
+
+CALL sp_insertarventa(2000100180101,3,@v18);
+CALL sp_agregardetalleventa(@v18,'978-0-140',1,3);
+
+CALL sp_insertarventa(2000100190101,3,@v19);
+CALL sp_agregardetalleventa(@v19,'978-0-141',2,3);
+
+CALL sp_insertarventa(2000100200101,3,@v20);
+CALL sp_agregardetalleventa(@v20,'978-0-142',3,3);
+
+-- =============================================================================
+-- CONSULTAS DE PRUEBA
+-- =============================================================================
 
 SELECT * FROM vw_lista_categorias;
 SELECT * FROM vw_lista_editoriales;
@@ -1135,3 +1503,36 @@ SELECT * FROM vw_lista_autores_libro;
 SELECT * FROM vw_lista_ventas;
 SELECT * FROM vw_lista_detalle_venta;
 SELECT * FROM vw_movimientos_inventario;
+
+-- =============================================================================
+-- VERIFICACIONES
+-- =============================================================================
+
+SELECT
+    id,
+    username,
+    rol,
+    activo
+FROM usuarios;
+
+SELECT
+    isbn,
+    titulo,
+    stock_actual,
+    stock_minimo
+FROM libros;
+
+SELECT
+    id_movimiento,
+    isbn,
+    id_usuario,
+    cantidad
+FROM movimientos_inventario;
+
+SELECT
+    id_venta,
+    id_usuario,
+    subtotal,
+    total,
+    estado
+FROM ventas;
