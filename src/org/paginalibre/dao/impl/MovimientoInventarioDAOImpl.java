@@ -15,17 +15,20 @@ public class MovimientoInventarioDAOImpl implements MovimientoInventarioDAO {
 
     @Override
     public boolean insertar(MovimientoInventario movimiento) {
+        // Llamada al procedimiento almacenado de MySQL
         String consulta = "{call sp_registrar_movimiento_inventario(?, ?, ?, ?, ?)}";
+        
         try (Connection conexion = Conexion.getInstancia().conectar();
              CallableStatement consultaCall = conexion.prepareCall(consulta)) {
 
             consultaCall.setString(1, movimiento.getIsbn());
             consultaCall.setInt(2, movimiento.getIdTipoMovimiento());
-            consultaCall.setInt(3, movimiento.getIdUsuario());
-            consultaCall.setInt(4, movimiento.getCantidad());
-            consultaCall.setString(5, movimiento.getMotivo());
+            consultaCall.setInt(3, movimiento.getCantidad());  // _cantidad
+            consultaCall.setInt(4, movimiento.getIdUsuario()); // _id_usuario
+            consultaCall.setString(5, movimiento.getMotivo());  // _observacion
 
             return consultaCall.executeUpdate() > 0;
+            
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -35,24 +38,23 @@ public class MovimientoInventarioDAOImpl implements MovimientoInventarioDAO {
     @Override
     public List<MovimientoInventario> listar() {
         List<MovimientoInventario> lista = new ArrayList<>();
-        // Se cambia 'motivo' por 'observacion'
-        String consultaSQL = "SELECT id_movimiento, isbn, id_tipo_movimiento, id_usuario, cantidad, observacion, fecha_movimiento FROM movimientos_inventario ORDER BY fecha_movimiento DESC";
+        String consultaSQL = "SELECT id_movimiento, isbn, id_tipo_movimiento, id_usuario, cantidad, observacion, fecha_movimiento FROM movimientos_inventario ORDER BY id_movimiento DESC";
 
         try (Connection conexion = Conexion.getInstancia().conectar();
              PreparedStatement ps = conexion.prepareStatement(consultaSQL);
-             ResultSet tablaResultado = ps.executeQuery()) {
+             ResultSet rs = ps.executeQuery()) {
 
-            while (tablaResultado.next()) {
-                MovimientoInventario movimiento = new MovimientoInventario(
-                    tablaResultado.getInt("id_movimiento"),
-                    tablaResultado.getString("isbn"),
-                    tablaResultado.getInt("id_tipo_movimiento"),
-                    tablaResultado.getInt("id_usuario"),
-                    tablaResultado.getInt("cantidad"),
-                    tablaResultado.getString("observacion"),
-                    tablaResultado.getTimestamp("fecha_movimiento")
+            while (rs.next()) {
+                MovimientoInventario m = new MovimientoInventario(
+                    rs.getInt("id_movimiento"),
+                    rs.getString("isbn"),
+                    rs.getInt("id_tipo_movimiento"),
+                    rs.getInt("id_usuario"),
+                    rs.getInt("cantidad"),
+                    rs.getString("observacion"),
+                    rs.getTimestamp("fecha_movimiento")
                 );
-                lista.add(movimiento);
+                lista.add(m);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -63,23 +65,22 @@ public class MovimientoInventarioDAOImpl implements MovimientoInventarioDAO {
     @Override
     public MovimientoInventario buscar(Integer id) {
         MovimientoInventario movimiento = null;
-        // Se cambia 'motivo' por 'observacion'
         String consultaSQL = "SELECT id_movimiento, isbn, id_tipo_movimiento, id_usuario, cantidad, observacion, fecha_movimiento FROM movimientos_inventario WHERE id_movimiento = ?";
 
         try (Connection conexion = Conexion.getInstancia().conectar();
              PreparedStatement ps = conexion.prepareStatement(consultaSQL)) {
 
             ps.setInt(1, id);
-            try (ResultSet tablaResultado = ps.executeQuery()) {
-                if (tablaResultado.next()) {
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
                     movimiento = new MovimientoInventario(
-                        tablaResultado.getInt("id_movimiento"),
-                        tablaResultado.getString("isbn"),
-                        tablaResultado.getInt("id_tipo_movimiento"),
-                        tablaResultado.getInt("id_usuario"),
-                        tablaResultado.getInt("cantidad"),
-                        tablaResultado.getString("observacion"),
-                        tablaResultado.getTimestamp("fecha_movimiento")
+                        rs.getInt("id_movimiento"),
+                        rs.getString("isbn"),
+                        rs.getInt("id_tipo_movimiento"),
+                        rs.getInt("id_usuario"),
+                        rs.getInt("cantidad"),
+                        rs.getString("observacion"),
+                        rs.getTimestamp("fecha_movimiento")
                     );
                 }
             }

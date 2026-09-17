@@ -579,68 +579,70 @@ delimiter ;
 -- =============================================================================
 -- 13. MOVIMIENTOS_INVENTARIO
 -- =============================================================================
-delimiter $$
+DELIMITER $$
 
-create procedure sp_registrar_movimiento_inventario(
-    in _isbn varchar(20),
-    in _id_tipo_movimiento int,
-    in _cantidad int,
-    in _id_usuario int,
-    in _observacion varchar(255)
+-- 1. Registrar Movimiento
+DROP PROCEDURE IF EXISTS sp_registrar_movimiento_inventario$$
+CREATE PROCEDURE sp_registrar_movimiento_inventario(
+    IN _isbn VARCHAR(20),
+    IN _id_tipo_movimiento INT,
+    IN _cantidad INT,
+    IN _id_usuario INT,
+    IN _observacion VARCHAR(255)
 )
-begin
-    declare _delta int;
-    declare _operacion varchar(10);
+BEGIN
+    DECLARE _delta INT;
+    DECLARE _operacion VARCHAR(10);
 
-    select operacion into _operacion from tipos_movimiento where id_tipo_movimiento = _id_tipo_movimiento;
+    SELECT operacion INTO _operacion 
+    FROM tipos_movimiento 
+    WHERE id_tipo_movimiento = _id_tipo_movimiento;
 
-    if _operacion = 'SUMAR' then
-        set _delta = _cantidad;
-    else
-        set _delta = -_cantidad;
-    end if;
+    IF _operacion = 'SUMAR' THEN
+        SET _delta = _cantidad;
+    ELSE
+        SET _delta = -_cantidad;
+    END IF;
 
-    insert into movimientos_inventario(isbn, id_tipo_movimiento, cantidad, id_usuario, observacion)
-    values (_isbn, _id_tipo_movimiento, _cantidad, _id_usuario, _observacion);
+    INSERT INTO movimientos_inventario(isbn, id_tipo_movimiento, cantidad, id_usuario, observacion)
+    VALUES (_isbn, _id_tipo_movimiento, _cantidad, _id_usuario, _observacion);
 
-    update libros
-    set stock_actual = stock_actual + _delta
-    where isbn = _isbn;
-end $$
+    UPDATE libros
+    SET stock_actual = stock_actual + _delta
+    WHERE isbn = _isbn;
+END$$
 
-create procedure sp_listarmovimientosinventario()
-begin
-    select 
-        mi.id_movimiento, 
-        mi.isbn, 
-        tm.nombre_tipo as tipo_movimiento, 
-        mi.cantidad, 
-        mi.fecha_movimiento, 
-        mi.id_usuario, 
-        mi.observacion
-    from movimientos_inventario mi
-    inner join tipos_movimiento tm on mi.id_tipo_movimiento = tm.id_tipo_movimiento
-    order by mi.fecha_movimiento desc;
-end $$
 
-create procedure sp_movimientos_por_libro(
-    in _isbn varchar(20)
+-- 3. Agregar Detalle Venta
+DROP PROCEDURE IF EXISTS sp_agregardetalleventa$$
+CREATE PROCEDURE sp_agregardetalleventa(
+    IN _id_venta INT,
+    IN _isbn VARCHAR(20),
+    IN _cantidad INT,
+    IN _id_usuario INT
 )
-begin
-    select 
-        mi.id_movimiento, 
-        tm.nombre_tipo as tipo_movimiento, 
-        mi.cantidad, 
-        mi.fecha_movimiento, 
-        mi.id_usuario, 
-        mi.observacion
-    from movimientos_inventario mi
-    inner join tipos_movimiento tm on mi.id_tipo_movimiento = tm.id_tipo_movimiento
-    where mi.isbn = _isbn
-    order by mi.fecha_movimiento desc;
-end $$
+BEGIN
+    -- Declaraciones SIEMPRE al inicio
+    DECLARE _precio DECIMAL(8,2);
+    DECLARE _subtotal_linea DECIMAL(10,2);
 
-delimiter ;
+    -- Lógica de negocio
+    SELECT precio INTO _precio FROM libros WHERE isbn = _isbn;
+    SET _subtotal_linea = _precio * _cantidad;
+
+    INSERT INTO detalle_venta(id_venta, isbn, cantidad, precio_unitario, subtotal)
+    VALUES (_id_venta, _isbn, _cantidad, _precio, _subtotal_linea);
+
+    CALL sp_registrar_movimiento_inventario(_isbn, 2, _cantidad, _id_usuario, CONCAT('Venta #', _id_venta));
+
+    UPDATE ventas v
+    JOIN (SELECT SUM(subtotal) AS total_sub FROM detalle_venta WHERE id_venta = _id_venta) d
+    SET v.subtotal = d.total_sub,
+        v.total = d.total_sub - v.descuento
+    WHERE v.id_venta = _id_venta;
+END$$
+
+DELIMITER ;
 
 -- =============================================================================
 -- 14. VENTAS Y DETALLE_VENTA 
@@ -659,30 +661,6 @@ begin
     set _id_venta = last_insert_id();
 end $$
 
-create procedure sp_agregardetalleventa(
-    in _id_venta int,
-    in _isbn varchar(20),
-    in _cantidad int,
-    in _id_usuario int
-)
-begin
-    declare _precio decimal(8,2);
-    declare _subtotal_linea decimal(10,2);
-
-    select precio into _precio from libros where isbn = _isbn;
-    set _subtotal_linea = _precio * _cantidad;
-
-    insert into detalle_venta(id_venta, isbn, cantidad, precio_unitario, subtotal)
-    values (_id_venta, _isbn, _cantidad, _precio, _subtotal_linea);
-
-    call sp_registrar_movimiento_inventario(_isbn, 2, _cantidad, _id_usuario, concat('Venta #', _id_venta));
-
-    update ventas v
-    join (select sum(subtotal) as total_sub from detalle_venta where id_venta = _id_venta) d
-    set v.subtotal = d.total_sub,
-        v.total = d.total_sub - v.descuento
-    where v.id_venta = _id_venta;
-end $$
 
 create procedure sp_aplicardescuentoventa(
     in _id_venta int,
