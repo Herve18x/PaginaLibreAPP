@@ -29,35 +29,49 @@
                 <Button maxWidth="1.7976931348623157E308"
                         mnemonicParsing="false"
                         prefHeight="40.0"
-                        style="-fx-background-color: #34495e; -fx-text-fill: white;"
+                        style="-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"
                         text="DASHBOARD" />
+
+                <Button maxWidth="1.7976931348623157E308"
+                        mnemonicParsing="false"
+                        onAction="#irIngresoInventario"
+                        prefHeight="40.0"
+                        style="-fx-background-color: transparent; -fx-text-fill: #BDC3C7; -fx-alignment: BASELINE_LEFT; -fx-cursor: hand;"
+                        text="ENTRADAS (INGRESO)" />
+
+                <Button maxWidth="1.7976931348623157E308"
+                        mnemonicParsing="false"
+                        onAction="#irSalidaInventario"
+                        prefHeight="40.0"
+                        style="-fx-background-color: transparent; -fx-text-fill: #BDC3C7; -fx-alignment: BASELINE_LEFT; -fx-cursor: hand;"
+                        text="SALIDAS DE INVENTARIO" />
 
                 <Button maxWidth="1.7976931348623157E308"
                         mnemonicParsing="false"
                         onAction="#abrirNuevoLibro"
                         prefHeight="40.0"
-                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: BASELINE_LEFT;"
+                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: BASELINE_LEFT; -fx-cursor: hand;"
                         text="NUEVO LIBRO" />
 
                 <Button maxWidth="1.7976931348623157E308"
                         mnemonicParsing="false"
                         onAction="#abrirMovimientos"
                         prefHeight="40.0"
-                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: BASELINE_LEFT;"
+                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: BASELINE_LEFT; -fx-cursor: hand;"
                         text="MOVIMIENTOS INVENTARIO" />
 
                 <Button maxWidth="1.7976931348623157E308"
                         mnemonicParsing="false"
                         onAction="#abrirInventario"
                         prefHeight="40.0"
-                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: BASELINE_LEFT;"
+                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: BASELINE_LEFT; -fx-cursor: hand;"
                         text="INVENTARIO (CATÁLOGO)" />
 
                 <Button maxWidth="1.7976931348623157E308"
                         mnemonicParsing="false"
                         onAction="#abrirReportes"
                         prefHeight="40.0"
-                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: BASELINE_LEFT;"
+                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: BASELINE_LEFT; -fx-cursor: hand;"
                         text="REPORTES BODEGA" />
 
                 <VBox VBox.vgrow="ALWAYS" />
@@ -66,7 +80,7 @@
                         mnemonicParsing="false"
                         onAction="#handleCerrarSesion"
                         prefHeight="40.0"
-                        style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;"
+                        style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"
                         text="CERRAR SESIÓN">
                     <VBox.margin>
                         <Insets bottom="10.0" />

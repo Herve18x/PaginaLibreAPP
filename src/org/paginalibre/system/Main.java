@@ -7,6 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+import java.net.URL;
 
 public class Main extends Application {
 
@@ -30,32 +31,51 @@ public class Main extends Application {
     }
 
     public static Object cambiarVista(String fxmlPath) throws Exception {
-        FXMLLoader loader = new FXMLLoader(Main.class.getResource(fxmlPath));
+        // Ajusta la ruta si solo se envía el nombre del archivo
+        if (!fxmlPath.startsWith("/")) {
+            fxmlPath = "/org/paginalibre/view/" + fxmlPath;
+        }
+
+        URL location = Main.class.getResource(fxmlPath);
+        if (location == null) {
+            throw new IllegalArgumentException("No se encontró el archivo FXML en la ruta: " + fxmlPath);
+        }
+
+        FXMLLoader loader = new FXMLLoader(location);
         Parent root = loader.load();
 
         if (escenarioPrincipal != null) {
             escenarioPrincipal.setScene(new Scene(root));
             escenarioPrincipal.centerOnScreen();
         }
-        
+
         return loader.getController();
     }
 
-
     public static Object cargarVistaEnContenedor(String fxmlPath, Pane contenedor) throws Exception {
-        FXMLLoader loader = new FXMLLoader(Main.class.getResource(fxmlPath));
+        // Ajusta la ruta si solo se envía el nombre del archivo
+        if (!fxmlPath.startsWith("/")) {
+            fxmlPath = "/org/paginalibre/view/" + fxmlPath;
+        }
+
+        URL location = Main.class.getResource(fxmlPath);
+        if (location == null) {
+            throw new IllegalArgumentException("No se encontró el archivo FXML en la ruta: " + fxmlPath);
+        }
+
+        FXMLLoader loader = new FXMLLoader(location);
         Node vista = loader.load();
-        
+
         contenedor.getChildren().clear();
         contenedor.getChildren().add(vista);
-        
+
         if (contenedor instanceof javafx.scene.layout.AnchorPane) {
             javafx.scene.layout.AnchorPane.setTopAnchor(vista, 0.0);
             javafx.scene.layout.AnchorPane.setBottomAnchor(vista, 0.0);
             javafx.scene.layout.AnchorPane.setLeftAnchor(vista, 0.0);
             javafx.scene.layout.AnchorPane.setRightAnchor(vista, 0.0);
         }
-        
+
         return loader.getController();
     }
 

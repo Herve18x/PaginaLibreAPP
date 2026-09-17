@@ -96,6 +96,26 @@ public class BodegaDashboardController implements Initializable, BaseDashboardCo
         }
     }
 
+    // --- Métodos del Menú Lateral y Acciones ---
+
+    @FXML
+    private void irIngresoInventario(ActionEvent event) {
+        try {
+            Main.cambiarVista("/org/paginalibre/view/IngresoInventario.fxml");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void irSalidaInventario(ActionEvent event) {
+        try {
+            Main.cambiarVista("/org/paginalibre/view/SalidaInventarioView.fxml");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @FXML
     private void abrirNuevoLibro(ActionEvent event) {
         try {
