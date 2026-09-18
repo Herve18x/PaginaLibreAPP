@@ -118,7 +118,7 @@ public class InventarioBodegaController implements Initializable {
                 txtPrecio.setText(String.valueOf(libroSeleccionado.getPrecio()));
                 txtStock.setText(String.valueOf(libroSeleccionado.getStockActual()));
                 txtStockMinimo.setText(String.valueOf(libroSeleccionado.getStockMinimo()));
-                txtCategoria.setText(String.valueOf(libroSeleccionado.getIdCategoria()));
+                txtCategoria.setText(String.valueOf(libroSeleccionado.getCategoriaId()));
                 txtEditorial.setText(libroSeleccionado.getNitEditorial());
                 dpFechaPub.setValue(libroSeleccionado.getFechaPublicacion());
                 lblAutoresInfo.setText((libroSeleccionado.getAutores() == null || libroSeleccionado.getAutores().isBlank())
@@ -150,7 +150,7 @@ public class InventarioBodegaController implements Initializable {
             } else {
                 libroSeleccionado.setStockMinimo(5);
             }
-            libroSeleccionado.setIdCategoria(Integer.parseInt(txtCategoria.getText()));
+            libroSeleccionado.setCategoriaId(Integer.parseInt(txtCategoria.getText()));
             libroSeleccionado.setNitEditorial(txtEditorial.getText());
             libroSeleccionado.setFechaPublicacion(dpFechaPub.getValue());
 

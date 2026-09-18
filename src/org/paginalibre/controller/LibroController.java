@@ -1,7 +1,6 @@
 package org.paginalibre.controller;
 
 import java.net.URL;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -23,156 +22,168 @@ import org.paginalibre.system.Main;
 
 public class LibroController implements Initializable {
 
-    @FXML
-    private TableView<Libro> tablaLibros;
 
-    @FXML
-    private TableColumn<Libro, String> colIsbn;
+@FXML
+private TableView<Libro> tablaLibros;
 
-    @FXML
-    private TableColumn<Libro, String> colTitulo;
+@FXML
+private TableColumn<Libro, String> colIsbn;
 
-    @FXML
-    private TableColumn<Libro, LocalDate> colFechaPublicacion;
+@FXML
+private TableColumn<Libro, String> colTitulo;
 
-    @FXML
-    private TableColumn<Libro, Double> colPrecio;
+@FXML
+private TableColumn<Libro, java.time.LocalDate> colFechaPublicacion;
 
-    @FXML
-    private TableColumn<Libro, Integer> colCategoria;
+@FXML
+private TableColumn<Libro, Double> colPrecio;
 
-    @FXML
-    private TableColumn<Libro, String> colEditorial;
+@FXML
+private TableColumn<Libro, Integer> colCategoria;
 
-    @FXML
-    private TableColumn<Libro, Integer> colStockActual;
+@FXML
+private TableColumn<Libro, String> colEditorial;
 
-    @FXML
-    private TableColumn<Libro, Integer> colStockMinimo;
+@FXML
+private TableColumn<Libro, Integer> colStockActual;
 
-    @FXML
-    private TextField txtBuscarIsbn;
+@FXML
+private TableColumn<Libro, Integer> colStockMinimo;
 
-    private LibroDAO libroDAO;
+@FXML
+private TextField txtBuscarIsbn;
 
-    private ObservableList<Libro> listaLibros;
+private final LibroDAO libroDAO = new LibroDAOImpl();
 
-    @Override
-    public void initialize(URL url, ResourceBundle rb) {
+private final ObservableList<Libro> listaLibros =
+        FXCollections.observableArrayList();
 
-        libroDAO = new LibroDAOImpl();
+@Override
+public void initialize(URL url, ResourceBundle rb) {
+    colIsbn.setCellValueFactory(
+            new PropertyValueFactory<>("isbn")
+    );
 
-        listaLibros = FXCollections.observableArrayList();
+    colTitulo.setCellValueFactory(
+            new PropertyValueFactory<>("titulo")
+    );
 
-        colIsbn.setCellValueFactory(
-                new PropertyValueFactory<>("isbn")
-        );
+    colFechaPublicacion.setCellValueFactory(
+            new PropertyValueFactory<>("fechaPublicacion")
+    );
 
-        colTitulo.setCellValueFactory(
-                new PropertyValueFactory<>("titulo")
-        );
+    colPrecio.setCellValueFactory(
+            new PropertyValueFactory<>("precio")
+    );
 
-        colFechaPublicacion.setCellValueFactory(
-                new PropertyValueFactory<>("fechaPublicacion")
-        );
+    colCategoria.setCellValueFactory(
+            new PropertyValueFactory<>("categoriaId")
+    );
 
-        colPrecio.setCellValueFactory(
-                new PropertyValueFactory<>("precio")
-        );
+    colEditorial.setCellValueFactory(
+            new PropertyValueFactory<>("nitEditorial")
+    );
 
-        colCategoria.setCellValueFactory(
-                new PropertyValueFactory<>("categoriaId")
-        );
+    colStockActual.setCellValueFactory(
+            new PropertyValueFactory<>("stockActual")
+    );
 
-        colEditorial.setCellValueFactory(
-                new PropertyValueFactory<>("nitEditorial")
-        );
+    colStockMinimo.setCellValueFactory(
+            new PropertyValueFactory<>("stockMinimo")
+    );
 
-        colStockActual.setCellValueFactory(
-                new PropertyValueFactory<>("stockActual")
-        );
+    tablaLibros.setItems(listaLibros);
 
-        colStockMinimo.setCellValueFactory(
-                new PropertyValueFactory<>("stockMinimo")
-        );
+    cargarLibros();
+}
 
-        cargarLibros();
-    }
+private void cargarLibros() {
+    List<Libro> libros = libroDAO.listar();
 
-    private void cargarLibros() {
+    listaLibros.clear();
 
-        listaLibros.clear();
-
-        List<Libro> libros = libroDAO.listar();
-
-        if (libros != null) {
-            listaLibros.addAll(libros);
-        }
-
-        tablaLibros.setItems(listaLibros);
-    }
-
-    @FXML
-    private void buscarPorIsbn(ActionEvent event) {
-
-        String isbn = txtBuscarIsbn.getText().trim();
-
-        if (isbn.isEmpty()) {
-            cargarLibros();
-            return;
-        }
-
-        Libro libro = libroDAO.buscar(isbn);
-
-        if (libro != null) {
-
-            listaLibros.clear();
-
-            listaLibros.add(libro);
-            
-            tablaLibros.setItems(listaLibros);
-        } else {
-            Alert alerta = new Alert(
-                    Alert.AlertType.INFORMATION
-            );
-            alerta.setTitle("Buscar libro");
-            alerta.setHeaderText(null);
-            alerta.setContentText(
-                    "No se encontró ningún libro con el ISBN: " + isbn
-            );
-            alerta.showAndWait();
-        }
-    }
-    
-    @FXML
-private void mostrarFormularioAgregar(ActionEvent event) {
-    try {
-        Main.cambiarVista(
-                "/org/paginalibre/view/FormularioLibro.fxml"
-        );
-    } catch (Exception e) {
-        System.err.println(
-                "Error al abrir formulario de libro: "
-                + e.getMessage()
-        );
-        e.printStackTrace();
+    if (libros != null) {
+        listaLibros.addAll(libros);
     }
 }
 
-    @FXML
-    private void mostrarTodos(ActionEvent event) {
-        txtBuscarIsbn.clear();
+@FXML
+private void buscarPorIsbn(ActionEvent event) {
+    String isbn = txtBuscarIsbn.getText();
+
+    if (isbn == null || isbn.trim().isEmpty()) {
         cargarLibros();
+        return;
     }
 
-    @FXML
-    private void regresarDashboard(ActionEvent event) {
-        try {
-            Main.cambiarVista(
-                    "/org/paginalibre/view/AdminDashboardView.fxml"
+    try {
+        Libro libro = libroDAO.buscar(isbn.trim());
+
+        listaLibros.clear();
+
+        if (libro != null) {
+            listaLibros.add(libro);
+        } else {
+            mostrarAlerta(
+                    "Buscar libro",
+                    "No se encontró ningún libro con el ISBN: "
+                            + isbn.trim(),
+                    Alert.AlertType.INFORMATION
             );
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+    } catch (Exception e) {
+        mostrarAlerta(
+                "Error",
+                "No se pudo realizar la búsqueda.",
+                Alert.AlertType.ERROR
+        );
     }
+}
+
+@FXML
+private void mostrarTodos(ActionEvent event) {
+    txtBuscarIsbn.clear();
+    cargarLibros();
+}
+
+@FXML
+private void mostrarFormularioAgregar(ActionEvent event) {
+    try {
+        Main.cambiarVista(
+                "/org/paginalibre/view/NuevoLibroView.fxml"
+        );
+    } catch (Exception e) {
+        mostrarAlerta(
+                "Error",
+                "No se pudo abrir el formulario de libros.",
+                Alert.AlertType.ERROR
+        );
+    }
+}
+
+@FXML
+private void regresarDashboard(ActionEvent event) {
+    try {
+        Main.regresarDashboard();
+    } catch (Exception e) {
+        mostrarAlerta(
+                "Error",
+                "No se pudo regresar al panel principal.",
+                Alert.AlertType.ERROR
+        );
+    }
+}
+
+private void mostrarAlerta(
+        String titulo,
+        String mensaje,
+        Alert.AlertType tipo) {
+
+    Alert alerta = new Alert(tipo);
+    alerta.setTitle(titulo);
+    alerta.setHeaderText(null);
+    alerta.setContentText(mensaje);
+    alerta.showAndWait();
+}
+
 }

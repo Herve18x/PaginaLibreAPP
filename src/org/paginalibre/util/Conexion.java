@@ -1,22 +1,24 @@
 package org.paginalibre.util;
-
-import java.io.IOException;
-import java.io.InputStream;
+ 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Properties;
  
 public class Conexion {
-
+ 
     private static Conexion instancia;
  
-    private static final String CONFIG_FILE = "/db.properties";
+    // Configuración de la conexión a MySQL
+    private static final String URL =
+            "jdbc:mysql://localhost:3306/libreriadb_in4cm"
+            + "?useSSL=false"
+            + "&allowPublicKeyRetrieval=true"
+            + "&serverTimezone=UTC";
  
-    private final String url;
-    private final String user;
-    private final String password;
+    private static final String USER = "IN4CM";
+    private static final String PASSWORD = "#NdimAM4";
  
+    // Constructor privado
     private Conexion() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -25,28 +27,9 @@ public class Conexion {
             System.err.println("Error al cargar el Driver de MySQL: "
                     + e.getMessage());
         }
- 
-        Properties config = new Properties();
-        try (InputStream in = getClass().getResourceAsStream(CONFIG_FILE)) {
-            if (in == null) {
-                throw new IllegalStateException(
-                        "No se encontro " + CONFIG_FILE + " en el classpath. "
-                        + "Copia db.properties.example como src/db.properties y ajusta los valores.");
-            }
-            config.load(in);
-        } catch (IOException e) {
-            throw new IllegalStateException("Error al leer " + CONFIG_FILE, e);
-        }
-        this.url = config.getProperty("db.url");
-        this.user = config.getProperty("db.user");
-        this.password = config.getProperty("db.password");
- 
-        if (url == null || user == null || password == null) {
-            throw new IllegalStateException(
-                    "Faltan propiedades (db.url, db.user, db.password) en " + CONFIG_FILE);
-        }
     }
  
+    // Singleton
     public static synchronized Conexion getInstancia() {
         if (instancia == null) {
             instancia = new Conexion();
@@ -54,7 +37,19 @@ public class Conexion {
         return instancia;
     }
  
+    // Crear una conexión nueva
     public Connection conectar() throws SQLException {
-        return DriverManager.getConnection(url, user, password);
+        return DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+ 
+    // Probar conexión
+    public boolean probarConexion() {
+        try (Connection conexion = conectar()) {
+            return conexion != null && !conexion.isClosed();
+        } catch (SQLException e) {
+            System.err.println("Error de conexión a MySQL: "
+                    + e.getMessage());
+            return false;
+        }
     }
 }
