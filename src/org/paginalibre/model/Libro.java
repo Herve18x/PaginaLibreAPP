@@ -7,42 +7,17 @@ import java.sql.Timestamp;
  * Modelo para representar la entidad Libro
  */
 public class Libro {
-    private String isbn;
-    private String titulo;
-    private LocalDate fechaPublicacion;
-    private double precio;
-    private int idCategoria;
-    private String nombreCategoria; // Atributo para mostrar la categoría en el TableView
-    private String nitEditorial;
-    private String nombreEditorial;
-    private String autores;
-    private int stockActual;
-    private int stockMinimo;
-    private boolean activo; 
-    private Timestamp fechaActualizacion;
+    String isbn;
+    String titulo;
+    LocalDate fechaPublicacion;
+    double precio;
+    int categoriaId;
+    String nitEditorial;
+    int stockActual;
+    int stockMinimo;
+    boolean estado; 
+    Timestamp fechaActualizacion;
 
-    // Constructor vacío
-    public Libro() {
-    }
-
-    // Constructor completo
-    public Libro(String isbn, String titulo, LocalDate fechaPublicacion, double precio, int idCategoria, 
-                 String nombreCategoria, String nitEditorial, int stockActual, int stockMinimo, 
-                 boolean activo, Timestamp fechaActualizacion) {
-        this.isbn = isbn;
-        this.titulo = titulo;
-        this.fechaPublicacion = fechaPublicacion;
-        this.precio = precio;
-        this.idCategoria = idCategoria;
-        this.nombreCategoria = nombreCategoria;
-        this.nitEditorial = nitEditorial;
-        this.stockActual = stockActual;
-        this.stockMinimo = stockMinimo;
-        this.activo = activo;
-        this.fechaActualizacion = fechaActualizacion;
-    }
-
-    // Getters y Setters
     public String getIsbn() {
         return isbn;
     }
@@ -75,12 +50,12 @@ public class Libro {
         this.precio = precio;
     }
 
-    public int getIdCategoria() {
-        return idCategoria;
+    public int getCategoriaId() {
+        return categoriaId;
     }
 
-    public void setIdCategoria(int idCategoria) {
-        this.idCategoria = idCategoria;
+    public void setCategoriaId(int categoriaId) {
+        this.categoriaId = categoriaId;
     }
 
     public String getNombreCategoria() {
@@ -131,12 +106,12 @@ public class Libro {
         this.stockMinimo = stockMinimo;
     }
 
-    public boolean isActivo() {
-        return activo;
+    public boolean isEstado() {
+        return estado;
     }
 
-    public void setActivo(boolean activo) {
-        this.activo = activo;
+    public void setEstado(boolean estado) {
+        this.estado = estado;
     }
 
     public Timestamp getFechaActualizacion() {
@@ -146,4 +121,21 @@ public class Libro {
     public void setFechaActualizacion(Timestamp fechaActualizacion) {
         this.fechaActualizacion = fechaActualizacion;
     }
+
+    public Libro() {
+    }
+
+    public Libro(String isbn, String titulo, LocalDate fechaPublicacion, double precio, int categoriaId, String nitEditorial, int stockActual, int stockMinimo, boolean estado, Timestamp fechaActualizacion) {
+        this.isbn = isbn;
+        this.titulo = titulo;
+        this.fechaPublicacion = fechaPublicacion;
+        this.precio = precio;
+        this.categoriaId = categoriaId;
+        this.nitEditorial = nitEditorial;
+        this.stockActual = stockActual;
+        this.stockMinimo = stockMinimo;
+        this.estado = estado;
+        this.fechaActualizacion = fechaActualizacion;
+    }
+
 }

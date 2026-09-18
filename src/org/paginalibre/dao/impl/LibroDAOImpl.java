@@ -15,26 +15,21 @@ import java.util.List;
 public class LibroDAOImpl implements LibroDAO {
 
     @Override
-    public List<Libro> listarLibrosBajoStock() {
-        List<Libro> lista = new ArrayList<>();
-        // Cambiado "libro" por "libros"
-        String sql = "SELECT l.*, c.nombre_categoria AS nombre_categoria, "
-                   + "e.nombre_editorial AS nombre_editorial, "
-                   + "COALESCE((SELECT GROUP_CONCAT(CONCAT(a.nombre_autor, ' ', a.apellido_autor) "
-                   + "ORDER BY a.apellido_autor SEPARATOR ', ') FROM autores_libro al "
-                   + "INNER JOIN autores a ON a.id_autor = al.id_autor WHERE al.isbn = l.isbn), '') AS autores "
-                   + "FROM libros l "
-                   + "INNER JOIN categoria c ON l.categoria_id = c.categoria_id "
-                   + "LEFT JOIN editoriales e ON l.nit_editorial = e.nit "
-                   + "WHERE l.stock_actual <= l.stock_minimo AND l.estado = 1";
+    public boolean insertar(Libro libros) {
+        String consulta = "{call sp_insertarlibro(?, ?, ?, ?, ?, ?, ?, ?)}";
+        try (Connection conexion = Conexion.getInstancia().conectar(); 
+             CallableStatement consultaCall = conexion.prepareCall(consulta)) {
+            
+            consultaCall.setString(1, libros.getIsbn());
+            consultaCall.setString(2, libros.getTitulo());
+            consultaCall.setDate(3, java.sql.Date.valueOf(libros.getFechaPublicacion()));
+            consultaCall.setDouble(4, libros.getPrecio());
+            consultaCall.setInt(5, libros.getCategoriaId());
+            consultaCall.setString(6, libros.getNitEditorial());
+            consultaCall.setInt(7, libros.getStockActual());
+            consultaCall.setInt(8, libros.getStockMinimo());
 
-        try (Connection conn = Conexion.getInstancia().conectar();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                lista.add(mapearLibro(rs));
-            }
+            return consultaCall.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error al listar libros bajo stock: " + e.getMessage());
         }
@@ -49,23 +44,29 @@ public class LibroDAOImpl implements LibroDAO {
     @Override
     public List<Libro> listar() {
         List<Libro> lista = new ArrayList<>();
-        // Cambiado "libro" por "libros"
-        String sql = "SELECT l.*, c.nombre_categoria AS nombre_categoria, "
-                   + "e.nombre_editorial AS nombre_editorial, "
-                   + "COALESCE((SELECT GROUP_CONCAT(CONCAT(a.nombre_autor, ' ', a.apellido_autor) "
-                   + "ORDER BY a.apellido_autor SEPARATOR ', ') FROM autores_libro al "
-                   + "INNER JOIN autores a ON a.id_autor = al.id_autor WHERE al.isbn = l.isbn), '') AS autores "
-                   + "FROM libros l "
-                   + "INNER JOIN categoria c ON l.categoria_id = c.categoria_id "
-                   + "LEFT JOIN editoriales e ON l.nit_editorial = e.nit "
-                   + "WHERE l.estado = 1";
+        String consultaSQL = "SELECT isbn, titulo, fecha_publicacion, precio, categoria_id, nit_editorial, stock_actual, stock_minimo, estado, fecha_actualizacion FROM libros WHERE estado = 1";
 
-        try (Connection conn = Conexion.getInstancia().conectar();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+        try (Connection conexion = Conexion.getInstancia().conectar(); 
+             PreparedStatement ps = conexion.prepareStatement(consultaSQL); 
+             ResultSet tablaResultado = ps.executeQuery()) {
 
-            while (rs.next()) {
-                lista.add(mapearLibro(rs));
+            while (tablaResultado.next()) {
+                java.sql.Date sqlFecha = tablaResultado.getDate("fecha_publicacion");
+                LocalDate fechaPublicacion = (sqlFecha != null) ? sqlFecha.toLocalDate() : null;
+
+                Libro libro = new Libro(
+                        tablaResultado.getString("isbn"),
+                        tablaResultado.getString("titulo"),
+                        fechaPublicacion,
+                        tablaResultado.getDouble("precio"),
+                        tablaResultado.getInt("categoria_id"),
+                        tablaResultado.getString("nit_editorial"),
+                        tablaResultado.getInt("stock_actual"),
+                        tablaResultado.getInt("stock_minimo"),
+                        tablaResultado.getBoolean("estado"),
+                        tablaResultado.getTimestamp("fecha_actualizacion")
+                );
+                lista.add(libro);
             }
         } catch (SQLException e) {
             System.err.println("Error al listar libros: " + e.getMessage());
@@ -75,24 +76,29 @@ public class LibroDAOImpl implements LibroDAO {
 
     public Libro buscar(String isbn) {
         Libro libro = null;
-        // Cambiado "libro" por "libros"
-        String sql = "SELECT l.*, c.nombre_categoria AS nombre_categoria, "
-                   + "e.nombre_editorial AS nombre_editorial, "
-                   + "COALESCE((SELECT GROUP_CONCAT(CONCAT(a.nombre_autor, ' ', a.apellido_autor) "
-                   + "ORDER BY a.apellido_autor SEPARATOR ', ') FROM autores_libro al "
-                   + "INNER JOIN autores a ON a.id_autor = al.id_autor WHERE al.isbn = l.isbn), '') AS autores "
-                   + "FROM libros l "
-                   + "INNER JOIN categoria c ON l.categoria_id = c.categoria_id "
-                   + "LEFT JOIN editoriales e ON l.nit_editorial = e.nit "
-                   + "WHERE l.isbn = ? AND l.estado = 1";
+        String consultaSQL = "SELECT isbn, titulo, fecha_publicacion, precio, categoria_id, nit_editorial, stock_actual, stock_minimo, estado, fecha_actualizacion FROM libros WHERE isbn = ?";
+        
+        try (Connection conexion = Conexion.getInstancia().conectar(); 
+             PreparedStatement ps = conexion.prepareStatement(consultaSQL)) {
+            
+            ps.setString(1, isbn);
+            try (ResultSet tablaResultado = ps.executeQuery()) {
+                if (tablaResultado.next()) {
+                    java.sql.Date sqlFecha = tablaResultado.getDate("fecha_publicacion");
+                    LocalDate fechaPublicacion = (sqlFecha != null) ? sqlFecha.toLocalDate() : null;
 
-        try (Connection conn = Conexion.getInstancia().conectar();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, isbn);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    libro = mapearLibro(rs);
+                    libro = new Libro(
+                            tablaResultado.getString("isbn"),
+                            tablaResultado.getString("titulo"),
+                            fechaPublicacion,
+                            tablaResultado.getDouble("precio"),
+                            tablaResultado.getInt("categoria_id"),
+                            tablaResultado.getString("nit_editorial"),
+                            tablaResultado.getInt("stock_actual"),
+                            tablaResultado.getInt("stock_minimo"),
+                            tablaResultado.getBoolean("estado"),
+                            tablaResultado.getTimestamp("fecha_actualizacion")
+                    );
                 }
             }
         } catch (SQLException e) {
@@ -131,22 +137,21 @@ public class LibroDAOImpl implements LibroDAO {
 
     @Override
     public boolean actualizar(Libro libro) {
-        // Cambiado "libro" por "libros"
-        String sql = "UPDATE libros SET titulo = ?, precio = ?, stock_actual = ?, stock_minimo = ?, "
-                   + "categoria_id = ?, nit_editorial = ?, fecha_publicacion = ? WHERE isbn = ?";
-        try (Connection conn = Conexion.getInstancia().conectar();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+       String consultaSQL = "SELECT isbn, titulo, fecha_publicacion, precio, categoria_id, nit_editorial, stock_actual, stock_minimo, estado, fecha_actualizacion FROM libros WHERE isbn = ?";
+        try (Connection conexion = Conexion.getInstancia().conectar();
+             PreparedStatement ps = conexion.prepareStatement(consultaSQL)) {
 
-            stmt.setString(1, libro.getTitulo());
-            stmt.setDouble(2, libro.getPrecio());
-            stmt.setInt(3, libro.getStockActual());
-            stmt.setInt(4, libro.getStockMinimo());
-            stmt.setInt(5, libro.getIdCategoria());
-            stmt.setString(6, libro.getNitEditorial());
-            stmt.setDate(7, libro.getFechaPublicacion() != null ? Date.valueOf(libro.getFechaPublicacion()) : null);
-            stmt.setString(8, libro.getIsbn());
+            ps.setString(1, libro.getTitulo());
+            ps.setDate(2, libro.getFechaPublicacion() != null ? java.sql.Date.valueOf(libro.getFechaPublicacion()) : null);
+            ps.setDouble(3, libro.getPrecio());
+            ps.setInt(4, libro.getCategoriaId());
+            ps.setString(5, libro.getNitEditorial());
+            ps.setInt(6, libro.getStockActual());
+            ps.setInt(7, libro.getStockMinimo());
+            ps.setBoolean(8, libro.isEstado());
+            ps.setString(9, libro.getIsbn());
 
-            return stmt.executeUpdate() > 0;
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Error al actualizar libro: " + e.getMessage());
         }
@@ -155,18 +160,9 @@ public class LibroDAOImpl implements LibroDAO {
 
     @Override
     public boolean eliminar(String isbn) {
-        // Cambiado "libro" por "libros"
-        String sql = "UPDATE libros SET estado = 0 WHERE isbn = ?";
-        try (Connection conn = Conexion.getInstancia().conectar();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, isbn);
-            return stmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            System.err.println("Error al eliminar libro: " + e.getMessage());
-        }
-        return false;
-    }
+        String consultaSQL = "UPDATE libros SET estado = 0 WHERE isbn = ?";
+        try (Connection conexion = Conexion.getInstancia().conectar();
+             PreparedStatement ps = conexion.prepareStatement(consultaSQL)) {
 
     private Libro mapearLibro(ResultSet rs) throws SQLException {
         Libro libro = new Libro();

@@ -149,53 +149,18 @@ public class VentaController implements Initializable {
         }
     }
 
-    @FXML
-    private void nuevoCliente(ActionEvent event) {
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Nuevo cliente");
-        dialog.setHeaderText("Agregar cliente");
+        if (listaLibrosBD != null && !listaLibrosBD.isEmpty()) {
+            for (Libro libro : listaLibrosBD) {
+                if (libro.isEstado() && libro.getStockActual() >0) {
+                    DetalleVenta detalle = new DetalleVenta();
+                    // Se elimina la línea detalle.setIdLibro(...) que causaba el error
+                    detalle.setIsbn(libro.getIsbn());
+                    detalle.setTitulo(libro.getTitulo());
+                    detalle.setCantidad(0);
+                    detalle.setPrecioUnitario(libro.getPrecio());
+                    detalle.setSubtotal(0.0);
 
-        TextField cui = new TextField();
-        TextField nombre = new TextField();
-        TextField apellido = new TextField();
-        TextField correo = new TextField();
-
-        cui.setTextFormatter(new TextFormatter<String>(change ->
-            change.getControlNewText().matches("\\d{0,20}") ? change : null));
-        nombre.setTextFormatter(new TextFormatter<String>(change ->
-            change.getControlNewText().matches("[\\p{L}\\s.'-]{0,100}") ? change : null));
-        apellido.setTextFormatter(new TextFormatter<String>(change ->
-            change.getControlNewText().matches("[\\p{L}\\s.'-]{0,100}") ? change : null));
-
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.add(new Label("CUI *"), 0, 0);
-        grid.add(cui, 1, 0);
-        grid.add(new Label("Nombre *"), 0, 1);
-        grid.add(nombre, 1, 1);
-        grid.add(new Label("Apellido *"), 0, 2);
-        grid.add(apellido, 1, 2);
-        grid.add(new Label("Correo"), 0, 3);
-        grid.add(correo, 1, 3);
-
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
-        dialog.setResultConverter(btn -> {
-            if (btn != ButtonType.OK) return null;
-            if (cui.getText().trim().isEmpty() || nombre.getText().trim().isEmpty() || apellido.getText().trim().isEmpty()) {
-                mostrarAlerta("Datos incompletos", "CUI, nombre y apellido son obligatorios.", Alert.AlertType.WARNING);
-                return null;
-            }
-            try {
-                Cliente cliente = new Cliente();
-                cliente.setCui(Long.parseLong(cui.getText().trim()));
-                cliente.setNombre(nombre.getText().trim());
-                cliente.setApellido(apellido.getText().trim());
-                cliente.setCorreoElectronico(correo.getText().trim().isEmpty() ? null : correo.getText().trim());
-                if (!clienteDAO.insertar(cliente)) {
-                    mostrarAlerta("Error", "No se pudo agregar el cliente.", Alert.AlertType.ERROR);
-                    return null;
+                    listaTabla.add(detalle);
                 }
                 return ButtonType.OK;
             } catch (NumberFormatException ex) {
@@ -269,7 +234,7 @@ public class VentaController implements Initializable {
         }
 
         Libro libroBD = libroDAO.buscar(itemSeleccionado.getIsbn());
-        if (libroBD == null || !libroBD.isActivo()) {
+        if (libroBD == null || !libroBD.isEstado()) {
             mostrarAlerta("Error", "El libro no se encuentra disponible.", Alert.AlertType.ERROR);
             return;
         }

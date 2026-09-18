@@ -55,10 +55,20 @@ public class InventarioLibrosController implements Initializable {
 
     private void cargarDatos() {
         listaLibros.clear();
+
         List<Libro> libros = libroDAO.listar();
+
         if (libros != null) {
-            listaLibros.addAll(libros);
+
+            for (Libro libro : libros) {
+
+                if (libro.getStockActual() > 0) {
+                    listaLibros.add(libro);
+                }
+
+            }
         }
+
         listaFiltrada = new FilteredList<>(listaLibros, p -> true);
         tablaLibros.setItems(listaFiltrada);
     }
@@ -76,6 +86,13 @@ public class InventarioLibrosController implements Initializable {
         });
     }
 
+    
+    @FXML 
+    private void agregarLibro(ActionEvent event){
+        
+    
+    }
+    
     @FXML
     private void regresarDashboard(ActionEvent event) {
         try {
