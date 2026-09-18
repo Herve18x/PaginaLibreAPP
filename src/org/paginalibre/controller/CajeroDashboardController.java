@@ -69,6 +69,7 @@ public class CajeroDashboardController implements BaseDashboardController {
     @FXML
     private void cerrarSesion(ActionEvent event) {
         try {
+            Main.cerrarSesion();
             Main.cambiarVista("/org/paginalibre/view/login.fxml");
         } catch (Exception e) {
             e.printStackTrace();

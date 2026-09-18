@@ -5,10 +5,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -25,10 +22,13 @@ public class LoginController implements Initializable {
 
     @FXML
     private TextField txtUsuario;
+
     @FXML
     private PasswordField txtPassword;
+
     @FXML
     private Button btnIniciarSesion;
+
     @FXML
     private Label lblMensaje;
 
@@ -37,6 +37,7 @@ public class LoginController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         usuarioDAO = new UsuarioDAOImpl();
+
         if (lblMensaje != null) {
             lblMensaje.setText("");
         }
@@ -55,7 +56,6 @@ public class LoginController implements Initializable {
         String usuarioIngresado = txtUsuario != null ? txtUsuario.getText().trim() : "";
         String passwordIngresada = txtPassword != null ? txtPassword.getText().trim() : "";
 
-        // 1. Validar que no haya campos vacíos
         if (usuarioIngresado.isEmpty() || passwordIngresada.isEmpty()) {
             if (lblMensaje != null) {
                 lblMensaje.setText("Por favor, complete todos los campos.");
@@ -63,7 +63,6 @@ public class LoginController implements Initializable {
             return;
         }
 
-        // Hash de la contraseña ingresada
         String passwordHash = SecurityUtil.hashSHA256(passwordIngresada);
         Usuario usuarioEncontrado = null;
 
@@ -71,10 +70,12 @@ public class LoginController implements Initializable {
 
         if (usuarios != null) {
             for (Usuario u : usuarios) {
-                if (u.getUsername() != null && u.getUsername().equalsIgnoreCase(usuarioIngresado)) {
-                    // Verifica comparando el Hash SHA-256 o el texto plano (por compatibilidad con usuarios antiguos)
-                    if (u.getPasswordHash() != null && 
-                       (u.getPasswordHash().equals(passwordHash) || u.getPasswordHash().equals(passwordIngresada))) {
+                if (u.getUsername() != null
+                        && u.getUsername().equalsIgnoreCase(usuarioIngresado)) {
+
+                    if (u.getPasswordHash() != null
+                            && (u.getPasswordHash().equals(passwordHash)
+                            || u.getPasswordHash().equals(passwordIngresada))) {
                         usuarioEncontrado = u;
                         break;
                     }
@@ -90,9 +91,12 @@ public class LoginController implements Initializable {
                 return;
             }
 
+            Main.establecerUsuarioSesion(usuarioEncontrado);
+
             if (lblMensaje != null) {
                 lblMensaje.setText("Inicio correcto");
             }
+
             abrirDashboard(usuarioEncontrado);
         } else {
             if (lblMensaje != null) {
@@ -148,22 +152,29 @@ public class LoginController implements Initializable {
         }
 
         try {
-            FXMLLoader cargadorFXML = new FXMLLoader(getClass().getResource(rutaFXML));
-            Parent raiz = cargadorFXML.load();
-            Object controlador = cargadorFXML.getController();
+            Object controlador = Main.cambiarVista(rutaFXML);
 
             if (controlador instanceof BaseDashboardController) {
                 ((BaseDashboardController) controlador).iniciarUsuario(usuario);
             }
 
             Stage escenarioPrincipal = Main.getEscenarioPrincipal();
-            escenarioPrincipal.setScene(new Scene(raiz));
-            escenarioPrincipal.setTitle(tituloDashboard);
-            escenarioPrincipal.centerOnScreen();
+
+            if (escenarioPrincipal != null) {
+                escenarioPrincipal.setTitle(tituloDashboard);
+                escenarioPrincipal.centerOnScreen();
+            }
 
         } catch (Exception e) {
-            System.err.println("Error al cargar la vista: " + rutaFXML + " - " + e.getMessage());
+            System.err.println(
+                    "Error al cargar la vista: "
+                    + rutaFXML
+                    + " - "
+                    + e.getMessage()
+            );
+
             e.printStackTrace();
+
             if (lblMensaje != null) {
                 lblMensaje.setText("Error interno al abrir la vista.");
             }

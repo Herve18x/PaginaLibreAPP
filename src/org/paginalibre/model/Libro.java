@@ -1,14 +1,10 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package org.paginalibre.model;
 
 import java.time.LocalDate;
 import java.sql.Timestamp;
+
 /**
- *
- * @author informatica
+ * Modelo para representar la entidad Libro
  */
 public class Libro {
     String isbn;
@@ -60,6 +56,30 @@ public class Libro {
 
     public void setCategoriaId(int categoriaId) {
         this.categoriaId = categoriaId;
+    }
+
+    public String getNombreCategoria() {
+        return nombreCategoria;
+    }
+
+    public void setNombreCategoria(String nombreCategoria) {
+        this.nombreCategoria = nombreCategoria;
+    }
+
+    public String getNombreEditorial() {
+        return nombreEditorial;
+    }
+
+    public void setNombreEditorial(String nombreEditorial) {
+        this.nombreEditorial = nombreEditorial;
+    }
+
+    public String getAutores() {
+        return autores;
+    }
+
+    public void setAutores(String autores) {
+        this.autores = autores;
     }
 
     public String getNitEditorial() {

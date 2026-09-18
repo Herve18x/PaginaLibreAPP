@@ -1,16 +1,16 @@
 package org.paginalibre.dao.impl;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import org.paginalibre.dao.LibroDAO;
 import org.paginalibre.model.Libro;
 import org.paginalibre.util.Conexion;
+
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LibroDAOImpl implements LibroDAO {
 
@@ -31,9 +31,14 @@ public class LibroDAOImpl implements LibroDAO {
 
             return consultaCall.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error al insertar Libro: " + e.getMessage());
-            return false;
+            System.err.println("Error al listar libros bajo stock: " + e.getMessage());
         }
+        return lista;
+    }
+
+    @Override
+    public List<Libro> listarLibros() {
+        return listar();
     }
 
     @Override
@@ -64,13 +69,11 @@ public class LibroDAOImpl implements LibroDAO {
                 lista.add(libro);
             }
         } catch (SQLException e) {
-            System.err.println("ERROR al listar Libros: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Error al listar libros: " + e.getMessage());
         }
         return lista;
     }
 
-    @Override
     public Libro buscar(String isbn) {
         Libro libro = null;
         String consultaSQL = "SELECT isbn, titulo, fecha_publicacion, precio, categoria_id, nit_editorial, stock_actual, stock_minimo, estado, fecha_actualizacion FROM libros WHERE isbn = ?";
@@ -99,10 +102,37 @@ public class LibroDAOImpl implements LibroDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error al buscar Libro por ISBN (" + isbn + "): " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Error al buscar libro por ISBN: " + e.getMessage());
         }
         return libro;
+    }
+
+    @Override
+    public boolean insertar(Libro libro) {
+        // Cambiado "libro" por "libros"
+        String sql = "INSERT INTO libros (isbn, titulo, precio, stock_actual, stock_minimo, categoria_id, nit_editorial, fecha_publicacion, estado) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)";
+        try (Connection conn = Conexion.getInstancia().conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, libro.getIsbn());
+            stmt.setString(2, libro.getTitulo());
+            stmt.setDouble(3, libro.getPrecio());
+            stmt.setInt(4, libro.getStockActual());
+            stmt.setInt(5, libro.getStockMinimo());
+            stmt.setInt(6, libro.getIdCategoria());
+            stmt.setString(7, libro.getNitEditorial());
+            stmt.setDate(8, libro.getFechaPublicacion() != null ? Date.valueOf(libro.getFechaPublicacion()) : null);
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error al insertar libro: " + e.getMessage());
+        }
+        return false;
+    }
+
+    public boolean agregar(Libro libro) {
+        return insertar(libro);
     }
 
     @Override
@@ -123,9 +153,9 @@ public class LibroDAOImpl implements LibroDAO {
 
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
-            System.err.println("Error al actualizar Libro: " + e.getMessage());
-            return false;
+            System.err.println("Error al actualizar libro: " + e.getMessage());
         }
+        return false;
     }
 
     @Override
@@ -134,11 +164,36 @@ public class LibroDAOImpl implements LibroDAO {
         try (Connection conexion = Conexion.getInstancia().conectar();
              PreparedStatement ps = conexion.prepareStatement(consultaSQL)) {
 
-            ps.setString(1, isbn);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            System.err.println("Error al eliminar Libro (desactivar): " + e.getMessage());
-            return false;
+    private Libro mapearLibro(ResultSet rs) throws SQLException {
+        Libro libro = new Libro();
+        libro.setIsbn(rs.getString("isbn"));
+        libro.setTitulo(rs.getString("titulo"));
+        libro.setPrecio(rs.getDouble("precio"));
+        libro.setStockActual(rs.getInt("stock_actual"));
+        libro.setStockMinimo(rs.getInt("stock_minimo"));
+        libro.setIdCategoria(rs.getInt("categoria_id"));
+        libro.setNombreCategoria(rs.getString("nombre_categoria"));
+        libro.setNitEditorial(rs.getString("nit_editorial"));
+        libro.setNombreEditorial(rs.getString("nombre_editorial"));
+        libro.setAutores(rs.getString("autores"));
+        
+        Date fechaSql = rs.getDate("fecha_publicacion");
+        if (fechaSql != null) {
+            libro.setFechaPublicacion(fechaSql.toLocalDate());
         }
+        
+        try {
+            libro.setActivo(rs.getBoolean("estado"));
+        } catch (SQLException e) {
+            libro.setActivo(true);
+        }
+
+        try {
+            libro.setFechaActualizacion(rs.getTimestamp("fecha_actualizacion"));
+        } catch (SQLException e) {
+            libro.setFechaActualizacion(null);
+        }
+        
+        return libro;
     }
 }
