@@ -15,6 +15,7 @@ import javafx.stage.Stage;
 import org.paginalibre.dao.UsuarioDAO;
 import org.paginalibre.dao.impl.UsuarioDAOImpl;
 import org.paginalibre.model.Usuario;
+import org.paginalibre.system.Main;
 
 public class UsuarioController {
 
@@ -188,10 +189,10 @@ public class UsuarioController {
 
     @FXML
     private void cerrarVentana() {
-        Stage stage = (Stage) tblUsuarios.getScene().getWindow();
-
-        if (stage != null) {
-            stage.close();
+        try {
+            Main.regresarAnterior();
+        } catch (Exception e) {
+            mostrarAlerta("Error", "No se pudo regresar al dashboard: " + e.getMessage(), Alert.AlertType.ERROR);
         }
     }
 

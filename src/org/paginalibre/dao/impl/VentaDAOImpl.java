@@ -34,7 +34,7 @@ public class VentaDAOImpl implements VentaDAO {
                 ps.setDouble(3, venta.getTotal());
                 ps.setString(4, venta.getEstado() != null ? venta.getEstado() : "COMPLETADA");
                 ps.setLong(5, cuiClienteFinal);
-                ps.setInt(6, venta.getIdUsuario() > 0 ? venta.getIdUsuario() : 1); // Asigna usuario 1 por defecto si no viene especificado
+                ps.setInt(6, venta.getIdUsuario());
                 int filas = ps.executeUpdate();
                 if (filas == 0) {
                     conexion.rollback();

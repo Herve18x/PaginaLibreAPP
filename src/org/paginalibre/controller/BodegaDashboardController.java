@@ -161,6 +161,7 @@ public class BodegaDashboardController implements Initializable, BaseDashboardCo
     @FXML
     private void handleCerrarSesion(ActionEvent event) {
         try {
+            Main.cerrarSesion();
             Main.cambiarVista("/org/paginalibre/view/login.fxml");
         } catch (Exception e) {
             e.printStackTrace();

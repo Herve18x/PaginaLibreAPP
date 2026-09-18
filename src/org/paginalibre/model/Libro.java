@@ -14,6 +14,8 @@ public class Libro {
     private int idCategoria;
     private String nombreCategoria; // Atributo para mostrar la categoría en el TableView
     private String nitEditorial;
+    private String nombreEditorial;
+    private String autores;
     private int stockActual;
     private int stockMinimo;
     private boolean activo; 
@@ -87,6 +89,22 @@ public class Libro {
 
     public void setNombreCategoria(String nombreCategoria) {
         this.nombreCategoria = nombreCategoria;
+    }
+
+    public String getNombreEditorial() {
+        return nombreEditorial;
+    }
+
+    public void setNombreEditorial(String nombreEditorial) {
+        this.nombreEditorial = nombreEditorial;
+    }
+
+    public String getAutores() {
+        return autores;
+    }
+
+    public void setAutores(String autores) {
+        this.autores = autores;
     }
 
     public String getNitEditorial() {

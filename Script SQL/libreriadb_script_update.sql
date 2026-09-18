@@ -63,7 +63,7 @@ CREATE TABLE libros (
     categoria_id INT,
     nit_editorial VARCHAR(20),
     stock_actual INT NOT NULL DEFAULT 0,
-    stock_minimo INT NOT NULL DEFAULT 0,
+    stock_minimo INT NOT NULL DEFAULT 5,
     estado TINYINT(1) NOT NULL DEFAULT 1,
     fecha_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP
@@ -627,7 +627,7 @@ BEGIN
         _categoria_id,
         _nit_editorial,
         _stock_actual,
-        _stock_minimo
+        COALESCE(_stock_minimo, 5)
     );
 END $$
 
@@ -1067,13 +1067,23 @@ SELECT
     l.precio AS 'precio',
     c.nombre_categoria AS 'categoría',
     e.nombre_editorial AS 'editorial',
+    COALESCE(
+        (SELECT GROUP_CONCAT(
+            CONCAT(a.nombre_autor, ' ', a.apellido_autor)
+            ORDER BY a.apellido_autor SEPARATOR ', '
+        )
+        FROM autores_libro al
+        INNER JOIN autores a ON a.id_autor = al.id_autor
+        WHERE al.isbn = l.isbn),
+        'Sin autor registrado'
+    ) AS 'autores',
     l.stock_actual AS 'stock actual',
     l.stock_minimo AS 'stock mínimo',
     l.estado AS 'activo'
 FROM libros l
 INNER JOIN categoria c
     ON l.categoria_id = c.categoria_id
-INNER JOIN editoriales e
+LEFT JOIN editoriales e
     ON l.nit_editorial = e.nit;
 
 CREATE OR REPLACE VIEW vw_libros_bajo_stock AS
@@ -1097,6 +1107,30 @@ INNER JOIN autores a
     ON al.id_autor = a.id_autor
 INNER JOIN libros l
     ON al.isbn = l.isbn;
+
+CREATE OR REPLACE VIEW vw_informacion_libro AS
+SELECT
+    l.isbn AS 'isbn',
+    l.titulo AS 'título',
+    c.nombre_categoria AS 'categoría',
+    COALESCE(e.nombre_editorial, 'Sin editorial registrada') AS 'editorial',
+    COALESCE(
+        (SELECT GROUP_CONCAT(
+            CONCAT(a.nombre_autor, ' ', a.apellido_autor)
+            ORDER BY a.apellido_autor SEPARATOR ', '
+        )
+        FROM autores_libro al
+        INNER JOIN autores a ON a.id_autor = al.id_autor
+        WHERE al.isbn = l.isbn),
+        'Sin autor registrado'
+    ) AS 'autores',
+    l.fecha_publicacion AS 'fecha de publicación',
+    l.precio AS 'precio',
+    l.stock_actual AS 'stock actual',
+    l.stock_minimo AS 'stock mínimo'
+FROM libros l
+LEFT JOIN categoria c ON l.categoria_id = c.categoria_id
+LEFT JOIN editoriales e ON l.nit_editorial = e.nit;
 
 CREATE OR REPLACE VIEW vw_lista_ventas AS
 SELECT

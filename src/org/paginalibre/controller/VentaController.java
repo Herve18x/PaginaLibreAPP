@@ -38,8 +38,6 @@ public class VentaController implements Initializable {
     private TextField txtBusqueda;
     @FXML
     private Spinner<Integer> spinnerCantidad;
-
-    // Tabla Principal (Catálogo / Búsqueda)
     @FXML
     private TableView<DetalleVenta> tablaDetalleVenta;
     @FXML
@@ -52,8 +50,6 @@ public class VentaController implements Initializable {
     private TableColumn<DetalleVenta, Double> colPrecioUnit;
     @FXML
     private TableColumn<DetalleVenta, Double> colSubtotal;
-
-    // Tabla Carrito Lateral
     @FXML
     private TableView<DetalleVenta> tablaCarrito;
     @FXML
@@ -68,8 +64,6 @@ public class VentaController implements Initializable {
     private Spinner<Integer> spinnerCantidadCarrito;
     @FXML
     private Label lblTotalCarrito;
-
-    // Cliente y Formulario
     @FXML
     private ComboBox<Cliente> cmbCliente;
     @FXML
@@ -89,7 +83,6 @@ public class VentaController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Inicializar Spinners
         if (spinnerCantidad != null && spinnerCantidad.getValueFactory() == null) {
             spinnerCantidad.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 1));
         }
@@ -99,16 +92,12 @@ public class VentaController implements Initializable {
         if (spinnerDescuento != null && spinnerDescuento.getValueFactory() == null) {
             spinnerDescuento.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 100.0, 0.0, 5.0));
         }
-
-        // Mapeo de columnas de la tabla principal
         colIsbn.setCellValueFactory(new PropertyValueFactory<>("isbn"));
         colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
         colCantidad.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
         colPrecioUnit.setCellValueFactory(new PropertyValueFactory<>("precioUnitario"));
         colSubtotal.setCellValueFactory(new PropertyValueFactory<>("subtotal"));
         tablaDetalleVenta.setItems(listaCatalogo);
-
-        // Mapeo de columnas del carrito
         if (tablaCarrito != null) {
             colCarritoProducto.setCellValueFactory(new PropertyValueFactory<>("titulo"));
             colCarritoCant.setCellValueFactory(new PropertyValueFactory<>("cantidad"));
@@ -116,11 +105,7 @@ public class VentaController implements Initializable {
             colCarritoSubtotal.setCellValueFactory(new PropertyValueFactory<>("subtotal"));
             tablaCarrito.setItems(listaCarrito);
         }
-
-        // Configurar despliegue de nombre de clientes en ComboBox
         configurarComboBoxClientes();
-
-        // Recalcular descuento al cambiar valor
         if (spinnerDescuento != null) {
             spinnerDescuento.valueProperty().addListener((obs, oldValue, newValue) -> calcularTotales());
         }
@@ -162,6 +147,73 @@ public class VentaController implements Initializable {
             listaClientesBD.setAll(clientes);
             cmbCliente.setItems(listaClientesBD);
         }
+    }
+
+    @FXML
+    private void nuevoCliente(ActionEvent event) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Nuevo cliente");
+        dialog.setHeaderText("Agregar cliente");
+
+        TextField cui = new TextField();
+        TextField nombre = new TextField();
+        TextField apellido = new TextField();
+        TextField correo = new TextField();
+
+        cui.setTextFormatter(new TextFormatter<String>(change ->
+            change.getControlNewText().matches("\\d{0,20}") ? change : null));
+        nombre.setTextFormatter(new TextFormatter<String>(change ->
+            change.getControlNewText().matches("[\\p{L}\\s.'-]{0,100}") ? change : null));
+        apellido.setTextFormatter(new TextFormatter<String>(change ->
+            change.getControlNewText().matches("[\\p{L}\\s.'-]{0,100}") ? change : null));
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.add(new Label("CUI *"), 0, 0);
+        grid.add(cui, 1, 0);
+        grid.add(new Label("Nombre *"), 0, 1);
+        grid.add(nombre, 1, 1);
+        grid.add(new Label("Apellido *"), 0, 2);
+        grid.add(apellido, 1, 2);
+        grid.add(new Label("Correo"), 0, 3);
+        grid.add(correo, 1, 3);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+        dialog.setResultConverter(btn -> {
+            if (btn != ButtonType.OK) return null;
+            if (cui.getText().trim().isEmpty() || nombre.getText().trim().isEmpty() || apellido.getText().trim().isEmpty()) {
+                mostrarAlerta("Datos incompletos", "CUI, nombre y apellido son obligatorios.", Alert.AlertType.WARNING);
+                return null;
+            }
+            try {
+                Cliente cliente = new Cliente();
+                cliente.setCui(Long.parseLong(cui.getText().trim()));
+                cliente.setNombre(nombre.getText().trim());
+                cliente.setApellido(apellido.getText().trim());
+                cliente.setCorreoElectronico(correo.getText().trim().isEmpty() ? null : correo.getText().trim());
+                if (!clienteDAO.insertar(cliente)) {
+                    mostrarAlerta("Error", "No se pudo agregar el cliente.", Alert.AlertType.ERROR);
+                    return null;
+                }
+                return ButtonType.OK;
+            } catch (NumberFormatException ex) {
+                mostrarAlerta("CUI inválido", "El CUI debe contener únicamente números.", Alert.AlertType.WARNING);
+                return null;
+            }
+        });
+
+        dialog.showAndWait().ifPresent(result -> {
+            cargarClientes();
+            long cuiCreado = Long.parseLong(cui.getText().trim());
+            for (Cliente cliente : listaClientesBD) {
+                if (cliente.getCui() != null && cliente.getCui() == cuiCreado) {
+                    cmbCliente.getSelectionModel().select(cliente);
+                    break;
+                }
+            }
+        });
     }
 
     @FXML
@@ -324,7 +376,12 @@ public class VentaController implements Initializable {
             venta.setCuiCliente(0L); // Consumidor Final
         }
 
-        venta.setIdUsuario(1);
+        Usuario usuarioSesion = Main.getUsuarioSesion();
+        if (usuarioSesion == null) {
+            mostrarAlerta("Sesión inválida", "No hay un usuario autenticado para registrar la venta.", Alert.AlertType.ERROR);
+            return;
+        }
+        venta.setIdUsuario(usuarioSesion.getId());
 
         boolean exito = ventaDAO.guardarVentaConDetalles(venta, listaCarrito);
 
@@ -362,13 +419,25 @@ public class VentaController implements Initializable {
         infoGrid.add(new Label("Fecha:"), 0, 1);
         infoGrid.add(new Label(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))), 1, 1);
 
-        infoGrid.add(new Label("Cliente:"), 0, 2);
+        infoGrid.add(new Label("Vendido por:"), 0, 2);
+        String vendedorMostrar = "Usuario";
+        Usuario vendedor = Main.getUsuarioSesion();
+        if (vendedor != null) {
+            vendedorMostrar = ((vendedor.getNombre() == null ? "" : vendedor.getNombre()) + " "
+                    + (vendedor.getApellido() == null ? "" : vendedor.getApellido())).trim();
+            if (vendedorMostrar.isEmpty()) {
+                vendedorMostrar = vendedor.getUsername();
+            }
+        }
+        infoGrid.add(new Label(vendedorMostrar), 1, 2);
+
+        infoGrid.add(new Label("Cliente:"), 0, 3);
 
         String nombreClienteMostrar = (cliente != null)
                 ? cliente.getNombre() + " " + cliente.getApellido()
                 : "Consumidor Final";
 
-        infoGrid.add(new Label(nombreClienteMostrar), 1, 2);
+        infoGrid.add(new Label(nombreClienteMostrar), 1, 3);
 
         TableView<DetalleVenta> tablaComprobante = new TableView<>(FXCollections.observableArrayList(listaCarrito));
 
@@ -438,7 +507,7 @@ public class VentaController implements Initializable {
     @FXML
     private void cancelarVenta(ActionEvent event) {
         try {
-            Main.cambiarVista("/org/paginalibre/view/CajeroDashboardView.fxml");
+            Main.regresarAnterior();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -504,6 +573,5 @@ public class VentaController implements Initializable {
     }
 
     void iniciarUsuario(Usuario usuarioSesion) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

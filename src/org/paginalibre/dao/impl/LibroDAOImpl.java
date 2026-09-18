@@ -18,9 +18,14 @@ public class LibroDAOImpl implements LibroDAO {
     public List<Libro> listarLibrosBajoStock() {
         List<Libro> lista = new ArrayList<>();
         // Cambiado "libro" por "libros"
-        String sql = "SELECT l.*, c.nombre_categoria AS nombre_categoria "
+        String sql = "SELECT l.*, c.nombre_categoria AS nombre_categoria, "
+                   + "e.nombre_editorial AS nombre_editorial, "
+                   + "COALESCE((SELECT GROUP_CONCAT(CONCAT(a.nombre_autor, ' ', a.apellido_autor) "
+                   + "ORDER BY a.apellido_autor SEPARATOR ', ') FROM autores_libro al "
+                   + "INNER JOIN autores a ON a.id_autor = al.id_autor WHERE al.isbn = l.isbn), '') AS autores "
                    + "FROM libros l "
                    + "INNER JOIN categoria c ON l.categoria_id = c.categoria_id "
+                   + "LEFT JOIN editoriales e ON l.nit_editorial = e.nit "
                    + "WHERE l.stock_actual <= l.stock_minimo AND l.estado = 1";
 
         try (Connection conn = Conexion.getInstancia().conectar();
@@ -45,9 +50,14 @@ public class LibroDAOImpl implements LibroDAO {
     public List<Libro> listar() {
         List<Libro> lista = new ArrayList<>();
         // Cambiado "libro" por "libros"
-        String sql = "SELECT l.*, c.nombre_categoria AS nombre_categoria "
+        String sql = "SELECT l.*, c.nombre_categoria AS nombre_categoria, "
+                   + "e.nombre_editorial AS nombre_editorial, "
+                   + "COALESCE((SELECT GROUP_CONCAT(CONCAT(a.nombre_autor, ' ', a.apellido_autor) "
+                   + "ORDER BY a.apellido_autor SEPARATOR ', ') FROM autores_libro al "
+                   + "INNER JOIN autores a ON a.id_autor = al.id_autor WHERE al.isbn = l.isbn), '') AS autores "
                    + "FROM libros l "
                    + "INNER JOIN categoria c ON l.categoria_id = c.categoria_id "
+                   + "LEFT JOIN editoriales e ON l.nit_editorial = e.nit "
                    + "WHERE l.estado = 1";
 
         try (Connection conn = Conexion.getInstancia().conectar();
@@ -66,9 +76,14 @@ public class LibroDAOImpl implements LibroDAO {
     public Libro buscar(String isbn) {
         Libro libro = null;
         // Cambiado "libro" por "libros"
-        String sql = "SELECT l.*, c.nombre_categoria AS nombre_categoria "
+        String sql = "SELECT l.*, c.nombre_categoria AS nombre_categoria, "
+                   + "e.nombre_editorial AS nombre_editorial, "
+                   + "COALESCE((SELECT GROUP_CONCAT(CONCAT(a.nombre_autor, ' ', a.apellido_autor) "
+                   + "ORDER BY a.apellido_autor SEPARATOR ', ') FROM autores_libro al "
+                   + "INNER JOIN autores a ON a.id_autor = al.id_autor WHERE al.isbn = l.isbn), '') AS autores "
                    + "FROM libros l "
                    + "INNER JOIN categoria c ON l.categoria_id = c.categoria_id "
+                   + "LEFT JOIN editoriales e ON l.nit_editorial = e.nit "
                    + "WHERE l.isbn = ? AND l.estado = 1";
 
         try (Connection conn = Conexion.getInstancia().conectar();
@@ -163,6 +178,8 @@ public class LibroDAOImpl implements LibroDAO {
         libro.setIdCategoria(rs.getInt("categoria_id"));
         libro.setNombreCategoria(rs.getString("nombre_categoria"));
         libro.setNitEditorial(rs.getString("nit_editorial"));
+        libro.setNombreEditorial(rs.getString("nombre_editorial"));
+        libro.setAutores(rs.getString("autores"));
         
         Date fechaSql = rs.getDate("fecha_publicacion");
         if (fechaSql != null) {

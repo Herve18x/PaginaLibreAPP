@@ -75,7 +75,7 @@ public class IngresoInventarioController implements Initializable {
     @FXML
     private void handleRegresar(ActionEvent event) {
         try {
-            Main.cambiarVista("/org/paginalibre/view/BodegaDashboardView.fxml");
+            Main.regresarAnterior();
         } catch (Exception e) {
             e.printStackTrace();
         }

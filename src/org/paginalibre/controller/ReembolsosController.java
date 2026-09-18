@@ -80,7 +80,7 @@ public class ReembolsosController implements Initializable {
     @FXML
     private void regresarDashboard(ActionEvent event) {
         try {
-            Main.cambiarVista("/org/paginalibre/view/CajeroDashboardView.fxml");
+            Main.regresarAnterior();
         } catch (Exception e) {
             e.printStackTrace();
         }

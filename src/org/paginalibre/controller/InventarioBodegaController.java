@@ -37,6 +37,9 @@ public class InventarioBodegaController implements Initializable {
     @FXML private TextField txtCategoria;
     @FXML private TextField txtEditorial;
     @FXML private DatePicker dpFechaPub;
+    @FXML private Label lblAutoresInfo;
+    @FXML private Label lblEditorialInfo;
+    @FXML private Label lblStockMinimoAyuda;
 
     private LibroDAO libroDAO;
     private ObservableList<Libro> listaLibros;
@@ -52,12 +55,35 @@ public class InventarioBodegaController implements Initializable {
         colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
         colPrecio.setCellValueFactory(new PropertyValueFactory<>("precio"));
         colStock.setCellValueFactory(new PropertyValueFactory<>("stockActual"));
-        colEditorial.setCellValueFactory(new PropertyValueFactory<>("nitEditorial"));
+        colEditorial.setCellValueFactory(new PropertyValueFactory<>("nombreEditorial"));
         colFecha.setCellValueFactory(new PropertyValueFactory<>("fechaPublicacion"));
 
         cargarDatos();
         configurarFiltroBusqueda();
         configurarSeleccionTabla();
+        configurarValidaciones();
+        boolean esAdmin = Main.getUsuarioSesion() != null
+                && "admin".equalsIgnoreCase(Main.getUsuarioSesion().getRol());
+        txtStockMinimo.setDisable(!esAdmin);
+        txtStockMinimo.setEditable(esAdmin);
+        if (lblStockMinimoAyuda != null) {
+            lblStockMinimoAyuda.setText(esAdmin ? "Admin puede modificarlo" : "Predeterminado: 5 (solo admin puede cambiarlo)");
+        }
+    }
+
+    private void configurarValidaciones() {
+        txtPrecio.setTextFormatter(new TextFormatter<String>(change ->
+            change.getControlNewText().matches("\\d{0,6}([.,]\\d{0,2})?") ? change : null));
+        txtStock.setTextFormatter(new TextFormatter<String>(change ->
+            change.getControlNewText().matches("\\d{0,10}") ? change : null));
+        txtStockMinimo.setTextFormatter(new TextFormatter<String>(change ->
+            change.getControlNewText().matches("\\d{0,10}") ? change : null));
+        txtCategoria.setTextFormatter(new TextFormatter<String>(change ->
+            change.getControlNewText().matches("\\d{0,10}") ? change : null));
+        txtTitulo.setTextFormatter(new TextFormatter<String>(change ->
+            change.getControlNewText().matches("[\\p{L}\\p{N}\\s.,:;!?¿¡()'\"-]{0,100}") ? change : null));
+        txtEditorial.setTextFormatter(new TextFormatter<String>(change ->
+            change.getControlNewText().matches("[A-Za-z0-9-]{0,20}") ? change : null));
     }
 
     private void cargarDatos() {
@@ -95,6 +121,12 @@ public class InventarioBodegaController implements Initializable {
                 txtCategoria.setText(String.valueOf(libroSeleccionado.getIdCategoria()));
                 txtEditorial.setText(libroSeleccionado.getNitEditorial());
                 dpFechaPub.setValue(libroSeleccionado.getFechaPublicacion());
+                lblAutoresInfo.setText((libroSeleccionado.getAutores() == null || libroSeleccionado.getAutores().isBlank())
+                        ? "Sin autor registrado" : libroSeleccionado.getAutores());
+                lblEditorialInfo.setText((libroSeleccionado.getNombreEditorial() == null || libroSeleccionado.getNombreEditorial().isBlank())
+                        ? "Sin editorial registrada" : libroSeleccionado.getNombreEditorial()
+                        + " (NIT: " + libroSeleccionado.getNitEditorial() + ")");
+
             }
         });
     }
@@ -110,7 +142,14 @@ public class InventarioBodegaController implements Initializable {
             libroSeleccionado.setTitulo(txtTitulo.getText());
             libroSeleccionado.setPrecio(Double.parseDouble(txtPrecio.getText()));
             libroSeleccionado.setStockActual(Integer.parseInt(txtStock.getText()));
-            libroSeleccionado.setStockMinimo(Integer.parseInt(txtStockMinimo.getText()));
+            boolean esAdmin = Main.getUsuarioSesion() != null
+                    && "admin".equalsIgnoreCase(Main.getUsuarioSesion().getRol());
+            if (esAdmin) {
+                String min = txtStockMinimo.getText().trim();
+                libroSeleccionado.setStockMinimo(min.isEmpty() ? 5 : Integer.parseInt(min));
+            } else {
+                libroSeleccionado.setStockMinimo(5);
+            }
             libroSeleccionado.setIdCategoria(Integer.parseInt(txtCategoria.getText()));
             libroSeleccionado.setNitEditorial(txtEditorial.getText());
             libroSeleccionado.setFechaPublicacion(dpFechaPub.getValue());
@@ -140,13 +179,15 @@ public class InventarioBodegaController implements Initializable {
         txtCategoria.clear();
         txtEditorial.clear();
         dpFechaPub.setValue(null);
+        lblAutoresInfo.setText("Seleccione un libro");
+        lblEditorialInfo.setText("Seleccione un libro");
         tablaLibros.getSelectionModel().clearSelection();
     }
 
     @FXML
     private void regresarDashboard(ActionEvent event) {
         try {
-            Main.cambiarVista("/org/paginalibre/view/BodegaDashboardView.fxml");
+            Main.regresarAnterior();
         } catch (Exception e) {
             e.printStackTrace();
         }

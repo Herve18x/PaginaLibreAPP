@@ -6,6 +6,7 @@
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
@@ -58,19 +59,32 @@
                         <TextField fx:id="txtPrecio" promptText="0.00" GridPane.columnIndex="3" GridPane.rowIndex="1" />
 
                         <Label text="Categoría ID *" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                        <TextField fx:id="txtCategoria" promptText="ID de categoría" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <ComboBox fx:id="cmbCategoria" promptText="Seleccionar categoría" GridPane.columnIndex="1" GridPane.rowIndex="2" />
 
-                        <Label text="NIT Editorial" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                        <TextField fx:id="txtEditorial" promptText="NIT de editorial" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                        <Label text="Editorial *" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+                        <HBox spacing="6.0" GridPane.columnIndex="3" GridPane.rowIndex="2">
+                            <children>
+                                <ComboBox fx:id="cmbEditorial" promptText="Seleccionar editorial" HBox.hgrow="ALWAYS" />
+                                <Button onAction="#nuevoEditorial" text="+ Nueva" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" />
+                            </children>
+                        </HBox>
 
-                        <Label text="Stock actual *" GridPane.columnIndex="0" GridPane.rowIndex="3" />
-                        <TextField fx:id="txtStockActual" promptText="0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <Label text="Autor *" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                        <HBox spacing="6.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                            <children>
+                                <ComboBox fx:id="cmbAutor" promptText="Seleccionar autor" HBox.hgrow="ALWAYS" />
+                                <Button onAction="#nuevoAutor" text="+ Nuevo" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" />
+                            </children>
+                        </HBox>
 
-                        <Label text="Stock mínimo *" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                        <TextField fx:id="txtStockMinimo" promptText="0" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+                        <Label text="Stock actual *" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                        <TextField fx:id="txtStockActual" promptText="0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
 
-                        <Label text="Estado" GridPane.columnIndex="0" GridPane.rowIndex="4" />
-                        <CheckBox fx:id="chkEstado" text="Libro activo" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        <Label text="Stock mínimo" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+                        <TextField fx:id="txtStockMinimo" promptText="5" GridPane.columnIndex="3" GridPane.rowIndex="4" />
+
+                        <Label text="Estado" GridPane.columnIndex="0" GridPane.rowIndex="5" />
+                        <CheckBox fx:id="chkEstado" text="Libro activo" GridPane.columnIndex="1" GridPane.rowIndex="5" />
                     </children>
 
                     <columnConstraints>

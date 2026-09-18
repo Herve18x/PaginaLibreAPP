@@ -300,7 +300,7 @@ public class SalidaInventarioController implements Initializable {
     @FXML
     public void regresarDashboard() {
         try {
-            Main.cambiarVista("BodegaDashboardView.fxml");
+            Main.regresarAnterior();
         } catch (Exception e) {
             mostrarAlerta(
                     "Error de Navegación",

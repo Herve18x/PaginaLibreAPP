@@ -5,10 +5,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -73,10 +70,12 @@ public class LoginController implements Initializable {
 
         if (usuarios != null) {
             for (Usuario u : usuarios) {
-                if (u.getUsername() != null && u.getUsername().equalsIgnoreCase(usuarioIngresado)) {
-                    if (u.getPasswordHash() != null &&
-                        (u.getPasswordHash().equals(passwordHash) ||
-                         u.getPasswordHash().equals(passwordIngresada))) {
+                if (u.getUsername() != null
+                        && u.getUsername().equalsIgnoreCase(usuarioIngresado)) {
+
+                    if (u.getPasswordHash() != null
+                            && (u.getPasswordHash().equals(passwordHash)
+                            || u.getPasswordHash().equals(passwordIngresada))) {
                         usuarioEncontrado = u;
                         break;
                     }
@@ -153,21 +152,27 @@ public class LoginController implements Initializable {
         }
 
         try {
-            FXMLLoader cargadorFXML = new FXMLLoader(getClass().getResource(rutaFXML));
-            Parent raiz = cargadorFXML.load();
-            Object controlador = cargadorFXML.getController();
+            Object controlador = Main.cambiarVista(rutaFXML);
 
             if (controlador instanceof BaseDashboardController) {
                 ((BaseDashboardController) controlador).iniciarUsuario(usuario);
             }
 
             Stage escenarioPrincipal = Main.getEscenarioPrincipal();
-            escenarioPrincipal.setScene(new Scene(raiz));
-            escenarioPrincipal.setTitle(tituloDashboard);
-            escenarioPrincipal.centerOnScreen();
+
+            if (escenarioPrincipal != null) {
+                escenarioPrincipal.setTitle(tituloDashboard);
+                escenarioPrincipal.centerOnScreen();
+            }
 
         } catch (Exception e) {
-            System.err.println("Error al cargar la vista: " + rutaFXML + " - " + e.getMessage());
+            System.err.println(
+                    "Error al cargar la vista: "
+                    + rutaFXML
+                    + " - "
+                    + e.getMessage()
+            );
+
             e.printStackTrace();
 
             if (lblMensaje != null) {
