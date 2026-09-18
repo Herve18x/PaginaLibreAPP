@@ -63,7 +63,7 @@
                     <Label text="Cliente:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
                     
                     <!-- Desplegable ComboBox para seleccionar el cliente -->
-                    <ComboBox fx:id="cmbCliente" prefWidth="250.0" promptText="Consumidor Final" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                    <HBox spacing="6.0" GridPane.columnIndex="1" GridPane.rowIndex="0"><children><ComboBox fx:id="cmbCliente" prefWidth="250.0" promptText="Consumidor Final" HBox.hgrow="ALWAYS"/><Button onAction="#nuevoCliente" text="+ Nuevo" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;"/></children></HBox>
 
                     <Label text="Descuento:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
                     <Spinner fx:id="spinnerDescuento" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
