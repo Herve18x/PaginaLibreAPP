@@ -1,0 +1,4 @@
+
+db.url=jdbc:mysql://localhost:3306/libreriadb_in4cm?serverTimezone=UTC
+db.user=IN4CM
+db.password=#NdimAM4
