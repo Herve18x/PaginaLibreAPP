@@ -3,48 +3,166 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="650.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.paginalibre.controller.AdminDashboardController">
-<left>
-<VBox prefWidth="210.0" spacing="7.0" style="-fx-background-color: #51ADBD;">
-<padding><Insets bottom="12" left="10" right="10" top="12" /></padding>
-<children>
-<Label text="PÁGINA LIBRE" textFill="WHITE"><font><Font name="System Bold" size="18" /></font></Label>
-<Label text="PANEL DE ADMINISTRACIÓN" textFill="WHITE" wrapText="true" />
-<Button maxWidth="Infinity" onAction="#abrirUsuarios" text="USUARIOS" />
-<Button maxWidth="Infinity" onAction="#abrirInventario" text="INVENTARIO" />
-<Button maxWidth="Infinity" onAction="#abrirReportes" text="REPORTES" />
-<Button maxWidth="Infinity" onAction="#abrirNuevaVenta" text="NUEVA VENTA" />
-<Button maxWidth="Infinity" onAction="#abrirVentas" text="HISTORIAL DE VENTAS" />
-<Button maxWidth="Infinity" onAction="#abrirReembolsos" text="REEMBOLSOS" />
-<Button maxWidth="Infinity" onAction="#abrirLibros" text="CATÁLOGO DE LIBROS" />
-<Button maxWidth="Infinity" onAction="#abrirBodega" text="INGRESO DE INVENTARIO" />
-<Button maxWidth="Infinity" onAction="#abrirSalidas" text="SALIDAS DE INVENTARIO" />
-<Button maxWidth="Infinity" onAction="#abrirNuevoLibro" text="REGISTRAR LIBRO" />
-            <Button maxWidth="Infinity" onAction="#abrirClientes" text="CLIENTES" />
-<Button maxWidth="Infinity" onAction="#abrirLibros" text="LIBROS" />
-<VBox VBox.vgrow="ALWAYS" />
-<Button maxWidth="Infinity" onAction="#cerrarSesion" style="-fx-background-color:#d9534f; -fx-text-fill:white; -fx-font-weight:bold;" text="CERRAR SESIÓN" />
-</children>
-</VBox>
-</left>
-<center>
-<VBox alignment="TOP_LEFT" spacing="18">
-<padding><Insets bottom="25" left="25" right="25" top="25" /></padding>
-<children>
-<HBox alignment="CENTER_RIGHT" spacing="10">
-<children>
-<Label fx:id="lblUsuario" style="-fx-border-color:#aaa; -fx-padding:6 10;" text="ADMIN" />
-<Label fx:id="lblRol" style="-fx-border-color:#aaa; -fx-padding:6 10;" text="Rol: admin" />
-</children>
-</HBox>
-<Label text="PANEL DE ADMINISTRACIÓN"><font><Font name="System Bold" size="25" /></font></Label>
-<Label text="El administrador tiene acceso a todos los módulos disponibles del sistema." wrapText="true" />
-</children>
-</VBox>
-</center>
+<BorderPane prefHeight="800.0" prefWidth="1200.0" stylesheets="@dashboard.css" styleClass="root" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.paginalibre.controller.AdminDashboardController">
+   <top>
+      <StackPane prefHeight="200.0" styleClass="top-header-dark">
+         <children>
+            <Label text="PANEL DE ADMINISTRACIÓN" textFill="WHITE">
+               <font>
+                  <Font name="Arial Bold" size="36.0" />
+               </font>
+            </Label>
+            
+            <HBox alignment="TOP_RIGHT" pickOnBounds="false">
+                <padding><Insets top="20" right="30"/></padding>
+                <Button onAction="#cerrarSesion" styleClass="btn-logout" text="CERRAR SESIÓN" />
+            </HBox>
+
+            <HBox visible="false">
+               <Label fx:id="lblUsuario" />
+               <Label fx:id="lblRol" />
+            </HBox>
+         </children>
+      </StackPane>
+   </top>
+   <center>
+      <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
+         <content>
+            <TilePane alignment="CENTER" hgap="30.0" prefColumns="4" style="-fx-background-color: transparent; -fx-padding: 40 40 60 40;" vgap="30.0">
+               <children>
+
+                  <!-- 1. Usuarios -->
+                  <Button onAction="#abrirUsuarios" styleClass="card-button" focusTraversable="false">
+                     <graphic>
+                        <VBox alignment="TOP_CENTER" prefHeight="160.0" prefWidth="200.0">
+                           <Label styleClass="card-icon" text="👤"><VBox.margin><Insets bottom="10.0" /></VBox.margin></Label>
+                           <Label text="Usuarios" styleClass="card-title"><VBox.margin><Insets bottom="5.0" /></VBox.margin></Label>
+                           <Label text="Perfiles, permisos y accesos." textAlignment="CENTER" wrapText="true" styleClass="card-description" />
+                        </VBox>
+                     </graphic>
+                  </Button>
+
+                  <!-- 2. Inventario -->
+                  <Button onAction="#abrirInventario" styleClass="card-button" focusTraversable="false">
+                     <graphic>
+                        <VBox alignment="TOP_CENTER" prefHeight="160.0" prefWidth="200.0">
+                           <Label styleClass="card-icon" text="📦"><VBox.margin><Insets bottom="10.0" /></VBox.margin></Label>
+                           <Label text="Inventario" styleClass="card-title"><VBox.margin><Insets bottom="5.0" /></VBox.margin></Label>
+                           <Label text="Stock de productos y categorías." textAlignment="CENTER" wrapText="true" styleClass="card-description" />
+                        </VBox>
+                     </graphic>
+                  </Button>
+
+                  <!-- 3. Reportes -->
+                  <Button onAction="#abrirReportes" styleClass="card-button" focusTraversable="false">
+                     <graphic>
+                        <VBox alignment="TOP_CENTER" prefHeight="160.0" prefWidth="200.0">
+                           <Label styleClass="card-icon" text="📊"><VBox.margin><Insets bottom="10.0" /></VBox.margin></Label>
+                           <Label text="Reportes" styleClass="card-title"><VBox.margin><Insets bottom="5.0" /></VBox.margin></Label>
+                           <Label text="Informes de ventas e inventario." textAlignment="CENTER" wrapText="true" styleClass="card-description" />
+                        </VBox>
+                     </graphic>
+                  </Button>
+
+                  <!-- 4. Nueva Venta -->
+                  <Button onAction="#abrirNuevaVenta" styleClass="card-button" focusTraversable="false">
+                     <graphic>
+                        <VBox alignment="TOP_CENTER" prefHeight="160.0" prefWidth="200.0">
+                           <Label styleClass="card-icon" text="🛒"><VBox.margin><Insets bottom="10.0" /></VBox.margin></Label>
+                           <Label text="Nueva Venta" styleClass="card-title"><VBox.margin><Insets bottom="5.0" /></VBox.margin></Label>
+                           <Label text="Procesa nuevas transacciones." textAlignment="CENTER" wrapText="true" styleClass="card-description" />
+                        </VBox>
+                     </graphic>
+                  </Button>
+
+                  <!-- 5. Historial de Ventas -->
+                  <Button onAction="#abrirVentas" styleClass="card-button" focusTraversable="false">
+                     <graphic>
+                        <VBox alignment="TOP_CENTER" prefHeight="160.0" prefWidth="200.0">
+                           <Label styleClass="card-icon" text="🧾"><VBox.margin><Insets bottom="10.0" /></VBox.margin></Label>
+                           <Label text="Historial de Ventas" styleClass="card-title"><VBox.margin><Insets bottom="5.0" /></VBox.margin></Label>
+                           <Label text="Consulta registros de ventas." textAlignment="CENTER" wrapText="true" styleClass="card-description" />
+                        </VBox>
+                     </graphic>
+                  </Button>
+
+                  <!-- 6. Reembolsos -->
+                  <Button onAction="#abrirReembolsos" styleClass="card-button" focusTraversable="false">
+                     <graphic>
+                        <VBox alignment="TOP_CENTER" prefHeight="160.0" prefWidth="200.0">
+                           <Label styleClass="card-icon" text="💸"><VBox.margin><Insets bottom="10.0" /></VBox.margin></Label>
+                           <Label text="Reembolsos" styleClass="card-title"><VBox.margin><Insets bottom="5.0" /></VBox.margin></Label>
+                           <Label text="Gestiona devoluciones." textAlignment="CENTER" wrapText="true" styleClass="card-description" />
+                        </VBox>
+                     </graphic>
+                  </Button>
+
+                  <!-- 7. Catálogo de Libros -->
+                  <Button onAction="#abrirLibros" styleClass="card-button" focusTraversable="false">
+                     <graphic>
+                        <VBox alignment="TOP_CENTER" prefHeight="160.0" prefWidth="200.0">
+                           <Label styleClass="card-icon" text="📚"><VBox.margin><Insets bottom="10.0" /></VBox.margin></Label>
+                           <Label text="Catálogo Libros" styleClass="card-title"><VBox.margin><Insets bottom="5.0" /></VBox.margin></Label>
+                           <Label text="Visualiza libros disponibles." textAlignment="CENTER" wrapText="true" styleClass="card-description" />
+                        </VBox>
+                     </graphic>
+                  </Button>
+
+                  <!-- 8. Ingreso de Inventario -->
+                  <Button onAction="#abrirBodega" styleClass="card-button" focusTraversable="false">
+                     <graphic>
+                        <VBox alignment="TOP_CENTER" prefHeight="160.0" prefWidth="200.0">
+                           <Label styleClass="card-icon" text="📥"><VBox.margin><Insets bottom="10.0" /></VBox.margin></Label>
+                           <Label text="Ingreso Inventario" styleClass="card-title"><VBox.margin><Insets bottom="5.0" /></VBox.margin></Label>
+                           <Label text="Registra entrada de productos." textAlignment="CENTER" wrapText="true" styleClass="card-description" />
+                        </VBox>
+                     </graphic>
+                  </Button>
+
+                  <!-- 9. Salidas de Inventario -->
+                  <Button onAction="#abrirSalidas" styleClass="card-button" focusTraversable="false">
+                     <graphic>
+                        <VBox alignment="TOP_CENTER" prefHeight="160.0" prefWidth="200.0">
+                           <Label styleClass="card-icon" text="📤"><VBox.margin><Insets bottom="10.0" /></VBox.margin></Label>
+                           <Label text="Salidas Inventario" styleClass="card-title"><VBox.margin><Insets bottom="5.0" /></VBox.margin></Label>
+                           <Label text="Registra salida de productos." textAlignment="CENTER" wrapText="true" styleClass="card-description" />
+                        </VBox>
+                     </graphic>
+                  </Button>
+
+                  <!-- 10. Registrar Libro -->
+                  <Button onAction="#abrirNuevoLibro" styleClass="card-button" focusTraversable="false">
+                     <graphic>
+                        <VBox alignment="TOP_CENTER" prefHeight="160.0" prefWidth="200.0">
+                           <Label styleClass="card-icon" text="📖"><VBox.margin><Insets bottom="10.0" /></VBox.margin></Label>
+                           <Label text="Registrar Libro" styleClass="card-title"><VBox.margin><Insets bottom="5.0" /></VBox.margin></Label>
+                           <Label text="Añade nuevos títulos al catálogo." textAlignment="CENTER" wrapText="true" styleClass="card-description" />
+                        </VBox>
+                     </graphic>
+                  </Button>
+
+                  <!-- 11. Clientes -->
+                  <Button onAction="#abrirClientes" styleClass="card-button" focusTraversable="false">
+                     <graphic>
+                        <VBox alignment="TOP_CENTER" prefHeight="160.0" prefWidth="200.0">
+                           <Label styleClass="card-icon" text="👥"><VBox.margin><Insets bottom="10.0" /></VBox.margin></Label>
+                           <Label text="Clientes" styleClass="card-title"><VBox.margin><Insets bottom="5.0" /></VBox.margin></Label>
+                           <Label text="Base de datos de compradores." textAlignment="CENTER" wrapText="true" styleClass="card-description" />
+                        </VBox>
+                     </graphic>
+                  </Button>
+
+               </children>
+            </TilePane>
+         </content>
+      </ScrollPane>
+   </center>
 </BorderPane>
