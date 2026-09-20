@@ -3,296 +3,114 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.TilePane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="650.0" prefWidth="950.0" style="-fx-background-color: #f4f6f9;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.paginalibre.controller.BodegaDashboardController">
+<BorderPane prefHeight="800.0" prefWidth="1200.0" stylesheets="@dashboard.css" styleClass="root" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.paginalibre.controller.BodegaDashboardController">
+   <top>
+      <StackPane prefHeight="200.0" styleClass="top-header-dark">
+         <children>
+            <Label text="PANEL DE BODEGA" textFill="WHITE">
+               <font>
+                  <Font name="Arial Bold" size="36.0" />
+               </font>
+            </Label>
+            
+            <HBox alignment="TOP_RIGHT" pickOnBounds="false">
+                <padding><Insets top="20" right="30"/></padding>
+                <Button onAction="#handleCerrarSesion" styleClass="btn-logout" text="CERRAR SESIÓN" />
+            </HBox>
 
-    <left>
-        <VBox prefWidth="220.0" spacing="12.0" style="-fx-background-color: #2c3e50;" BorderPane.alignment="CENTER">
-            <children>
+            <HBox visible="false">
+               <Label fx:id="lblUsuario" />
+               <Label fx:id="lblRol" />
+               <Label fx:id="lblAlertasStock" />
+               <Label fx:id="lblEntradasHoy" />
+               <Label fx:id="lblTitulosCatalogo" />
+            </HBox>
+         </children>
+      </StackPane>
+   </top>
+   <center>
+      <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
+         <content>
+            <TilePane alignment="CENTER" hgap="30.0" prefColumns="3" style="-fx-background-color: transparent; -fx-padding: 40 40 60 40;" vgap="30.0">
+               <children>
 
-                <Label alignment="CENTER" maxWidth="1.7976931348623157E308" text="PÁGINA LIBRE" textFill="WHITE">
-                    <font>
-                        <Font name="System Bold" size="20.0" />
-                    </font>
-                    <VBox.margin>
-                        <Insets bottom="10.0" top="10.0" />
-                    </VBox.margin>
-                </Label>
-
-                <Button maxWidth="1.7976931348623157E308"
-                        mnemonicParsing="false"
-                        prefHeight="40.0"
-                        style="-fx-background-color: #34495e; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"
-                        text="DASHBOARD" />
-
-                <Button maxWidth="1.7976931348623157E308"
-                        mnemonicParsing="false"
-                        onAction="#irIngresoInventario"
-                        prefHeight="40.0"
-                        style="-fx-background-color: transparent; -fx-text-fill: #BDC3C7; -fx-alignment: BASELINE_LEFT; -fx-cursor: hand;"
-                        text="ENTRADAS (INGRESO)" />
-
-                <Button maxWidth="1.7976931348623157E308"
-                        mnemonicParsing="false"
-                        onAction="#irSalidaInventario"
-                        prefHeight="40.0"
-                        style="-fx-background-color: transparent; -fx-text-fill: #BDC3C7; -fx-alignment: BASELINE_LEFT; -fx-cursor: hand;"
-                        text="SALIDAS DE INVENTARIO" />
-
-                <Button maxWidth="1.7976931348623157E308"
-                        mnemonicParsing="false"
-                        onAction="#abrirNuevoLibro"
-                        prefHeight="40.0"
-                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: BASELINE_LEFT; -fx-cursor: hand;"
-                        text="NUEVO LIBRO" />
-
-                <Button maxWidth="1.7976931348623157E308"
-                        mnemonicParsing="false"
-                        onAction="#abrirMovimientos"
-                        prefHeight="40.0"
-                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: BASELINE_LEFT; -fx-cursor: hand;"
-                        text="MOVIMIENTOS INVENTARIO" />
-
-                <Button maxWidth="1.7976931348623157E308"
-                        mnemonicParsing="false"
-                        onAction="#abrirInventario"
-                        prefHeight="40.0"
-                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: BASELINE_LEFT; -fx-cursor: hand;"
-                        text="INVENTARIO (CATÁLOGO)" />
-
-                <Button maxWidth="1.7976931348623157E308"
-                        mnemonicParsing="false"
-                        onAction="#abrirReportes"
-                        prefHeight="40.0"
-                        style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: BASELINE_LEFT; -fx-cursor: hand;"
-                        text="REPORTES BODEGA" />
-
-                <VBox VBox.vgrow="ALWAYS" />
-
-                <Button maxWidth="1.7976931348623157E308"
-                        mnemonicParsing="false"
-                        onAction="#handleCerrarSesion"
-                        prefHeight="40.0"
-                        style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold; -fx-cursor: hand;"
-                        text="CERRAR SESIÓN">
-                    <VBox.margin>
-                        <Insets bottom="10.0" />
-                    </VBox.margin>
-                </Button>
-
-            </children>
-
-            <padding>
-                <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-            </padding>
-        </VBox>
-    </left>
-
-    <center>
-        <VBox spacing="20.0" BorderPane.alignment="CENTER">
-            <padding>
-                <Insets bottom="20.0" left="25.0" right="25.0" top="20.0" />
-            </padding>
-
-            <children>
-
-                <HBox alignment="CENTER_LEFT" prefHeight="50.0">
-                    <children>
-
-                        <VBox HBox.hgrow="ALWAYS">
-                            <children>
-                                <Label text="PANEL DE BODEGA E INVENTARIO" textFill="#2c3e50">
-                                    <font>
-                                        <Font name="System Bold" size="22.0" />
-                                    </font>
-                                </Label>
-
-                                <Label text="Monitoreo de alertas de stock y resumen general"
-                                       textFill="#7f8c8d" />
-                            </children>
+                  <!-- 1. Entradas -->
+                  <Button onAction="#irIngresoInventario" styleClass="card-button" focusTraversable="false">
+                     <graphic>
+                        <VBox alignment="TOP_CENTER" prefHeight="160.0" prefWidth="200.0">
+                           <Label styleClass="card-icon" text="📥"><VBox.margin><Insets bottom="10.0" /></VBox.margin></Label>
+                           <Label text="Entradas" styleClass="card-title"><VBox.margin><Insets bottom="5.0" /></VBox.margin></Label>
+                           <Label text="Ingreso de nuevo inventario." textAlignment="CENTER" wrapText="true" styleClass="card-description" />
                         </VBox>
+                     </graphic>
+                  </Button>
 
-                        <HBox alignment="CENTER_RIGHT" spacing="10.0">
-                            <children>
-
-                                <Label text="Usuario:" textFill="#7f8c8d">
-                                    <font>
-                                        <Font name="System Bold" size="13.0" />
-                                    </font>
-                                </Label>
-
-                                <Label fx:id="lblUsuario"
-                                       text="Luis Ramírez"
-                                       textFill="#2c3e50">
-                                    <font>
-                                        <Font name="System Bold" size="13.0" />
-                                    </font>
-                                </Label>
-
-                                <Label fx:id="lblRol"
-                                       style="-fx-background-color: #e8f8f5; -fx-text-fill: #1abc9c; -fx-padding: 3 8 3 8; -fx-background-radius: 10;"
-                                       text="bodega" />
-
-                            </children>
-                        </HBox>
-
-                    </children>
-                </HBox>
-
-                <HBox spacing="15.0">
-                    <children>
-
-                        <VBox prefHeight="90.0"
-                              style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 1);"
-                              HBox.hgrow="ALWAYS">
-
-                            <padding>
-                                <Insets bottom="12.0" left="15.0" right="15.0" top="12.0" />
-                            </padding>
-
-                            <children>
-                                <Label text="ALERTAS STOCK MÍNIMO" textFill="#e74c3c">
-                                    <font>
-                                        <Font name="System Bold" size="12.0" />
-                                    </font>
-                                </Label>
-
-                                <Label fx:id="lblAlertasStock"
-                                       text="0"
-                                       textFill="#c0392b">
-                                    <font>
-                                        <Font name="System Bold" size="28.0" />
-                                    </font>
-                                </Label>
-                            </children>
+                  <!-- 2. Salidas -->
+                  <Button onAction="#irSalidaInventario" styleClass="card-button" focusTraversable="false">
+                     <graphic>
+                        <VBox alignment="TOP_CENTER" prefHeight="160.0" prefWidth="200.0">
+                           <Label styleClass="card-icon" text="📤"><VBox.margin><Insets bottom="10.0" /></VBox.margin></Label>
+                           <Label text="Salidas" styleClass="card-title"><VBox.margin><Insets bottom="5.0" /></VBox.margin></Label>
+                           <Label text="Registro de salidas de bodega." textAlignment="CENTER" wrapText="true" styleClass="card-description" />
                         </VBox>
+                     </graphic>
+                  </Button>
 
-                        <VBox prefHeight="90.0"
-                              style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 1);"
-                              HBox.hgrow="ALWAYS">
-
-                            <padding>
-                                <Insets bottom="12.0" left="15.0" right="15.0" top="12.0" />
-                            </padding>
-
-                            <children>
-                                <Label text="ENTRADAS HOY" textFill="#27ae60">
-                                    <font>
-                                        <Font name="System Bold" size="12.0" />
-                                    </font>
-                                </Label>
-
-                                <Label fx:id="lblEntradasHoy"
-                                       text="0"
-                                       textFill="#2ec771">
-                                    <font>
-                                        <Font name="System Bold" size="28.0" />
-                                    </font>
-                                </Label>
-                            </children>
+                  <!-- 3. Nuevo Libro -->
+                  <Button onAction="#abrirNuevoLibro" styleClass="card-button" focusTraversable="false">
+                     <graphic>
+                        <VBox alignment="TOP_CENTER" prefHeight="160.0" prefWidth="200.0">
+                           <Label styleClass="card-icon" text="📖"><VBox.margin><Insets bottom="10.0" /></VBox.margin></Label>
+                           <Label text="Nuevo Libro" styleClass="card-title"><VBox.margin><Insets bottom="5.0" /></VBox.margin></Label>
+                           <Label text="Registrar nuevos títulos." textAlignment="CENTER" wrapText="true" styleClass="card-description" />
                         </VBox>
+                     </graphic>
+                  </Button>
 
-                        <VBox prefHeight="90.0"
-                              style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 1);"
-                              HBox.hgrow="ALWAYS">
-
-                            <padding>
-                                <Insets bottom="12.0" left="15.0" right="15.0" top="12.0" />
-                            </padding>
-
-                            <children>
-                                <Label text="TÍTULOS EN CATÁLOGO" textFill="#2980b9">
-                                    <font>
-                                        <Font name="System Bold" size="12.0" />
-                                    </font>
-                                </Label>
-
-                                <Label fx:id="lblTitulosCatalogo"
-                                       text="0"
-                                       textFill="#3498db">
-                                    <font>
-                                        <Font name="System Bold" size="28.0" />
-                                    </font>
-                                </Label>
-                            </children>
+                  <!-- 4. Movimientos -->
+                  <Button onAction="#abrirMovimientos" styleClass="card-button" focusTraversable="false">
+                     <graphic>
+                        <VBox alignment="TOP_CENTER" prefHeight="160.0" prefWidth="200.0">
+                           <Label styleClass="card-icon" text="🔄"><VBox.margin><Insets bottom="10.0" /></VBox.margin></Label>
+                           <Label text="Movimientos" styleClass="card-title"><VBox.margin><Insets bottom="5.0" /></VBox.margin></Label>
+                           <Label text="Historial de movimientos." textAlignment="CENTER" wrapText="true" styleClass="card-description" />
                         </VBox>
+                     </graphic>
+                  </Button>
 
-                    </children>
-                </HBox>
+                  <!-- 5. Inventario Catálogo -->
+                  <Button onAction="#abrirInventario" styleClass="card-button" focusTraversable="false">
+                     <graphic>
+                        <VBox alignment="TOP_CENTER" prefHeight="160.0" prefWidth="200.0">
+                           <Label styleClass="card-icon" text="📚"><VBox.margin><Insets bottom="10.0" /></VBox.margin></Label>
+                           <Label text="Inventario" styleClass="card-title"><VBox.margin><Insets bottom="5.0" /></VBox.margin></Label>
+                           <Label text="Ver catálogo de libros." textAlignment="CENTER" wrapText="true" styleClass="card-description" />
+                        </VBox>
+                     </graphic>
+                  </Button>
+                  
+                  <!-- 6. Reportes -->
+                  <Button onAction="#abrirReportes" styleClass="card-button" focusTraversable="false">
+                     <graphic>
+                        <VBox alignment="TOP_CENTER" prefHeight="160.0" prefWidth="200.0">
+                           <Label styleClass="card-icon" text="📈"><VBox.margin><Insets bottom="10.0" /></VBox.margin></Label>
+                           <Label text="Reportes" styleClass="card-title"><VBox.margin><Insets bottom="5.0" /></VBox.margin></Label>
+                           <Label text="Generar informes de bodega." textAlignment="CENTER" wrapText="true" styleClass="card-description" />
+                        </VBox>
+                     </graphic>
+                  </Button>
 
-                <VBox spacing="10.0"
-                      style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 5, 0, 0, 1);"
-                      VBox.vgrow="ALWAYS">
-
-                    <padding>
-                        <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
-                    </padding>
-
-                    <children>
-
-                        <HBox alignment="CENTER_LEFT">
-                            <children>
-
-                                <Label text="Productos Bajo Stock Mínimo (Requieren Reorden)"
-                                       textFill="#2c3e50">
-                                    <font>
-                                        <Font name="System Bold" size="15.0" />
-                                    </font>
-                                </Label>
-
-                                <HBox alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-                                    <children>
-                                        <TextField fx:id="txtBuscar"
-                                                   prefWidth="220.0"
-                                                   promptText="Buscar libro..." />
-                                    </children>
-                                </HBox>
-
-                            </children>
-                        </HBox>
-
-                        <TableView fx:id="tblBodega"
-                                   prefHeight="300.0"
-                                   VBox.vgrow="ALWAYS">
-
-                            <columns>
-
-                                <TableColumn fx:id="colIsbn"
-                                             prefWidth="120.0"
-                                             text="ISBN" />
-
-                                <TableColumn fx:id="colTitulo"
-                                             prefWidth="250.0"
-                                             text="Título del Libro" />
-
-                                <TableColumn fx:id="colCategoria"
-                                             prefWidth="130.0"
-                                             text="Categoría" />
-
-                                <TableColumn fx:id="colStockActual"
-                                             prefWidth="90.0"
-                                             text="Stock Actual" />
-
-                                <TableColumn fx:id="colStockMin"
-                                             prefWidth="90.0"
-                                             text="Stock Mín." />
-
-                            </columns>
-
-                        </TableView>
-
-                    </children>
-                </VBox>
-
-            </children>
-        </VBox>
-    </center>
-
+               </children>
+            </TilePane>
+         </content>
+      </ScrollPane>
+   </center>
 </BorderPane>
