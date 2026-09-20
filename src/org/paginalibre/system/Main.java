@@ -111,10 +111,10 @@ private static void mostrarVista(Parent contenido, String fxmlPath) {
     StackPane raiz = new StackPane();
     raiz.getChildren().add(contenido);
 
-    if (!fxmlPath.equals("/org/paginalibre/view/login.fxml")) {
+    if (!fxmlPath.equals("/org/paginalibre/view/login.fxml") && !esDashboard(fxmlPath)) {
         ocultarBotonesRegreso(contenido);
 
-        Button btnRegresar = new Button("← Volver");
+        Button btnRegresar = new Button("<- Volver");
         btnRegresar.setStyle(
                 "-fx-background-color: white;" +
                 "-fx-text-fill: #333;" +
