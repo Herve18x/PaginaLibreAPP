@@ -5,45 +5,53 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="480.0" prefWidth="707.0" spacing="12" style="-fx-background-color: FFE8FB;" styleClass="contenedor-login" stylesheets="@/org/paginalibre/view/style/login.css" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.paginalibre.controller.LoginController">
+<StackPane prefHeight="650.0" prefWidth="1000.0" styleClass="root" stylesheets="@/org/paginalibre/view/style/login.css" xmlns="http://javafx.com/javafx/21.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.paginalibre.controller.LoginController">
 
-    <padding>
-        <Insets bottom="40" left="40" right="40" top="40" />
-    </padding>
+    <!-- Tarjeta Blanca Centrada -->
+    <VBox alignment="CENTER" maxWidth="400.0" maxHeight="500.0" spacing="15" styleClass="login-card">
 
-    <Label styleClass="titulo-login" text="Página Libre" textFill="#b81db3">
-        <font>
-            <Font name="System Bold" size="32.0" />
-        </font>
-    </Label>
-    
-    <Label styleClass="subtitulo-login" text="Sistema de Gestión de Librería" textFill="#f872e9">
-        <font>
-            <Font name="System" size="18.0" />
-        </font>
-    </Label>
+        <padding>
+            <Insets bottom="40" left="40" right="40" top="30" />
+        </padding>
 
-    <TextField fx:id="txtUsuario" maxWidth="Infinity" promptText="Usuario">
-        <font>
-            <Font name="System" size="12.0" />
-        </font>
-    </TextField>
-    
-    <PasswordField fx:id="txtPassword" maxWidth="Infinity" promptText="Contraseña">
-        <font>
-            <Font name="System" size="12.0" />
-        </font>
-    </PasswordField>
+        <!-- Icono / Logo -->
+        <Label styleClass="login-icon" text="📚" />
 
-    <Label fx:id="lblMensaje" styleClass="mensaje-error" wrapText="true" />
+        <Label styleClass="titulo-login" text="Página Libre">
+            <font>
+                <Font name="System Bold" size="28.0" />
+            </font>
+        </Label>
+        
+        <Label styleClass="subtitulo-login" text="Sistema de Gestión de Librería">
+            <font>
+                <Font name="System" size="14.0" />
+            </font>
+            <VBox.margin>
+                <Insets bottom="10.0" />
+            </VBox.margin>
+        </Label>
 
-    <Button fx:id="btnIniciarSesion" defaultButton="true" maxWidth="Infinity" onAction="#eventoInicioSesion" style="-fx-background-color: FF87AC;" text="Ingresar" textFill="WHITE">
-        <font>
-            <Font name="System Bold" size="12.0" />
-        </font>
-    </Button>
+        <!-- Campos de Texto -->
+        <VBox spacing="15" maxWidth="Infinity">
+            <TextField fx:id="txtUsuario" maxWidth="Infinity" promptText="Nombre de usuario" />
+            <PasswordField fx:id="txtPassword" maxWidth="Infinity" promptText="Contraseña" />
+        </VBox>
 
-</VBox>
+        <!-- Espacio para el mensaje de error -->
+        <Label fx:id="lblMensaje" styleClass="mensaje-error" wrapText="true" minHeight="20.0" />
+
+        <!-- Botón de Inicio de Sesión -->
+        <Button fx:id="btnIniciarSesion" defaultButton="true" maxWidth="Infinity" onAction="#eventoInicioSesion" text="INGRESAR">
+            <VBox.margin>
+                <Insets top="10.0" />
+            </VBox.margin>
+        </Button>
+
+    </VBox>
+
+</StackPane>
