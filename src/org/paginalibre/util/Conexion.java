@@ -15,8 +15,8 @@ public class Conexion {
             + "&allowPublicKeyRetrieval=true"
             + "&serverTimezone=UTC";
  
-    private static final String USER = "DannySQL";
-    private static final String PASSWORD = "daniel2929**";
+    private static final String USER = "IN4CM";
+    private static final String PASSWORD = "#NdimAM4";
  
     // Constructor privado
     private Conexion() {
