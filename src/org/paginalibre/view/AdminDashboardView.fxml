@@ -34,6 +34,12 @@
       </StackPane>
    </top>
    <center>
+      <VBox spacing="15">
+         <HBox spacing="20" alignment="CENTER" style="-fx-padding:15;">
+            <VBox alignment="CENTER" prefWidth="240" style="-fx-background-color:white;-fx-padding:15;-fx-background-radius:10;"><Label text="VENTAS TOTALES"/><Label fx:id="lblVentas" text="Q 0.00" style="-fx-font-size:24px;-fx-font-weight:bold;"/></VBox>
+            <VBox alignment="CENTER" prefWidth="240" style="-fx-background-color:white;-fx-padding:15;-fx-background-radius:10;"><Label text="LIBROS ACTIVOS"/><Label fx:id="lblLibros" text="0" style="-fx-font-size:24px;-fx-font-weight:bold;"/></VBox>
+            <VBox alignment="CENTER" prefWidth="240" style="-fx-background-color:white;-fx-padding:15;-fx-background-radius:10;"><Label text="USUARIOS ACTIVOS"/><Label fx:id="lblUsuarios" text="0" style="-fx-font-size:24px;-fx-font-weight:bold;"/></VBox>
+         </HBox>
       <ScrollPane fitToWidth="true" style="-fx-background-color: transparent; -fx-background: transparent;">
          <content>
             <TilePane alignment="CENTER" hgap="30.0" prefColumns="4" style="-fx-background-color: transparent; -fx-padding: 40 40 60 40;" vgap="30.0">
@@ -149,6 +155,15 @@
                      </graphic>
                   </Button>
 
+                  <!-- Gestión administrativa -->
+                  <Button onAction="#abrirGestionAdmin" styleClass="card-button" focusTraversable="false">
+                     <graphic><VBox alignment="TOP_CENTER" prefHeight="160.0" prefWidth="200.0">
+                        <Label styleClass="card-icon" text="⚙"><VBox.margin><Insets bottom="10.0" /></VBox.margin></Label>
+                        <Label text="Gestión Administrativa" styleClass="card-title"><VBox.margin><Insets bottom="5.0" /></VBox.margin></Label>
+                        <Label text="Categorías, proveedores y precios." textAlignment="CENTER" wrapText="true" styleClass="card-description" />
+                     </VBox></graphic>
+                  </Button>
+
                   <!-- 11. Clientes -->
                   <Button onAction="#abrirClientes" styleClass="card-button" focusTraversable="false">
                      <graphic>
@@ -164,5 +179,6 @@
             </TilePane>
          </content>
       </ScrollPane>
+      </VBox>
    </center>
 </BorderPane>
