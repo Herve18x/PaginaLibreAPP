@@ -11,6 +11,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.paginalibre.dao.VentaDAO;
 import org.paginalibre.dao.impl.VentaDAOImpl;
@@ -68,12 +69,26 @@ public class ReembolsosController implements Initializable {
             return;
         }
 
-        boolean exito = ventaDAO.eliminar(seleccionada.getIdVenta());
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Motivo de devolución");
+        dialog.setHeaderText("Venta #" + seleccionada.getIdVenta());
+        dialog.setContentText("Motivo:");
+        String motivo = dialog.showAndWait().orElse("").trim();
+        if (motivo.isEmpty()) {
+            mostrarAlerta("Validación", "Debe indicar el motivo de la devolución.", Alert.AlertType.WARNING);
+            return;
+        }
+        if (Main.getUsuarioSesion() == null) {
+            mostrarAlerta("Sesión inválida", "No hay usuario autenticado.", Alert.AlertType.ERROR);
+            return;
+        }
+        boolean exito = ventaDAO instanceof VentaDAOImpl
+                && ((VentaDAOImpl) ventaDAO).devolver(seleccionada.getIdVenta(), Main.getUsuarioSesion().getId(), motivo);
         if (exito) {
-            mostrarAlerta("Éxito", "La venta #" + seleccionada.getIdVenta() + " ha sido reembolsada.", Alert.AlertType.INFORMATION);
+            mostrarAlerta("Éxito", "La venta #" + seleccionada.getIdVenta() + " fue devuelta y el stock fue repuesto.", Alert.AlertType.INFORMATION);
             cargarVentas();
         } else {
-            mostrarAlerta("Error", "No se pudo procesar el reembolso de la venta.", Alert.AlertType.ERROR);
+            mostrarAlerta("Error", "No se pudo procesar la devolución.", Alert.AlertType.ERROR);
         }
     }
 
