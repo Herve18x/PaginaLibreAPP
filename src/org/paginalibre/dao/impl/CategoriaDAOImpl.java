@@ -1,0 +1,9 @@
+package org.paginalibre.dao.impl;
+import java.sql.*; import java.util.*; import org.paginalibre.dao.CategoriaDAO; import org.paginalibre.model.Categoria; import org.paginalibre.util.Conexion;
+public class CategoriaDAOImpl implements CategoriaDAO {
+ public boolean insertar(Categoria c){String s="INSERT INTO categoria(nombre_categoria) VALUES(?)";try(Connection x=Conexion.getInstancia().conectar();PreparedStatement p=x.prepareStatement(s)){p.setString(1,c.getNombre());return p.executeUpdate()>0;}catch(SQLException e){return false;}}
+ public List<Categoria> listar(){List<Categoria> r=new ArrayList<>();String s="SELECT categoria_id,nombre_categoria FROM categoria ORDER BY nombre_categoria";try(Connection x=Conexion.getInstancia().conectar();PreparedStatement p=x.prepareStatement(s);ResultSet q=p.executeQuery()){while(q.next())r.add(new Categoria(q.getInt(1),q.getString(2)));}catch(SQLException e){}return r;}
+ public Categoria buscar(Integer id){String s="SELECT categoria_id,nombre_categoria FROM categoria WHERE categoria_id=?";try(Connection x=Conexion.getInstancia().conectar();PreparedStatement p=x.prepareStatement(s)){p.setInt(1,id);try(ResultSet q=p.executeQuery()){return q.next()?new Categoria(q.getInt(1),q.getString(2)):null;}}catch(SQLException e){return null;}}
+ public boolean actualizar(Categoria c){String s="UPDATE categoria SET nombre_categoria=? WHERE categoria_id=?";try(Connection x=Conexion.getInstancia().conectar();PreparedStatement p=x.prepareStatement(s)){p.setString(1,c.getNombre());p.setInt(2,c.getId());return p.executeUpdate()>0;}catch(SQLException e){return false;}}
+ public boolean eliminar(Integer id){String s="DELETE FROM categoria WHERE categoria_id=?";try(Connection x=Conexion.getInstancia().conectar();PreparedStatement p=x.prepareStatement(s)){p.setInt(1,id);return p.executeUpdate()>0;}catch(SQLException e){return false;}}
+}
