@@ -80,8 +80,8 @@ public class HistorialVentasController implements Initializable {
                 String filtro = newValue.toLowerCase().trim();
 
                 return String.valueOf(venta.getIdVenta()).contains(filtro)
-                    || String.valueOf(venta.getCuiCliente()).contains(filtro)
-                    || String.valueOf(venta.getIdUsuario()).contains(filtro);
+                        || String.valueOf(venta.getCuiCliente()).contains(filtro)
+                        || String.valueOf(venta.getIdUsuario()).contains(filtro);
             });
         });
     }

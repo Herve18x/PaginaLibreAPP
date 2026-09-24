@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.sql.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.ResourceBundle;
 
 import javafx.event.ActionEvent;
@@ -17,8 +16,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
-import javafx.util.converter.IntegerStringConverter;
 import org.paginalibre.model.Usuario;
 import org.paginalibre.system.Main;
 import org.paginalibre.util.Conexion;

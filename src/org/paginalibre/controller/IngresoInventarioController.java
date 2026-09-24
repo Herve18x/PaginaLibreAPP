@@ -139,26 +139,26 @@ public class IngresoInventarioController implements Initializable {
 
             if (movimientoDAO.insertar(movimiento)) {
                 mostrarAlerta(
-                    Alert.AlertType.INFORMATION,
-                    "Éxito",
-                    "Movimiento de inventario registrado correctamente."
+                        Alert.AlertType.INFORMATION,
+                        "Éxito",
+                        "Movimiento de inventario registrado correctamente."
                 );
 
                 handleLimpiar();
                 cargarHistorial();
             } else {
                 mostrarAlerta(
-                    Alert.AlertType.ERROR,
-                    "Error",
-                    "No se pudo registrar el movimiento en la base de datos."
+                        Alert.AlertType.ERROR,
+                        "Error",
+                        "No se pudo registrar el movimiento en la base de datos."
                 );
             }
 
         } catch (NumberFormatException e) {
             mostrarAlerta(
-                Alert.AlertType.ERROR,
-                "Error",
-                "La cantidad debe ser un número entero válido."
+                    Alert.AlertType.ERROR,
+                    "Error",
+                    "La cantidad debe ser un número entero válido."
             );
         }
     }
@@ -172,8 +172,8 @@ public class IngresoInventarioController implements Initializable {
     }
 
     private void cargarHistorial() {
-        ObservableList<MovimientoInventario> listaMovimientos =
-                FXCollections.observableArrayList(movimientoDAO.listar());
+        ObservableList<MovimientoInventario> listaMovimientos
+                = FXCollections.observableArrayList(movimientoDAO.listar());
 
         tblMovimientos.setItems(listaMovimientos);
     }

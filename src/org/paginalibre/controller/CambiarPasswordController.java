@@ -12,11 +12,16 @@ import org.paginalibre.util.SecurityUtil;
 
 public class CambiarPasswordController {
 
-    @FXML private PasswordField txtPasswordActual;
-    @FXML private PasswordField txtNuevaPassword;
-    @FXML private PasswordField txtConfirmarPassword;
-    @FXML private Label lblMensaje;
-    @FXML private Button btnGuardar;
+    @FXML
+    private PasswordField txtPasswordActual;
+    @FXML
+    private PasswordField txtNuevaPassword;
+    @FXML
+    private PasswordField txtConfirmarPassword;
+    @FXML
+    private Label lblMensaje;
+    @FXML
+    private Button btnGuardar;
 
     private Usuario usuarioActual;
     private final UsuarioDAO usuarioDAO = new UsuarioDAOImpl();
@@ -38,9 +43,9 @@ public class CambiarPasswordController {
 
         // Validación de la contraseña actual del usuario
         String hashActual = SecurityUtil.hashSHA256(actual);
-        if (usuarioActual.getPasswordHash() != null && 
-           !usuarioActual.getPasswordHash().equals(hashActual) && 
-           !usuarioActual.getPasswordHash().equals(actual)) {
+        if (usuarioActual.getPasswordHash() != null
+                && !usuarioActual.getPasswordHash().equals(hashActual)
+                && !usuarioActual.getPasswordHash().equals(actual)) {
             lblMensaje.setText("La contraseña actual es incorrecta.");
             return;
         }

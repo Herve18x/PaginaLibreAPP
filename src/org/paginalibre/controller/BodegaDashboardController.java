@@ -20,18 +20,29 @@ import org.paginalibre.system.Main;
 
 public class BodegaDashboardController implements Initializable, BaseDashboardController {
 
-    @FXML private Label lblUsuario;
-    @FXML private Label lblRol;
-    @FXML private Label lblAlertasStock;
-    @FXML private Label lblEntradasHoy;
-    @FXML private Label lblTitulosCatalogo;
+    @FXML
+    private Label lblUsuario;
+    @FXML
+    private Label lblRol;
+    @FXML
+    private Label lblAlertasStock;
+    @FXML
+    private Label lblEntradasHoy;
+    @FXML
+    private Label lblTitulosCatalogo;
 
-    @FXML private TableView<Libro> tblBodega;
-    @FXML private TableColumn<Libro, String> colIsbn;
-    @FXML private TableColumn<Libro, String> colTitulo;
-    @FXML private TableColumn<Libro, String> colCategoria;
-    @FXML private TableColumn<Libro, Integer> colStockActual;
-    @FXML private TableColumn<Libro, Integer> colStockMin;
+    @FXML
+    private TableView<Libro> tblBodega;
+    @FXML
+    private TableColumn<Libro, String> colIsbn;
+    @FXML
+    private TableColumn<Libro, String> colTitulo;
+    @FXML
+    private TableColumn<Libro, String> colCategoria;
+    @FXML
+    private TableColumn<Libro, Integer> colStockActual;
+    @FXML
+    private TableColumn<Libro, Integer> colStockMin;
 
     private LibroDAO libroDAO;
     private Usuario usuarioSesion;
@@ -40,17 +51,29 @@ public class BodegaDashboardController implements Initializable, BaseDashboardCo
     public void initialize(URL url, ResourceBundle rb) {
         libroDAO = new LibroDAOImpl();
 
-        if (colIsbn != null) colIsbn.setCellValueFactory(new PropertyValueFactory<>("isbn"));
-        if (colTitulo != null) colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
-        if (colCategoria != null) colCategoria.setCellValueFactory(new PropertyValueFactory<>("nombreCategoria"));
-        if (colStockActual != null) colStockActual.setCellValueFactory(new PropertyValueFactory<>("stockActual"));
-        if (colStockMin != null) colStockMin.setCellValueFactory(new PropertyValueFactory<>("stockMinimo"));
+        if (colIsbn != null) {
+            colIsbn.setCellValueFactory(new PropertyValueFactory<>("isbn"));
+        }
+        if (colTitulo != null) {
+            colTitulo.setCellValueFactory(new PropertyValueFactory<>("titulo"));
+        }
+        if (colCategoria != null) {
+            colCategoria.setCellValueFactory(new PropertyValueFactory<>("nombreCategoria"));
+        }
+        if (colStockActual != null) {
+            colStockActual.setCellValueFactory(new PropertyValueFactory<>("stockActual"));
+        }
+        if (colStockMin != null) {
+            colStockMin.setCellValueFactory(new PropertyValueFactory<>("stockMinimo"));
+        }
 
         cargarDashboard();
     }
 
     private void cargarDashboard() {
-        if (libroDAO == null) return;
+        if (libroDAO == null) {
+            return;
+        }
 
         List<Libro> listaBajoStock = libroDAO.listarLibrosBajoStock();
         ObservableList<Libro> itemsBajoStock = FXCollections.observableArrayList(listaBajoStock);
@@ -71,12 +94,10 @@ public class BodegaDashboardController implements Initializable, BaseDashboardCo
         }
 
         String sqlEntradas = "SELECT COUNT(*) FROM movimientos_inventario mi "
-                           + "INNER JOIN tipos_movimiento tm ON mi.id_tipo_movimiento = tm.id_tipo_movimiento "
-                           + "WHERE tm.nombre_tipo = 'INGRESO' AND DATE(mi.fecha_movimiento) = CURDATE()";
+                + "INNER JOIN tipos_movimiento tm ON mi.id_tipo_movimiento = tm.id_tipo_movimiento "
+                + "WHERE tm.nombre_tipo = 'INGRESO' AND DATE(mi.fecha_movimiento) = CURDATE()";
 
-        try (java.sql.Connection conn = org.paginalibre.util.Conexion.getInstancia().conectar();
-             java.sql.PreparedStatement ps = conn.prepareStatement(sqlEntradas);
-             java.sql.ResultSet rs = ps.executeQuery()) {
+        try (java.sql.Connection conn = org.paginalibre.util.Conexion.getInstancia().conectar(); java.sql.PreparedStatement ps = conn.prepareStatement(sqlEntradas); java.sql.ResultSet rs = ps.executeQuery()) {
 
             if (rs.next() && lblEntradasHoy != null) {
                 lblEntradasHoy.setText(String.valueOf(rs.getInt(1)));
