@@ -59,7 +59,11 @@
                         <TextField fx:id="txtPrecio" promptText="0.00" GridPane.columnIndex="3" GridPane.rowIndex="1" />
 
                         <Label text="Categoría ID *" GridPane.columnIndex="0" GridPane.rowIndex="2" />
-                        <ComboBox fx:id="cmbCategoria" promptText="Seleccionar categoría" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                        <HBox spacing="6.0" GridPane.columnIndex="1" GridPane.rowIndex="2"><children>
+                            <ComboBox fx:id="cmbCategoria" promptText="Seleccionar categoría" HBox.hgrow="ALWAYS" />
+                            <Button onAction="#nuevaCategoria" text="+ Agregar" />
+                            <Button onAction="#editarCategoria" text="Editar" />
+                        </children></HBox>
 
                         <Label text="Editorial *" GridPane.columnIndex="2" GridPane.rowIndex="2" />
                         <HBox spacing="6.0" GridPane.columnIndex="3" GridPane.rowIndex="2">
@@ -74,6 +78,7 @@
                             <children>
                                 <ComboBox fx:id="cmbAutor" promptText="Seleccionar autor" HBox.hgrow="ALWAYS" />
                                 <Button onAction="#nuevoAutor" text="+ Nuevo" style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;" />
+                                <Button onAction="#editarAutor" text="Editar" />
                             </children>
                         </HBox>
 

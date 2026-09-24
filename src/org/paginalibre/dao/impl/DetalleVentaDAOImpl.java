@@ -29,10 +29,11 @@ public class DetalleVentaDAOImpl implements DetalleVentaDAO {
     @Override
     public List<DetalleVenta> obtenerDetallesPorVenta(int idVenta) throws Exception {
         List<DetalleVenta> lista = new ArrayList<>();
-        String sql = "{call sp_listardetalleventa(?)}";
+        String sql = "SELECT d.id_detalle, d.id_venta, d.isbn, l.titulo, d.cantidad, d.precio_unitario, d.subtotal " +
+                "FROM detalle_venta d LEFT JOIN libros l ON l.isbn = d.isbn WHERE d.id_venta = ? ORDER BY d.id_detalle";
         
         try (Connection conn = Conexion.getInstancia().conectar();
-             CallableStatement cs = conn.prepareCall(sql)) {
+             PreparedStatement cs = conn.prepareStatement(sql)) {
             
             cs.setInt(1, idVenta);
             try (ResultSet rs = cs.executeQuery()) {
@@ -41,6 +42,7 @@ public class DetalleVentaDAOImpl implements DetalleVentaDAO {
                     detalle.setIdDetalle(rs.getInt("id_detalle"));
                     detalle.setIdVenta(rs.getInt("id_venta"));
                     detalle.setIsbn(rs.getString("isbn"));
+                    detalle.setTitulo(rs.getString("titulo") == null ? detalle.getIsbn() : rs.getString("titulo"));
                     detalle.setCantidad(rs.getInt("cantidad"));
                     detalle.setPrecioUnitario(rs.getDouble("precio_unitario"));
                     detalle.setSubtotal(rs.getDouble("subtotal"));

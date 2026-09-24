@@ -77,16 +77,14 @@ public class ClienteDAOImpl implements ClienteDAO {
 
     @Override
     public boolean actualizar(Cliente cliente) {
-        String sql = "{call sp_actualizarcliente(?, ?, ?, ?)}";
+        String sql = "UPDATE clientes SET nombre_cliente = ?, apellido_cliente = ?, correo_electronico = ? WHERE cui = ?";
         try (Connection conn = Conexion.getInstancia().conectar();
-             CallableStatement cs = conn.prepareCall(sql)) {
-
-            cs.setLong(1, cliente.getCui());
-            cs.setString(2, cliente.getNombre());
-            cs.setString(3, cliente.getApellido());
-            cs.setString(4, cliente.getCorreoElectronico());
-
-            return cs.executeUpdate() > 0;
+             java.sql.PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, cliente.getNombre());
+            ps.setString(2, cliente.getApellido());
+            ps.setString(3, cliente.getCorreoElectronico());
+            ps.setLong(4, cliente.getCui());
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
             return false;

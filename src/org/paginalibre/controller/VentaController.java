@@ -390,10 +390,11 @@ public class VentaController implements Initializable {
             return;
         }
  
-        mostrarComprobante(venta, clienteSeleccionadoBD);
+        mostrarComprobante(venta, clienteSeleccionadoBD, listaCarrito);
+        limpiarFormulario();
     }
  
-    private void mostrarComprobante(Venta venta, Cliente cliente) {
+    public static void mostrarComprobante(Venta venta, Cliente cliente, List<DetalleVenta> detalles) {
         Stage stage = new Stage();
         stage.initModality(Modality.APPLICATION_MODAL);
         stage.setTitle("Comprobante de Venta - Página Viva");
@@ -417,11 +418,12 @@ public class VentaController implements Initializable {
         infoGrid.add(new Label(String.valueOf(venta.getIdVenta())), 1, 0);
  
         infoGrid.add(new Label("Fecha:"), 0, 1);
-        infoGrid.add(new Label(LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))), 1, 1);
+        infoGrid.add(new Label((venta.getFechaVenta() == null ? LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : venta.getFechaVenta().toLocalDateTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")))), 1, 1);
  
         infoGrid.add(new Label("Vendido por:"), 0, 2);
-        String vendedorMostrar = "Usuario";
+        String vendedorMostrar = "Usuario #" + venta.getIdUsuario();
         Usuario vendedor = Main.getUsuarioSesion();
+        if (vendedor != null && vendedor.getId() != venta.getIdUsuario()) vendedor = null;
         if (vendedor != null) {
             vendedorMostrar = ((vendedor.getNombre() == null ? "" : vendedor.getNombre()) + " "
                     + (vendedor.getApellido() == null ? "" : vendedor.getApellido())).trim();
@@ -439,7 +441,7 @@ public class VentaController implements Initializable {
  
         infoGrid.add(new Label(nombreClienteMostrar), 1, 3);
  
-        TableView<DetalleVenta> tablaComprobante = new TableView<>(FXCollections.observableArrayList(listaCarrito));
+        TableView<DetalleVenta> tablaComprobante = new TableView<>(FXCollections.observableArrayList(detalles));
  
         TableColumn<DetalleVenta, String> colProd = new TableColumn<>("Producto");
         colProd.setCellValueFactory(new PropertyValueFactory<>("titulo"));
@@ -467,15 +469,15 @@ public class VentaController implements Initializable {
         totalesGrid.setVgap(5);
  
         totalesGrid.add(new Label("Subtotal:"), 0, 0);
-        totalesGrid.add(new Label("Q" + txtSubtotal.getText()), 1, 0);
+        totalesGrid.add(new Label(String.format("Q%.2f", venta.getSubtotal())), 1, 0);
  
         totalesGrid.add(new Label("Descuento:"), 0, 1);
-        double descVal = (txtSubtotal.getText().isEmpty()) ? 0.0 : Double.parseDouble(txtSubtotal.getText().replace(",", ".")) - Double.parseDouble(txtTotal.getText().replace(",", "."));
+        double descVal = venta.getDescuento();
         totalesGrid.add(new Label(String.format("Q%.2f", descVal)), 1, 1);
  
         Label lblTotNombre = new Label("Total:");
         lblTotNombre.setStyle("-fx-font-weight: bold;");
-        Label lblTotValor = new Label("Q" + txtTotal.getText());
+        Label lblTotValor = new Label(String.format("Q%.2f", venta.getTotal()));
         lblTotValor.setStyle("-fx-font-weight: bold;");
  
         totalesGrid.add(lblTotNombre, 0, 2);
@@ -492,7 +494,6 @@ public class VentaController implements Initializable {
  
         btnCerrar.setOnAction(e -> {
             stage.close();
-            limpiarFormulario();
         });
  
         botones.getChildren().addAll(btnImprimir, btnCerrar);
@@ -504,6 +505,53 @@ public class VentaController implements Initializable {
         stage.showAndWait();
     }
  
+    @FXML
+    private void editarCliente(ActionEvent event) {
+        List<Cliente> clientes = clienteDAO.listar();
+        if (clientes == null || clientes.isEmpty()) {
+            mostrarAlerta("Clientes", "No hay clientes para editar.", Alert.AlertType.INFORMATION);
+            return;
+        }
+        ChoiceDialog<Cliente> selector = new ChoiceDialog<>(cmbCliente.getValue() == null ? clientes.get(0) : cmbCliente.getValue(), clientes);
+        selector.setTitle("Editar cliente");
+        selector.setHeaderText("Selecciona el cliente que deseas editar");
+        selector.showAndWait().ifPresent(seleccionado -> {
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setTitle("Editar cliente");
+            dialog.setHeaderText("Cliente: " + seleccionado.getCui());
+            TextField nombre = new TextField(seleccionado.getNombre());
+            TextField apellido = new TextField(seleccionado.getApellido());
+            TextField correo = new TextField(seleccionado.getCorreoElectronico() == null ? "" : seleccionado.getCorreoElectronico());
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.addRow(0, new Label("Nombre *"), nombre);
+            grid.addRow(1, new Label("Apellido *"), apellido);
+            grid.addRow(2, new Label("Correo"), correo);
+            dialog.getDialogPane().setContent(grid);
+            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+            dialog.setResultConverter(btn -> {
+                if (btn != ButtonType.OK) return null;
+                if (nombre.getText().trim().isEmpty() || apellido.getText().trim().isEmpty()) {
+                    mostrarAlerta("Datos incompletos", "Nombre y apellido son obligatorios.", Alert.AlertType.WARNING);
+                    return null;
+                }
+                Cliente actualizado = new Cliente(seleccionado.getCui(), nombre.getText().trim(), apellido.getText().trim(),
+                        correo.getText().trim().isEmpty() ? null : correo.getText().trim());
+                if (!clienteDAO.actualizar(actualizado)) {
+                    mostrarAlerta("Error", "No se pudo actualizar el cliente.", Alert.AlertType.ERROR);
+                    return null;
+                }
+                return ButtonType.OK;
+            });
+            dialog.showAndWait().ifPresent(resultado -> {
+                cargarClientes();
+                listaClientesBD.stream().filter(c -> c.getCui().equals(seleccionado.getCui())).findFirst()
+                        .ifPresent(c -> cmbCliente.getSelectionModel().select(c));
+            });
+        });
+    }
+
     @FXML
     private void cancelarVenta(ActionEvent event) {
         try {

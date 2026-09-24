@@ -28,6 +28,7 @@
                <children>
                   <Label text="Buscar:" />
                   <TextField fx:id="txtBuscar" promptText="Buscar por ID Venta, CUI o Usuario..." HBox.hgrow="ALWAYS" />
+                  <Button mnemonicParsing="false" onAction="#mostrarFactura" text="Ver factura" />
                   <Button mnemonicParsing="false" onAction="#regresarDashboard" text="Regresar" />
                </children>
             </HBox>

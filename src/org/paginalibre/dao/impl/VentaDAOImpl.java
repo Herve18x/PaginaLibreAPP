@@ -173,6 +173,7 @@ public class VentaDAOImpl implements VentaDAO {
             venta.setDescuento(descuento);
             venta.setTotal(total);
             venta.setEstado("COMPLETADA");
+            venta.setFechaVenta(new java.sql.Timestamp(System.currentTimeMillis()));
 
             conn.commit();
             return true;

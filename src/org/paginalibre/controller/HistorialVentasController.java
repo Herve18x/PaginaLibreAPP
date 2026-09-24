@@ -14,6 +14,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.paginalibre.dao.impl.VentaDAOImpl;
+import org.paginalibre.dao.impl.ClienteDAOImpl;
+import org.paginalibre.dao.impl.DetalleVentaDAOImpl;
+import org.paginalibre.model.Cliente;
+import org.paginalibre.model.DetalleVenta;
+import javafx.scene.control.Alert;
 import org.paginalibre.model.Venta;
 import org.paginalibre.system.Main;
 
@@ -49,6 +54,9 @@ public class HistorialVentasController implements Initializable {
         configurarTabla();
         cargarDatos();
         configurarFiltro();
+        tablaVentas.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) mostrarFactura();
+        });
     }
 
     private void configurarTabla() {
@@ -84,6 +92,26 @@ public class HistorialVentasController implements Initializable {
                         || String.valueOf(venta.getIdUsuario()).contains(filtro);
             });
         });
+    }
+
+    @FXML
+    private void mostrarFactura() {
+        Venta venta = tablaVentas.getSelectionModel().getSelectedItem();
+        if (venta == null) {
+            new Alert(Alert.AlertType.INFORMATION, "Selecciona una venta.").showAndWait();
+            return;
+        }
+        try {
+            List<DetalleVenta> detalles = new DetalleVentaDAOImpl().obtenerDetallesPorVenta(venta.getIdVenta());
+            if (detalles.isEmpty()) {
+                new Alert(Alert.AlertType.WARNING, "Esta venta no tiene detalles registrados.").showAndWait();
+                return;
+            }
+            Cliente cliente = venta.getCuiCliente() > 0 ? new ClienteDAOImpl().buscar(venta.getCuiCliente()) : null;
+            VentaController.mostrarComprobante(venta, cliente, detalles);
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "No se pudo abrir la factura: " + e.getMessage()).showAndWait();
+        }
     }
 
     @FXML

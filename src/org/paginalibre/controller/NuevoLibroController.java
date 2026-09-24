@@ -204,6 +204,129 @@ public class NuevoLibroController implements Initializable {
     }
 
     @FXML
+    private void nuevaCategoria(ActionEvent event) {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Nueva categoría");
+        dialog.setHeaderText("Agregar categoría");
+        dialog.setContentText("Nombre:");
+        dialog.showAndWait().ifPresent(valor -> {
+            String nombre = valor.trim();
+            if (nombre.isEmpty()) {
+                mostrarAlerta("Datos incompletos", "El nombre es obligatorio.", Alert.AlertType.WARNING);
+                return;
+            }
+            try (Connection conn = Conexion.getInstancia().conectar();
+                 PreparedStatement ps = conn.prepareStatement("INSERT INTO categoria(nombre_categoria) VALUES (?)", java.sql.Statement.RETURN_GENERATED_KEYS)) {
+                ps.setString(1, nombre);
+                ps.executeUpdate();
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        cargarCategorias();
+                        cmbCategoria.getSelectionModel().select(rs.getInt(1) + " - " + nombre);
+                    }
+                }
+            } catch (SQLException e) {
+                mostrarAlerta("Error", "No se pudo agregar la categoría: " + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        });
+    }
+
+    @FXML
+    private void editarCategoria(ActionEvent event) {
+        if (categorias.isEmpty()) return;
+        java.util.List<String> opciones = new java.util.ArrayList<>(cmbCategoria.getItems());
+        ChoiceDialog<String> selector = new ChoiceDialog<>(cmbCategoria.getValue() == null ? opciones.get(0) : cmbCategoria.getValue(), opciones);
+        selector.setTitle("Editar categoría");
+        selector.setHeaderText("Selecciona una categoría");
+        selector.showAndWait().ifPresent(elegida -> {
+            int id = Integer.parseInt(elegida.split(" - ", 2)[0]);
+            TextInputDialog dialog = new TextInputDialog(categorias.get(id));
+            dialog.setTitle("Editar categoría");
+            dialog.setHeaderText("Categoría #" + id);
+            dialog.setContentText("Nombre:");
+            dialog.showAndWait().ifPresent(valor -> {
+                if (valor.trim().isEmpty()) {
+                    mostrarAlerta("Datos incompletos", "El nombre es obligatorio.", Alert.AlertType.WARNING);
+                    return;
+                }
+                try (Connection conn = Conexion.getInstancia().conectar();
+                     PreparedStatement ps = conn.prepareStatement("UPDATE categoria SET nombre_categoria = ? WHERE categoria_id = ?")) {
+                    ps.setString(1, valor.trim());
+                    ps.setInt(2, id);
+                    ps.executeUpdate();
+                    cargarCategorias();
+                    cmbCategoria.getSelectionModel().select(id + " - " + valor.trim());
+                } catch (SQLException e) {
+                    mostrarAlerta("Error", "No se pudo editar la categoría: " + e.getMessage(), Alert.AlertType.ERROR);
+                }
+            });
+        });
+    }
+
+    @FXML
+    private void editarAutor(ActionEvent event) {
+        if (autores.isEmpty()) return;
+        java.util.List<String> opciones = new java.util.ArrayList<>();
+        autores.forEach((id, nombre) -> opciones.add(id + " - " + nombre));
+        ChoiceDialog<String> selector = new ChoiceDialog<>(opciones.get(0), opciones);
+        selector.setTitle("Editar autor");
+        selector.setHeaderText("Selecciona un autor");
+        selector.showAndWait().ifPresent(elegido -> {
+            int id = Integer.parseInt(elegido.split(" - ", 2)[0]);
+            try (Connection conn = Conexion.getInstancia().conectar();
+                 PreparedStatement ps = conn.prepareStatement("SELECT nombre_autor, apellido_autor, nacionalidad, biografia FROM autores WHERE id_autor = ?")) {
+                ps.setInt(1, id);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) return;
+                    TextField nombre = new TextField(rs.getString("nombre_autor"));
+                    TextField apellido = new TextField(rs.getString("apellido_autor"));
+                    TextField nacionalidad = new TextField(rs.getString("nacionalidad") == null ? "" : rs.getString("nacionalidad"));
+                    TextArea biografia = new TextArea(rs.getString("biografia") == null ? "" : rs.getString("biografia"));
+                    biografia.setPrefRowCount(3);
+                    GridPane grid = new GridPane();
+                    grid.setHgap(10);
+                    grid.setVgap(10);
+                    grid.addRow(0, new Label("Nombre *"), nombre);
+                    grid.addRow(1, new Label("Apellido *"), apellido);
+                    grid.addRow(2, new Label("Nacionalidad"), nacionalidad);
+                    grid.addRow(3, new Label("Biografía"), biografia);
+                    Dialog<ButtonType> dialog = new Dialog<>();
+                    dialog.setTitle("Editar autor");
+                    dialog.setHeaderText("Autor #" + id);
+                    dialog.getDialogPane().setContent(grid);
+                    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+                    dialog.setResultConverter(btn -> {
+                        if (btn != ButtonType.OK) return null;
+                        if (nombre.getText().trim().isEmpty() || apellido.getText().trim().isEmpty()) {
+                            mostrarAlerta("Datos incompletos", "Nombre y apellido son obligatorios.", Alert.AlertType.WARNING);
+                            return null;
+                        }
+                        try (Connection updateConn = Conexion.getInstancia().conectar();
+                             PreparedStatement update = updateConn.prepareStatement("UPDATE autores SET nombre_autor = ?, apellido_autor = ?, nacionalidad = ?, biografia = ? WHERE id_autor = ?")) {
+                            update.setString(1, nombre.getText().trim());
+                            update.setString(2, apellido.getText().trim());
+                            update.setString(3, nacionalidad.getText().trim().isEmpty() ? null : nacionalidad.getText().trim());
+                            update.setString(4, biografia.getText().trim().isEmpty() ? null : biografia.getText().trim());
+                            update.setInt(5, id);
+                            update.executeUpdate();
+                            return ButtonType.OK;
+                        } catch (SQLException e) {
+                            mostrarAlerta("Error", "No se pudo editar el autor: " + e.getMessage(), Alert.AlertType.ERROR);
+                            return null;
+                        }
+                    });
+                    dialog.showAndWait().ifPresent(resultado -> {
+                        cargarAutores();
+                        cmbAutor.getSelectionModel().select(autores.get(id));
+                    });
+                }
+            } catch (SQLException e) {
+                mostrarAlerta("Error", "No se pudo cargar el autor: " + e.getMessage(), Alert.AlertType.ERROR);
+            }
+        });
+    }
+
+    @FXML
     private void nuevoEditorial(ActionEvent event) {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Nueva editorial");
