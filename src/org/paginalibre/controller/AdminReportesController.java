@@ -1,12 +1,121 @@
 package org.paginalibre.controller;
-import java.time.DayOfWeek; import java.time.LocalDate; import javafx.collections.*; import javafx.event.ActionEvent; import javafx.fxml.FXML; import javafx.scene.control.*; import javafx.scene.control.cell.PropertyValueFactory; import org.paginalibre.dao.AdminReportesDAO; import org.paginalibre.dao.impl.AdminReportesDAOImpl; import org.paginalibre.system.Main;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.List;
+import javafx.collections.*;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
+import org.paginalibre.dao.AdminReportesDAO;
+import org.paginalibre.dao.impl.AdminReportesDAOImpl;
+import org.paginalibre.system.Main;
+
 public class AdminReportesController {
- @FXML private DatePicker dpDesde,dpHasta; @FXML private ComboBox<String> cmbPeriodo; @FXML private TableView<AdminReportesDAO.VentaReporte> tblVentas; @FXML private TableColumn<AdminReportesDAO.VentaReporte,Integer> colId; @FXML private TableColumn<AdminReportesDAO.VentaReporte,Object> colFecha; @FXML private TableColumn<AdminReportesDAO.VentaReporte,Double> colSubtotal,colDescuento,colTotal; @FXML private TableColumn<AdminReportesDAO.VentaReporte,String> colEstado,colCliente,colCajero;
- @FXML private TableView<AdminReportesDAO.LibroReporte> tblLibros; @FXML private TableColumn<AdminReportesDAO.LibroReporte,String> colIsbn,colTitulo; @FXML private TableColumn<AdminReportesDAO.LibroReporte,Integer> colCantidad,colStock; @FXML private TableColumn<AdminReportesDAO.LibroReporte,Double> colValor;
- private final AdminReportesDAO dao=new AdminReportesDAOImpl();
- @FXML public void initialize(){cmbPeriodo.setItems(FXCollections.observableArrayList("Día","Semana","Mes","Personalizado"));cmbPeriodo.setValue("Semana");cmbPeriodo.setOnAction(e->ajustarPeriodo());dpHasta.setValue(LocalDate.now());dpDesde.setValue(LocalDate.now().with(DayOfWeek.MONDAY)); colId.setCellValueFactory(c->new javafx.beans.property.SimpleIntegerProperty(c.getValue().id()).asObject());colFecha.setCellValueFactory(c->new javafx.beans.property.SimpleObjectProperty<>(c.getValue().fecha()));colSubtotal.setCellValueFactory(c->new javafx.beans.property.SimpleDoubleProperty(c.getValue().subtotal()).asObject());colDescuento.setCellValueFactory(c->new javafx.beans.property.SimpleDoubleProperty(c.getValue().descuento()).asObject());colTotal.setCellValueFactory(c->new javafx.beans.property.SimpleDoubleProperty(c.getValue().total()).asObject());colEstado.setCellValueFactory(c->new javafx.beans.property.SimpleStringProperty(c.getValue().estado()));colCliente.setCellValueFactory(c->new javafx.beans.property.SimpleStringProperty(c.getValue().cliente()));colCajero.setCellValueFactory(c->new javafx.beans.property.SimpleStringProperty(c.getValue().cajero()));colIsbn.setCellValueFactory(c->new javafx.beans.property.SimpleStringProperty(c.getValue().isbn()));colTitulo.setCellValueFactory(c->new javafx.beans.property.SimpleStringProperty(c.getValue().titulo()));colCantidad.setCellValueFactory(c->new javafx.beans.property.SimpleIntegerProperty(c.getValue().cantidad()).asObject());colStock.setCellValueFactory(c->new javafx.beans.property.SimpleIntegerProperty(c.getValue().stock()).asObject());colValor.setCellValueFactory(c->new javafx.beans.property.SimpleDoubleProperty(c.getValue().valor()).asObject());cargar();}
- @FXML private void filtrar(){cargar();} private void ajustarPeriodo(){LocalDate h=LocalDate.now();dpHasta.setValue(h);String p=cmbPeriodo.getValue();if("Día".equals(p))dpDesde.setValue(h);else if("Semana".equals(p))dpDesde.setValue(h.with(DayOfWeek.MONDAY));else if("Mes".equals(p))dpDesde.setValue(h.withDayOfMonth(1));}
- private void cargar(){LocalDate d=dpDesde.getValue(),h=dpHasta.getValue();if(d==null||h==null||h.isBefore(d))return;tblVentas.setItems(FXCollections.observableArrayList(dao.ventas(d,h)));tblLibros.setItems(FXCollections.observableArrayList(dao.masVendidos(d,h)));}
- @FXML private void verStockValorizado(){tblLibros.setItems(FXCollections.observableArrayList(dao.stockValorizado()));}
- @FXML private void regresar(ActionEvent e){try{Main.regresarAnterior();}catch(Exception ex){ex.printStackTrace();}}
+
+    @FXML
+    private DatePicker dpDesde, dpHasta;
+    @FXML
+    private ComboBox<String> cmbPeriodo;
+    @FXML
+    private TableView<AdminReportesDAO.VentaReporte> tblVentas;
+    @FXML
+    private TableColumn<AdminReportesDAO.VentaReporte, Integer> colId;
+    @FXML
+    private TableColumn<AdminReportesDAO.VentaReporte, Object> colFecha;
+    @FXML
+    private TableColumn<AdminReportesDAO.VentaReporte, Double> colSubtotal, colDescuento, colTotal;
+    @FXML
+    private TableColumn<AdminReportesDAO.VentaReporte, String> colEstado, colCliente, colCajero;
+    @FXML
+    private TableView<AdminReportesDAO.LibroReporte> tblLibros;
+    @FXML
+    private TableColumn<AdminReportesDAO.LibroReporte, String> colIsbn, colTitulo;
+    @FXML
+    private TableColumn<AdminReportesDAO.LibroReporte, Integer> colCantidad, colStock;
+    @FXML
+    private TableColumn<AdminReportesDAO.LibroReporte, Double> colValor;
+    @FXML
+    private Label lblTotalVentas;
+
+    private final AdminReportesDAO dao = new AdminReportesDAOImpl();
+
+    @FXML
+    public void initialize() {
+        cmbPeriodo.setItems(FXCollections.observableArrayList("Día", "Semana", "Mes", "Personalizado"));
+        cmbPeriodo.setValue("Semana");
+        cmbPeriodo.setOnAction(e -> ajustarPeriodo());
+        dpHasta.setValue(LocalDate.now());
+        dpDesde.setValue(LocalDate.now().with(DayOfWeek.MONDAY));
+        colId.setCellValueFactory(c -> new javafx.beans.property.SimpleIntegerProperty(c.getValue().id()).asObject());
+        colFecha.setCellValueFactory(c -> new javafx.beans.property.SimpleObjectProperty<>(c.getValue().fecha()));
+        colSubtotal.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().subtotal()).asObject());
+        colDescuento.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().descuento()).asObject());
+        colTotal.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().total()).asObject());
+        colEstado.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().estado()));
+        colCliente.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().cliente()));
+        colCajero.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().cajero()));
+        colIsbn.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().isbn()));
+        colTitulo.setCellValueFactory(c -> new javafx.beans.property.SimpleStringProperty(c.getValue().titulo()));
+        colCantidad.setCellValueFactory(c -> new javafx.beans.property.SimpleIntegerProperty(c.getValue().cantidad()).asObject());
+        colStock.setCellValueFactory(c -> new javafx.beans.property.SimpleIntegerProperty(c.getValue().stock()).asObject());
+        colValor.setCellValueFactory(c -> new javafx.beans.property.SimpleDoubleProperty(c.getValue().valor()).asObject());
+        cargar();
+    }
+
+    @FXML
+    private void filtrar() {
+        cargar();
+    }
+
+    private void ajustarPeriodo() {
+        LocalDate h = LocalDate.now();
+        dpHasta.setValue(h);
+        String p = cmbPeriodo.getValue();
+        if ("Día".equals(p)) {
+            dpDesde.setValue(h);
+        } else if ("Semana".equals(p)) {
+            dpDesde.setValue(h.with(DayOfWeek.MONDAY));
+        } else if ("Mes".equals(p)) {
+            dpDesde.setValue(h.withDayOfMonth(1));
+        }
+    }
+
+    private void cargar() {
+        LocalDate d = dpDesde.getValue(), h = dpHasta.getValue();
+        if (d == null || h == null || h.isBefore(d)) {
+            return;
+        }
+        List<AdminReportesDAO.VentaReporte> listaVentas = dao.ventas(d, h);
+        tblVentas.setItems(FXCollections.observableArrayList(listaVentas));
+        tblLibros.setItems(FXCollections.observableArrayList(dao.masVendidos(d, h)));
+
+        double totalSuma = 0.0;
+        if (listaVentas != null) {
+            for (AdminReportesDAO.VentaReporte v : listaVentas) {
+                if (!"CANCELADA".equalsIgnoreCase(v.estado())) {
+                    totalSuma += v.total();
+                }
+            }
+        }
+        if (lblTotalVentas != null) {
+            lblTotalVentas.setText(String.format("Q%.2f", totalSuma));
+        }
+    }
+
+    @FXML
+    private void verStockValorizado() {
+        tblLibros.setItems(FXCollections.observableArrayList(dao.stockValorizado()));
+    }
+
+    @FXML
+    private void regresar(ActionEvent e) {
+        try {
+            Main.regresarAnterior();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+    
 }
